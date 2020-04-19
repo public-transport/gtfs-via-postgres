@@ -23,7 +23,7 @@ CREATE TABLE trips (
 	direction_id INT,
 	block_id TEXT,
 	shape_id TEXT,
-	FOREIGN KEY (shape_id) REFERENCES shapes (shape_id),
+	-- todo: FOREIGN KEY (shape_id) REFERENCES shapes (shape_id),
 	wheelchair_accessible wheelchair_accessibility,
 	bikes_allowed bikes_allowance
 );
