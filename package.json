@@ -1,0 +1,31 @@
+{
+	"name": "gtfs-via-postgres",
+	"description": "Process GTFS using PostgreSQL.",
+	"version": "1.0.0",
+	"main": "lib/index.js",
+	"files": [
+		"lib",
+		"example.js"
+	],
+	"keywords": [
+		"todo"
+	],
+	"author": "Jannis R <mail@jannisr.de>",
+	"homepage": "https://github.com/derhuerst/gtfs-via-postgres",
+	"repository": "derhuerst/gtfs-via-postgres",
+	"bugs": "https://github.com/derhuerst/gtfs-via-postgres/issues",
+	"license": "ISC",
+	"engines": {
+		"node": ">=10"
+	},
+	"dependencies": {
+	},
+	"devDependencies": {
+		"eslint": "^6.8.0"
+	},
+	"scripts": {
+		"test": "node test.js",
+		"lint": "eslint .",
+		"prepublishOnly": "npm test && npm run lint"
+	}
+}

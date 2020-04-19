@@ -1,0 +1,13 @@
+language: node_js
+os: linux
+node_js:
+  - node
+  - 'lts/*'
+  - '10'
+script:
+  - 'npm test'
+  - 'npm run lint'
+cache: npm
+notifications:
+  email:
+    on_success: never
