@@ -22,6 +22,7 @@
 	"dependencies": {
 		"gtfs-utils": "^2.0.0",
 		"mri": "^1.1.5",
+		"sequencify": "0.0.7",
 		"sqlstring": "^2.3.2",
 		"stdout-stream": "^1.4.1"
 	},

@@ -24,6 +24,11 @@ todo
 ```
 
 
+## Performance
+
+On my Macbook 13" 2015 (Intel i5-5257U), converting the [442mb `2020-04-17` VBB GTFS feed](https://vbb-gtfs.jannisr.de/2020-04-17/) took ~2:20.
+
+
 ## Contributing
 
 If you have a question or need support using `gtfs-via-postgres`, please double-check your code and setup first. If you think you have found a bug or want to propose a feature, use [the issues page](https://github.com/derhuerst/gtfs-via-postgres/issues).

@@ -27,29 +27,36 @@ if (argv.version || argv.v) {
 	process.exit(0)
 }
 
+const {promisify} = require('util')
 const {basename, extname} = require('path')
+const sequencify = require('sequencify')
 const readCsv = require('gtfs-utils/read-csv')
-const {Transform} = require('stream')
-const stdout = require('stdout-stream')
-const {format, schemas} = require('.')
+const {PassThrough} = require('stream')
+// const stdout = require('stdout-stream')
+const formatters = require('.')
+const deps = require('./lib/deps')
 const converter = require('./lib/converter')
 
-const files = argv._
-
-const pump = (src, through, dest) => {
-	return new Promise((resolve, reject) => {
-		src.once('error', reject)
-		through.once('error', reject)
-		dest.once('error', reject)
-		through.once('end', () => {
-			src.removeListener('error', reject)
-			through.removeListener('error', reject)
-			dest.removeListener('error', reject)
-			resolve()
-		})
-		src.pipe(through).pipe(dest)
-	})
+const files = argv._.map((file) => {
+	const name = basename(file, extname(file))
+	return {name, file}
+})
+for (const {name} of files) {
+	if (!formatters[name]) {
+		throw new Error('invalid/unsupported file: ' + name)
+	}
 }
+
+const tasks = {}
+for (const file of files) {
+	const isAvailable = name => files.find(f => f.name === name)
+	tasks[file.name] = {
+		...file,
+		dep: (deps[file.name] || []).filter(isAvailable)
+	}
+}
+const order = []
+sequencify(tasks, files.map(f => f.name), order)
 
 ;(async () => {
 	process.stdout.write(`\
@@ -57,25 +64,34 @@ const pump = (src, through, dest) => {
 CREATE EXTENSION IF NOT EXISTS postgis;
 \n`)
 
-	for (const file of files) {
-		const name = basename(file, extname(file))
+	for (const name of order) {
+		console.error(name)
 		process.stdout.write(`-- ${name}\n-----------------\n\n`)
 
-		if (!schemas[name]) {
-			throw new Error('invalid/unsupported file: ' + name)
-		}
-		const schema = schemas[name]
-		process.stdout.write(schema + '\n\n')
+		const {file} = tasks[name]
+		const src = readCsv(file)
+		const convert = converter(formatters[name])
+		const dest = process.stdout
 
-		const formatter = format[name]
-		await pump(
-			readCsv(file),
-			converter(formatter),
-			stdout,
-		)
+		await new Promise((resolve, reject) => {
+			const onErr = (err) => {
+				src.destroy()
+				convert.destroy()
+				dest.removeListener('error', onErr)
+				reject(err)
+			}
+			src.once('error', onErr)
+			convert.once('error', onErr)
+			dest.on('error', onErr)
+			convert.once('end', () => {
+				// todo: this is extremely ugly, fix this
+				setTimeout(resolve, 3000)
+			})
+			src.pipe(convert).pipe(dest)
+		})
 	}
 })()
 .catch((err) => {
-	console.error(err)
+	if (err && err.code !== 'EPIPE') console.error(err)
 	process.exit(1)
 })
