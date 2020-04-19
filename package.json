@@ -4,6 +4,7 @@
 	"version": "1.0.0",
 	"main": "lib/index.js",
 	"files": [
+		"cli.js",
 		"lib",
 		"example.js"
 	],
@@ -19,6 +20,8 @@
 		"node": ">=10"
 	},
 	"dependencies": {
+		"gtfs-utils": "^2.0.0",
+		"mri": "^1.1.5",
 		"sqlstring": "^2.3.2"
 	},
 	"devDependencies": {
