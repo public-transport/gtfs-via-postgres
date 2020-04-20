@@ -62,6 +62,7 @@ sequencify(tasks, files.map(f => f.name), order)
 	process.stdout.write(`\
 \\set ON_ERROR_STOP on;
 CREATE EXTENSION IF NOT EXISTS postgis;
+BEGIN;
 \n`)
 
 	for (const name of order) {
@@ -90,6 +91,9 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 			src.pipe(convert).pipe(dest)
 		})
 	}
+
+	process.stdout.write(`\
+COMMIT;`)
 })()
 .catch((err) => {
 	if (err && err.code !== 'EPIPE') console.error(err)
