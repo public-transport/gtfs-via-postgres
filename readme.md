@@ -13,20 +13,35 @@
 ## Installation
 
 ```shell
-npm install gtfs-via-postgres
+npm install -g gtfs-via-postgres
 ```
+
+Or use [`npx`](https://npmjs.com/package/npx). ✨
 
 
 ## Usage
 
-```js
-todo
+```shell
+Usage:
+    gtfs-to-sql <gtfs-file> ...
+Options:
+    --silent  -s  Don't show files being converted.
+Examples:
+    gtfs-to-sql some-gtfs/*.txt >gtfs.sql
 ```
 
 
 ## Performance
 
 On my Macbook 13" 2015 (Intel i5-5257U), converting the [442mb `2020-04-17` VBB GTFS feed](https://vbb-gtfs.jannisr.de/2020-04-17/) took ~2:20.
+
+
+## Related
+
+- [gtfs_SQL_importer](https://github.com/cbick/gtfs_SQL_importer) – Quick & easy import of GTFS data into a SQL database. (Python)
+- [GtfsToSql](https://github.com/OpenMobilityData/GtfsToSql) – Parses a GTFS feed into an SQL database (Java)
+- [gtfs-to-sqlite](https://github.com/aytee17/gtfs-to-sqlite) – A tool for generating an SQLite database from a GTFS feed. (Java)
+- [markusvalo/HSLtraffic](https://github.com/markusvalo/HSLtraffic) – Scripts to create a PostgreSQL database for HSL GTFS-data. (plain SQL)
 
 
 ## Contributing

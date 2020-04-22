@@ -7,7 +7,8 @@ const pkg = require('./package.json')
 const argv = mri(process.argv.slice(2), {
 	boolean: [
 		'help', 'h',
-		'version', 'v'
+		'version', 'v',
+		'silent', 's',
 	]
 })
 
@@ -16,8 +17,9 @@ if (argv.help || argv.h) {
 Usage:
     gtfs-to-sql <gtfs-file> ...
 Options:
+    --silent  -s  Don't show files being converted.
 Examples:
-    gtfs-to-sql some-gtfs/stops.txt some-gtfs/stop_times.txt
+    gtfs-to-sql some-gtfs/*.txt >gtfs.sql
 \n`)
 	process.exit(0)
 }
@@ -58,6 +60,8 @@ for (const file of files) {
 const order = []
 sequencify(tasks, files.map(f => f.name), order)
 
+const silent = argv.silent || argv.s
+
 ;(async () => {
 	process.stdout.write(`\
 \\set ON_ERROR_STOP on;
@@ -66,7 +70,7 @@ BEGIN;
 \n`)
 
 	for (const name of order) {
-		console.error(name)
+		if (!silent) console.error(name)
 		process.stdout.write(`-- ${name}\n-----------------\n\n`)
 
 		const {file} = tasks[name]
