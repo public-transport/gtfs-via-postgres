@@ -1,6 +1,6 @@
 # gtfs-via-postgres
 
-**Process GTFS using PostgreSQL.**
+Yet another tool to **process GTFS using PostgreSQL.**
 
 [![npm version](https://img.shields.io/npm/v/gtfs-via-postgres.svg)](https://www.npmjs.com/package/gtfs-via-postgres)
 [![build status](https://api.travis-ci.org/derhuerst/gtfs-via-postgres.svg?branch=master)](https://travis-ci.org/derhuerst/gtfs-via-postgres)

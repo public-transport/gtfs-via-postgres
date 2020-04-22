@@ -12,6 +12,7 @@
 		"node_modules"
 	],
 	"rules": {
-		"no-unused-vars": "off"
+		"no-unused-vars": "off",
+		"no-irregular-whitespace": "off"
 	}
 }

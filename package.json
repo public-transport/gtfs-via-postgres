@@ -6,7 +6,7 @@
 	"files": [
 		"cli.js",
 		"lib",
-		"example.js"
+		"example.sh"
 	],
 	"keywords": [
 		"todo"
@@ -27,7 +27,8 @@
 		"stdout-stream": "^1.4.1"
 	},
 	"devDependencies": {
-		"eslint": "^6.8.0"
+		"eslint": "^6.8.0",
+		"sample-gtfs-feed": "^0.3.4"
 	},
 	"scripts": {
 		"test": "node test.js",
