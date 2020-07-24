@@ -3,7 +3,7 @@
 const a = require('assert')
 const sql = require('./lib/sql')
 
-a.strictEqual(sql `\
+a.strictEqual('' + sql `\
 INSERT INTO foo (
 	bar,
 	baz,
@@ -22,4 +22,8 @@ INSERT INTO foo (
 	'hey there',
 	NULL
 )`)
-// todo
+
+a.strictEqual(
+	'' + sql `(${sql `foo ${'bar'} baz`})`,
+	`(foo 'bar' baz)`,
+)
