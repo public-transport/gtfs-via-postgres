@@ -1,7 +1,7 @@
 'use strict'
 
 const a = require('assert')
-const sql = require('./lib/sql')
+const sql = require('../lib/sql')
 
 a.strictEqual('' + sql `\
 INSERT INTO foo (
