@@ -3,6 +3,9 @@
 	"description": "Process GTFS using PostgreSQL.",
 	"version": "2.0.0",
 	"main": "lib/index.js",
+	"bin": {
+		"gtfs-to-sql": "./cli.js"
+	},
 	"files": [
 		"cli.js",
 		"lib",
@@ -40,8 +43,7 @@
 		"gtfs-utils": "^2.0.0",
 		"mri": "^1.1.5",
 		"sequencify": "0.0.7",
-		"sqlstring": "^2.3.2",
-		"stdout-stream": "^1.4.1"
+		"sqlstring": "^2.3.2"
 	},
 	"devDependencies": {
 		"eslint": "^6.8.0",
