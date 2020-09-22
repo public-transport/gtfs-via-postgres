@@ -1,7 +1,7 @@
 {
 	"name": "gtfs-via-postgres",
 	"description": "Process GTFS using PostgreSQL.",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"main": "lib/index.js",
 	"bin": {
 		"gtfs-to-sql": "./cli.js"
@@ -16,7 +16,13 @@
 		"LICENSE-APACHE"
 	],
 	"keywords": [
-		"todo"
+		"gtfs",
+		"public transport",
+		"transit",
+		"convert",
+		"postgres",
+		"postgresql",
+		"sql"
 	],
 	"author": "Jannis R <mail@jannisr.de>",
 	"homepage": "https://github.com/derhuerst/gtfs-via-postgres",
