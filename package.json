@@ -8,6 +8,7 @@
 	},
 	"files": [
 		"cli.js",
+		"index.js",
 		"lib",
 		"example.sh",
 		"LICENSE",
