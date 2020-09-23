@@ -17,7 +17,10 @@ if (argv.help || argv.h) {
 Usage:
     gtfs-to-sql <gtfs-file> ...
 Options:
-    --silent  -s  Don't show files being converted.
+    --silent                -s  Don't show files being converted.
+    --require-dependencies  -d  Require files that the specified GTFS files depend
+                                on to be specified as well (e.g. stop_times.txt
+                                requires trips.txt). Default: false
 Examples:
     gtfs-to-sql some-gtfs/*.txt >gtfs.sql
 \n`)

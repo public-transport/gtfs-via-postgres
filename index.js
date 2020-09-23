@@ -10,17 +10,26 @@ const converter = require('./lib/converter')
 const convertGtfsToSql = async (files, opt = {}) => {
 	const {
 		silent,
+		requireDependencies,
 	} = {
 		silent: false,
+		requireDependencies: false,
 	}
 
+	const isAvailable = name => files.some(f => f.name === name)
 	for (const {name} of files) {
 		if (!formatters[name]) {
 			throw new Error('invalid/unsupported file: ' + name)
 		}
+		if (requireDependencies) {
+			for (const dep of deps[name] || []) {
+				if (!isAvailable(dep)) {
+					throw new Error(name + ' depends on ' + dep)
+				}
+			}
+		}
 	}
 
-	const isAvailable = name => files.find(f => f.name === name)
 	const tasks = {}
 	for (const file of files) {
 		tasks[file.name] = {
