@@ -47,10 +47,10 @@
 		"node": ">=10"
 	},
 	"dependencies": {
+		"csv-stringify": "^5.5.1",
 		"gtfs-utils": "^2.0.0",
 		"mri": "^1.1.5",
-		"sequencify": "0.0.7",
-		"sqlstring": "^2.3.2"
+		"sequencify": "0.0.7"
 	},
 	"devDependencies": {
 		"eslint": "^6.8.0",

@@ -33,7 +33,7 @@ Examples:
 
 ## Performance
 
-On my Macbook 13" 2015 (Intel i5-5257U), converting the [442mb `2020-04-17` VBB GTFS feed](https://vbb-gtfs.jannisr.de/2020-04-17/) took ~2:20.
+On my Macbook 13" 2015 (Intel i5-5257U), converting the [457mb `2020-09-04` VBB GTFS feed](https://vbb-gtfs.jannisr.de/2020-09-04/) took ~2:15.
 
 
 ## Related
