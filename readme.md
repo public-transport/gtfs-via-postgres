@@ -30,6 +30,12 @@ Examples:
     gtfs-to-sql some-gtfs/*.txt >gtfs.sql
 ```
 
+Some notable limitations mentioned in the [PostgreSQL 12 documentation on date/time types](https://www.postgresql.org/docs/12/datatype-datetime.html):
+
+> For `timestamp with time zone`, the internally stored value is always in UTC (Universal Coordinated Time, traditionally known as Greenwich Mean Time, GMT). An input value that has an explicit time zone specified is converted to UTC using the appropriate offset for that time zone.
+
+> When a `timestamp with time zone` value is output, it is always converted from UTC to the current `timezone` zone, and displayed as local time in that zone. To see the time in another time zone, either change `timezone` or use the `AT TIME ZONE` construct […].
+
 
 ## Performance
 

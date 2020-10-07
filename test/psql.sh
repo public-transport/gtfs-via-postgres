@@ -16,8 +16,23 @@ set +x
 	../node_modules/sample-gtfs-feed/gtfs/stop_times.txt \
 	| psql -b
 
-arr=$(psql --csv -c 'select t_arrival from arrivals_departures order by t_arrival limit 1' | tail -n 1)
-if [[ "$arr" != "2019-03-01 14:23:00+01" ]]; then
-	echo "invalid t_arrival: $arr" 1>&2
+query=$(cat << EOF
+select extract(epoch from t_arrival) as t_arrival
+from arrivals_departures
+where route_id = 'D'
+order by t_arrival
+EOF)
+
+arr1=$(psql --csv -t -c "$query" | head -n 1)
+if [[ "$arr1" != "1553993700" ]]; then
+	echo "invalid 1st t_arrival: $arr1" 1>&2
 	exit 1
 fi
+
+arr2=$(psql --csv -t -c "$query" | head -n 2 | tail -n 1)
+if [[ "$arr2" != "1553994180" ]]; then
+	echo "invalid 2nd t_arrival: $arr2" 1>&2
+	exit 1
+fi
+
+echo ✔︎
