@@ -57,7 +57,7 @@
 		"sample-gtfs-feed": "^0.5.1"
 	},
 	"scripts": {
-		"test": "node test/index.js && ./test/psql.sh",
+		"test": "./test/psql.sh",
 		"lint": "eslint .",
 		"prepublishOnly": "npm test && npm run lint"
 	}
