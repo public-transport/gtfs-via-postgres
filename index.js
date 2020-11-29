@@ -14,6 +14,7 @@ const convertGtfsToSql = async (files, opt = {}) => {
 	} = {
 		silent: false,
 		requireDependencies: false,
+		...opt,
 	}
 
 	const isAvailable = name => files.some(f => f.name === name)

@@ -43,6 +43,7 @@ const files = argv._.map((file) => {
 
 convertGtfsToSql(files, {
 	silent: !!(argv.silent || argv.s),
+	requireDependencies: !!(argv['require-dependencies'] || argv.d),
 })
 .catch((err) => {
 	if (err && err.code !== 'EPIPE') console.error(err)
