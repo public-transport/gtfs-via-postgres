@@ -10,6 +10,7 @@ const argv = mri(process.argv.slice(2), {
 		'version', 'v',
 		'silent', 's',
 		'require-dependencies', 'd',
+		'ignore-unsupported', 'u',
 	]
 })
 
@@ -22,8 +23,9 @@ Options:
     --require-dependencies  -d  Require files that the specified GTFS files depend
                                 on to be specified as well (e.g. stop_times.txt
                                 requires trips.txt). Default: false
+    --ignore-unsupported    -u  Ignore unsupported files. Default: false
 Examples:
-    gtfs-to-sql some-gtfs/*.txt >gtfs.sql
+    gtfs-to-sql -u some-gtfs/*.txt >gtfs.sql
 \n`)
 	process.exit(0)
 }
@@ -44,6 +46,7 @@ const files = argv._.map((file) => {
 convertGtfsToSql(files, {
 	silent: !!(argv.silent || argv.s),
 	requireDependencies: !!(argv['require-dependencies'] || argv.d),
+	ignoreUnsupportedFiles: !!(argv['ignore-unsupported'] || argv.u),
 })
 .catch((err) => {
 	if (err && err.code !== 'EPIPE') console.error(err)

@@ -11,12 +11,17 @@ const convertGtfsToSql = async (files, opt = {}) => {
 	const {
 		silent,
 		requireDependencies,
+		ignoreUnsupportedFiles,
 	} = {
 		silent: false,
 		requireDependencies: false,
+		ignoreUnsupportedFiles: false,
 		...opt,
 	}
 
+	if (ignoreUnsupportedFiles) {
+		files = files.filter(f => !!formatters[f.name])
+	}
 	const isAvailable = name => files.some(f => f.name === name)
 	for (const {name} of files) {
 		if (!formatters[name]) {

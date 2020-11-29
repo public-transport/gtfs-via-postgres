@@ -29,8 +29,9 @@ Options:
     --require-dependencies  -d  Require files that the specified GTFS files depend
                                 on to be specified as well (e.g. stop_times.txt
                                 requires trips.txt). Default: false
+    --ignore-unsupported    -u  Ignore unsupported files. Default: false
 Examples:
-    gtfs-to-sql some-gtfs/*.txt >gtfs.sql
+    gtfs-to-sql -u some-gtfs/*.txt >gtfs.sql
 ```
 
 Some notable limitations mentioned in the [PostgreSQL 12 documentation on date/time types](https://www.postgresql.org/docs/12/datatype-datetime.html):
