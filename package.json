@@ -1,10 +1,10 @@
 {
 	"name": "gtfs-via-postgres",
 	"description": "Process GTFS using PostgreSQL.",
-	"version": "2.3.0",
+	"version": "2.4.0",
 	"main": "lib/index.js",
 	"bin": {
-		"gtfs-to-sql": "./cli.js"
+		"gtfs-to-sql": "cli.js"
 	},
 	"files": [
 		"cli.js",

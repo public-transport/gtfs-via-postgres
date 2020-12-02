@@ -6,6 +6,8 @@ set -e
 set -o pipefail
 set +x
 
+env | grep '^PG'
+
 ../cli.js \
 	../node_modules/sample-gtfs-feed/gtfs/agency.txt \
 	../node_modules/sample-gtfs-feed/gtfs/calendar.txt \
