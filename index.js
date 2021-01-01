@@ -2,7 +2,7 @@
 
 const sequencify = require('sequencify')
 const readCsv = require('gtfs-utils/read-csv')
-const {PassThrough} = require('stream')
+const {PassThrough, pipeline} = require('stream')
 const formatters = require('./lib')
 const deps = require('./lib/deps')
 const converter = require('./lib/converter')
@@ -62,20 +62,15 @@ BEGIN;
 		const dest = process.stdout
 
 		await new Promise((resolve, reject) => {
-			const onErr = (err) => {
-				src.destroy()
-				convert.destroy()
-				dest.removeListener('error', onErr)
-				reject(err)
-			}
-			src.once('error', onErr)
-			convert.once('error', onErr)
-			dest.on('error', onErr)
-			convert.once('end', () => {
-				// todo: this is extremely ugly, fix this
-				setTimeout(resolve, 3000)
-			})
-			src.pipe(convert).pipe(dest)
+			pipeline(
+				src,
+				convert,
+				dest,
+				(err) => {
+					if (err) reject(err)
+					else setTimeout(resolve, 3000)
+				},
+			)
 		})
 	}
 
