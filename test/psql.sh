@@ -1,10 +1,10 @@
 #!/bin/bash
 
-cd "$(dirname $0)"
-
+set -x
 set -e
 set -o pipefail
-set +x
+
+cd "$(dirname $0)"
 
 env | grep '^PG'
 
