@@ -1,12 +1,12 @@
 #!/bin/bash
 
-set -x
 set -e
 set -o pipefail
+set -x
 
 cd "$(dirname $0)"
 
-env | grep '^PG'
+env | grep '^PG' || true
 
 ../cli.js \
 	../node_modules/sample-gtfs-feed/gtfs/agency.txt \
