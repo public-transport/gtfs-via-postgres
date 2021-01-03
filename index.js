@@ -62,19 +62,24 @@ BEGIN;
 		const {file} = tasks[name]
 		const src = readCsv(file)
 		const convert = converter(formatters[name])
+
+		// This is ugly, but I'm a bit overwhelmed with the number of
+		// edges cases in the stream/stdio logic.
+		// https://gist.github.com/derhuerst/42ab81b6d8ea5e05b4e2bfe83f702216
 		const dest = new PassThrough()
 		dest.pipe(process.stdout)
 
 		await new Promise((resolve, reject) => {
-			process.stdout.on('error', reject)
+			const destroyDest = err => dest.destroy(err)
+			process.stdout.on('error', destroyDest)
 			pipeline(
 				src,
 				convert,
 				dest,
 				(err) => {
-					process.stdout.removeListener('error', reject)
+					process.stdout.removeListener('error', destroyDest)
 					if (err) reject(err)
-					else setTimeout(resolve, 3000)
+					else setTimeout(resolve, 100)
 				},
 			)
 		})
