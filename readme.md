@@ -19,6 +19,89 @@ npm install -g gtfs-via-postgres
 Or use [`npx`](https://npmjs.com/package/npx). ✨
 
 
+## Getting Started
+
+If you have a `.zip` GTFS feed, unzip it into individual files.
+
+We're going to use the [2021-02-05 *VBB* feed](https://vbb-gtfs.jannisr.de/2021-02-05/) as an example, which consists of individual failes already.
+
+```sh
+wget -r --no-parent --no-directories -P gtfs -N 'https://vbb-gtfs.jannisr.de/2021-02-05/'
+# …
+# Downloaded 13 files in 20s.
+ls -lh gtfs
+# 3.5K agency.csv
+#  87K calendar.csv
+# 1.0M calendar_dates.csv
+#  64B frequencies.csv
+# 246B license
+# 140B pathways.csv
+#  47K routes.csv
+# 135M shapes.csv
+# 273M stop_times.csv
+# 4.5M stops.csv
+# 4.0M transfers.csv
+#  14M trips.csv
+```
+
+Depending on your specific setup, configure access to the PostgreSQL database via [`PG*` environment variables](https://www.postgresql.org/docs/13/libpq-envars.html):
+
+```sh
+export PGUSER=postgres
+export PGPASSWORD=password
+env PGDATABASE=postgres psql -c 'create database vbb_2021_02_05'
+export PGDATABASE=vbb_2021_02_05
+```
+
+Install `gtfs-via-postgres` and use it to import the GTFS data:
+
+```sh
+npm install -D gtfs-via-postgres
+npm exec -- gtfs-to-sql --require-dependencies gtfs/*.csv | psql -b
+# agency
+# calendar
+# CREATE EXTENSION
+# BEGIN
+# CREATE TABLE
+# COPY 37
+# …
+# CREATE INDEX
+# CREATE VIEW
+# COMMIT
+```
+
+Importing will take a 10s to 10m, depending on the size of the feed. On my laptop, importing the above feed takes about 4m.
+
+`gtfs-via-postgres` adds these views:
+
+- `service_days` ([materialized](https://www.postgresql.org/docs/13/sql-creatematerializedview.html)) "applies" [`calendar_dates`](https://gtfs.org/reference/static/#calendar_datestxt) to [`calendar`](https://gtfs.org/reference/static/#calendartxt) to give you all days of operation for each "service" defined in [`calendar`](https://gtfs.org/reference/static/#calendartxt).
+- `arrivals_departures` "applies" [`stop_times`](https://gtfs.org/reference/static/#stop_timestxt) to [`trips`](https://gtfs.org/reference/static/#tripstxt) and `service_days` to give you all arrivals/departures with their *absolute* dates & times. It also resolves each stop's parent station ID & name.
+- `shapes_aggregates` aggregates individual shape points in [`shapes`](https://gtfs.org/reference/static/#shapestxt) into a [PostGIS `LineString`](http://postgis.net/workshops/postgis-intro/geometries.html#linestrings).
+
+As an example, we're going to use the `arrivals_departures` view to query all *absolute* departures at `900000120003` (*S Ostkrez Bhf (Berlin)*) between `2021-02-23T12:30+01` and  `2021-02-23T12:35+01`:
+
+```sql
+SELECT *
+FROM arrivals_departures
+WHERE station_id = '900000120003'
+AND t_departure >= '2021-02-23T12:30+01' AND t_departure <= '2021-02-23T12:35+01'
+```
+
+```
+ route_id  | route_short_name | route_type |  trip_id  |        date         | stop_sequence |       t_arrival        |      t_departure       |   stop_id    |        stop_name        |  station_id  |      station_name
+-----------+------------------+------------+-----------+---------------------+---------------+------------------------+------------------------+--------------+-------------------------+--------------+-------------------------
+ 10148_109 | S3               | 109        | 145825009 | 2021-02-23 00:00:00 |            19 | 2021-02-23 12:31:24+01 | 2021-02-23 12:32:12+01 | 060120003653 | S Ostkreuz Bhf (Berlin) | 900000120003 | S Ostkreuz Bhf (Berlin)
+ 10148_109 | S3               | 109        | 145825160 | 2021-02-23 00:00:00 |            10 | 2021-02-23 12:33:06+01 | 2021-02-23 12:33:54+01 | 060120003654 | S Ostkreuz Bhf (Berlin) | 900000120003 | S Ostkreuz Bhf (Berlin)
+ 10162_109 | S7               | 109        | 145888587 | 2021-02-23 00:00:00 |            19 | 2021-02-23 12:33:54+01 | 2021-02-23 12:34:42+01 | 060120003653 | S Ostkreuz Bhf (Berlin) | 900000120003 | S Ostkreuz Bhf (Berlin)
+ 10162_109 | S7               | 109        | 145888694 | 2021-02-23 00:00:00 |             9 | 2021-02-23 12:30:36+01 | 2021-02-23 12:31:24+01 | 060120003654 | S Ostkreuz Bhf (Berlin) | 900000120003 | S Ostkreuz Bhf (Berlin)
+ 10223_109 | S41              | 109        | 151221298 | 2021-02-23 00:00:00 |            21 | 2021-02-23 12:30:24+01 | 2021-02-23 12:31:12+01 | 060120901551 | S Ostkreuz Bhf (Berlin) | 900000120003 | S Ostkreuz Bhf (Berlin)
+ 17398_700 | 347              | 700        | 151089751 | 2021-02-23 00:00:00 |            15 | 2021-02-23 12:32:00+01 | 2021-02-23 12:32:00+01 | 070101006976 | S Ostkreuz Bhf (Berlin) | 900000120003 | S Ostkreuz Bhf (Berlin)
+ 19040_100 | RB14             | 100        | 151311540 | 2021-02-23 00:00:00 |            12 | 2021-02-23 12:26:00+01 | 2021-02-23 12:30:00+01 | 000008011162 | S Ostkreuz Bhf (Berlin) | 900000120003 | S Ostkreuz Bhf (Berlin)
+ 22664_2   | FEX              | 2          | 151311081 | 2021-02-23 00:00:00 |             1 | 2021-02-23 12:32:00+01 | 2021-02-23 12:34:00+01 | 000008011162 | S Ostkreuz Bhf (Berlin) | 900000120003 | S Ostkreuz Bhf (Berlin)
+(8 rows)
+```
+
+
 ## Usage
 
 ```
