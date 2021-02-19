@@ -23,10 +23,10 @@ Or use [`npx`](https://npmjs.com/package/npx). ✨
 
 If you have a `.zip` GTFS feed, unzip it into individual files.
 
-We're going to use the [2021-02-05 *VBB* feed](https://vbb-gtfs.jannisr.de/2021-02-05/) as an example, which consists of individual failes already.
+We're going to use the [2021-02-12 *VBB* feed](https://vbb-gtfs.jannisr.de/2021-02-12/) as an example, which consists of individual files already.
 
 ```sh
-wget -r --no-parent --no-directories -P gtfs -N 'https://vbb-gtfs.jannisr.de/2021-02-05/'
+wget -r --no-parent --no-directories -P gtfs -N 'https://vbb-gtfs.jannisr.de/2021-02-12/'
 # …
 # Downloaded 13 files in 20s.
 ls -lh gtfs
@@ -49,8 +49,8 @@ Depending on your specific setup, configure access to the PostgreSQL database vi
 ```sh
 export PGUSER=postgres
 export PGPASSWORD=password
-env PGDATABASE=postgres psql -c 'create database vbb_2021_02_05'
-export PGDATABASE=vbb_2021_02_05
+env PGDATABASE=postgres psql -c 'create database vbb_2021_02_12'
+export PGDATABASE=vbb_2021_02_12
 ```
 
 Install `gtfs-via-postgres` and use it to import the GTFS data:
@@ -78,7 +78,7 @@ Importing will take a 10s to 10m, depending on the size of the feed. On my lapto
 - `arrivals_departures` "applies" [`stop_times`](https://gtfs.org/reference/static/#stop_timestxt) to [`trips`](https://gtfs.org/reference/static/#tripstxt) and `service_days` to give you all arrivals/departures with their *absolute* dates & times. It also resolves each stop's parent station ID & name.
 - `shapes_aggregates` aggregates individual shape points in [`shapes`](https://gtfs.org/reference/static/#shapestxt) into a [PostGIS `LineString`](http://postgis.net/workshops/postgis-intro/geometries.html#linestrings).
 
-As an example, we're going to use the `arrivals_departures` view to query all *absolute* departures at `900000120003` (*S Ostkrez Bhf (Berlin)*) between `2021-02-23T12:30+01` and  `2021-02-23T12:35+01`:
+As an example, we're going to use the `arrivals_departures` view to query all *absolute* departures at `900000120003` (*S Ostkreuz Bhf (Berlin)*) between `2021-02-23T12:30+01` and  `2021-02-23T12:35+01`:
 
 ```sql
 SELECT *
@@ -87,19 +87,16 @@ WHERE station_id = '900000120003'
 AND t_departure >= '2021-02-23T12:30+01' AND t_departure <= '2021-02-23T12:35+01'
 ```
 
-```
- route_id  | route_short_name | route_type |  trip_id  |        date         | stop_sequence |       t_arrival        |      t_departure       |   stop_id    |        stop_name        |  station_id  |      station_name
------------+------------------+------------+-----------+---------------------+---------------+------------------------+------------------------+--------------+-------------------------+--------------+-------------------------
- 10148_109 | S3               | 109        | 145825009 | 2021-02-23 00:00:00 |            19 | 2021-02-23 12:31:24+01 | 2021-02-23 12:32:12+01 | 060120003653 | S Ostkreuz Bhf (Berlin) | 900000120003 | S Ostkreuz Bhf (Berlin)
- 10148_109 | S3               | 109        | 145825160 | 2021-02-23 00:00:00 |            10 | 2021-02-23 12:33:06+01 | 2021-02-23 12:33:54+01 | 060120003654 | S Ostkreuz Bhf (Berlin) | 900000120003 | S Ostkreuz Bhf (Berlin)
- 10162_109 | S7               | 109        | 145888587 | 2021-02-23 00:00:00 |            19 | 2021-02-23 12:33:54+01 | 2021-02-23 12:34:42+01 | 060120003653 | S Ostkreuz Bhf (Berlin) | 900000120003 | S Ostkreuz Bhf (Berlin)
- 10162_109 | S7               | 109        | 145888694 | 2021-02-23 00:00:00 |             9 | 2021-02-23 12:30:36+01 | 2021-02-23 12:31:24+01 | 060120003654 | S Ostkreuz Bhf (Berlin) | 900000120003 | S Ostkreuz Bhf (Berlin)
- 10223_109 | S41              | 109        | 151221298 | 2021-02-23 00:00:00 |            21 | 2021-02-23 12:30:24+01 | 2021-02-23 12:31:12+01 | 060120901551 | S Ostkreuz Bhf (Berlin) | 900000120003 | S Ostkreuz Bhf (Berlin)
- 17398_700 | 347              | 700        | 151089751 | 2021-02-23 00:00:00 |            15 | 2021-02-23 12:32:00+01 | 2021-02-23 12:32:00+01 | 070101006976 | S Ostkreuz Bhf (Berlin) | 900000120003 | S Ostkreuz Bhf (Berlin)
- 19040_100 | RB14             | 100        | 151311540 | 2021-02-23 00:00:00 |            12 | 2021-02-23 12:26:00+01 | 2021-02-23 12:30:00+01 | 000008011162 | S Ostkreuz Bhf (Berlin) | 900000120003 | S Ostkreuz Bhf (Berlin)
- 22664_2   | FEX              | 2          | 151311081 | 2021-02-23 00:00:00 |             1 | 2021-02-23 12:32:00+01 | 2021-02-23 12:34:00+01 | 000008011162 | S Ostkreuz Bhf (Berlin) | 900000120003 | S Ostkreuz Bhf (Berlin)
-(8 rows)
-```
+`route_id` | `route_short_name` | `route_type` | `trip_id` | `date` | `stop_sequence` | `t_arrival` | `t_departure` | `stop_id` | `stop_name` | `station_id` | `station_name`
+-|-|-|-|-|-|-|-|-|-|-|-
+`10148_109` | `S3 ` | `109` | `145825009` | `2021-02-23 00:00:00` | `19` | `2021-02-23 12:31:24+01` | `2021-02-23 12:32:12+01` | `060120003653` | `S Ostkreuz Bhf (Berlin)` | `900000120003` | `S Ostkreuz Bhf (Berlin)`
+`10148_109` | `S3` | `109` | `145825160` | `2021-02-23 00:00:00` | `10` | `2021-02-23 12:33:06+01` | `2021-02-23 12:33:54+01` | `060120003654` | `S Ostkreuz Bhf (Berlin)` | `900000120003` | `S Ostkreuz Bhf (Berlin)`
+`10162_109` | `S7` | `109` | `145888587` | `2021-02-23 00:00:00` | `19` | `2021-02-23 12:33:54+01` | `2021-02-23 12:34:42+01` | `060120003653` | `S Ostkreuz Bhf (Berlin)` | `900000120003` | `S Ostkreuz Bhf (Berlin)`
+`10162_109` | `S7` | `109` | `145888694` | `2021-02-23 00:00:00` | `9` | `2021-02-23 12:30:36+01` | `2021-02-23 12:31:24+01` | `060120003654` | `S Ostkreuz Bhf (Berlin)` | `900000120003` | `S Ostkreuz Bhf (Berlin)`
+`10223_109` | `S41` | `109` | `151221298` | `2021-02-23 00:00:00` | `21` | `2021-02-23 12:30:24+01` | `2021-02-23 12:31:12+01` | `060120901551` | `S Ostkreuz Bhf (Berlin)` | `900000120003` | `S Ostkreuz Bhf (Berlin)`
+`17398_700` | `347` | `700` | `151089751` | `2021-02-23 00:00:00` | `15` | `2021-02-23 12:32:00+01` | `2021-02-23 12:32:00+01` | `070101006976` | `S Ostkreuz Bhf (Berlin)` | `900000120003` | `S Ostkreuz Bhf (Berlin)`
+`19040_100` | `RB14` | `100` | `151311540` | `2021-02-23 00:00:00` | `12` | `2021-02-23 12:26:00+01` | `2021-02-23 12:30:00+01` | `000008011162` | `S Ostkreuz Bhf (Berlin)` | `900000120003` | `S Ostkreuz Bhf (Berlin)`
+`22664_2` | `FEX` | `2` | `151311081` | `2021-02-23 00:00:00` | `1` | `2021-02-23 12:32:00+01` | `2021-02-23 12:34:00+01` | `000008011162` | `S Ostkreuz Bhf (Berlin)` | `900000120003` | `S Ostkreuz Bhf (Berlin)`
 
 
 ## Usage
@@ -124,7 +121,7 @@ Some notable limitations mentioned in the [PostgreSQL 13 documentation on date/t
 
 > When a `timestamp with time zone` value is output, it is always converted from UTC to the current `timezone` zone, and displayed as local time in that zone. To see the time in another time zone, either change `timezone` or use the `AT TIME ZONE` construct […].
 
-This means that, while you can run queries with date+time values in any timezone (offset) and they will be processed correctly, the output will always be in the database timezone (offset), unless you have explicitly used `AT TIME ZONE`.
+You can run queries with date+time values in any timezone (offset) and they will be processed correctly, but the output will always be in the database timezone (offset), unless you have explicitly used `AT TIME ZONE`.
 
 
 ## Correctness vs. Speed regarding GTFS Time Values
@@ -140,9 +137,9 @@ Let's consider two examples:
 
 `gtfs-via-postgres` always prioritizes correctness over speed. Because it follows the GTFS semantics, when filtering `arrivals_departures` by *absolute* departure date+time, it cannot filter `service_days` (which a processed form of `calendar` & `calendar_dates`), because **even a date *before* the desired departure date+time range might still end up within when combined with a `departure_time` of e.g. `27:30`**; Instead, it has to consider all `service_days` and apply the `departure_time` to all of them to check if they're within the range.
 
-However, values >48h are really rare. If you know (or want to assume) that your feed doesn't have unsually large `arrival_time`/`departure_time` values larger than a certain amount, you can filter on `date` when querying `arrivals_departures`; This allows PostgreSQL to reduce the number of joins and calendar calculations by *a lot*.
+However, values >48h are really rare. If you know (or want to assume) that your feed *does not* have `arrival_time`/`departure_time` values larger than a certain amount, you can filter on `date` when querying `arrivals_departures`; This allows PostgreSQL to reduce the number of joins and calendar calculations by *a lot*.
 
-For example, when querying all *absolute* departures at `900000120003` (*S Ostkrez Bhf (Berlin)*) between `2021-02-23T12:30+01` and  `2021-02-23T12:35+01` with the [2021-02-05 *VBB* feed](https://vbb-gtfs.jannisr.de/2021-02-05/), filtering `date` speeds it up nicely:
+For example, when querying all *absolute* departures at `900000120003` (*S Ostkreuz Bhf (Berlin)*) between `2021-02-23T12:30+01` and  `2021-02-23T12:35+01` with the [2021-02-12 *VBB* feed](https://vbb-gtfs.jannisr.de/2021-02-12/), filtering `date` speeds it up nicely:
 
 `station_id` filter | `date` filter | query time
 -|-|-
