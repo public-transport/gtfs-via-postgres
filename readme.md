@@ -1,6 +1,6 @@
 # gtfs-via-postgres
 
-Yet another tool to **process GTFS using PostgreSQL.**
+**Import GTFS into PostgreSQL** to allow for efficient analysis/processing of large GTFS datasets.
 
 [![npm version](https://img.shields.io/npm/v/gtfs-via-postgres.svg)](https://www.npmjs.com/package/gtfs-via-postgres)
 [![build status](https://api.travis-ci.org/derhuerst/gtfs-via-postgres.svg?branch=master)](https://travis-ci.org/derhuerst/gtfs-via-postgres)
@@ -31,14 +31,17 @@ Options:
                                 requires trips.txt). Default: false
     --ignore-unsupported    -u  Ignore unsupported files. Default: false
 Examples:
-    gtfs-to-sql -u some-gtfs/*.txt >gtfs.sql
+    gtfs-to-sql some-gtfs/*.txt | psql -b # import into PostgreSQL
+    gtfs-to-sql -u some-gtfs/*.txt | gzip >gtfs.sql # generate a gzipped SQL dump
 ```
 
-Some notable limitations mentioned in the [PostgreSQL 12 documentation on date/time types](https://www.postgresql.org/docs/12/datatype-datetime.html):
+Some notable limitations mentioned in the [PostgreSQL 13 documentation on date/time types](https://www.postgresql.org/docs/13/datatype-datetime.html):
 
 > For `timestamp with time zone`, the internally stored value is always in UTC (Universal Coordinated Time, traditionally known as Greenwich Mean Time, GMT). An input value that has an explicit time zone specified is converted to UTC using the appropriate offset for that time zone.
 
 > When a `timestamp with time zone` value is output, it is always converted from UTC to the current `timezone` zone, and displayed as local time in that zone. To see the time in another time zone, either change `timezone` or use the `AT TIME ZONE` construct […].
+
+This means that, while you can run queries with date+time values in any timezone (offset) and they will be processed correctly, the output will always be in the database timezone (offset), unless you have explicitly used `AT TIME ZONE`.
 
 
 ## Performance
@@ -46,15 +49,29 @@ Some notable limitations mentioned in the [PostgreSQL 12 documentation on date/t
 On my Macbook 13" 2015 (Intel i5-5257U), converting the [457mb `2020-09-04` VBB GTFS feed](https://vbb-gtfs.jannisr.de/2020-09-04/) took ~2:15.
 
 
-## Related
+## Related Projects
 
-- [gtfs-schema](https://github.com/tyleragreen/gtfs-schema) – PostgreSQL schemas for GTFS feeds.
+There are two projects that are very similar to `gtfs-via-postgres`:
+
+[Node-GTFS (`gtfs` npm package)](https://github.com/BlinkTagInc/node-gtfs) is widely used. It covers three use cases: importing GTFS into an [SQLite](https://sqlite.org/) DB, exporting GTFS/GeoJSON from it, and generating HTML or charts for humans. I don't use it though because
+
+- [doesn't handle GTFS Time values correctly](https://github.com/BlinkTagInc/node-gtfs/blob/653b3b747a46ba14e21026507d8e3d63867621e3/lib/utils.js#L31-L41) (checked on 2021-02-18).
+- it doesn't always work in a streaming/iterative way ([1](https://github.com/BlinkTagInc/node-gtfs/blob/2eecb2788334fbe3ce9f56b73de1ab714e332bda/lib/export.js#L53)/[2](https://github.com/BlinkTagInc/node-gtfs/blob/2eecb2788334fbe3ce9f56b73de1ab714e332bda/lib/geojson-utils.js#L113-L122), checked on 2021-02-18)
+- sometimes does synchronous fs calls ([1](https://github.com/BlinkTagInc/node-gtfs/blob/2eecb2788334fbe3ce9f56b73de1ab714e332bda/lib/import.js#L231-L234), checked on 2021-02-18)
+
+[gtfs-squelize](https://github.com/evansiroky/gtfs-sequelize) uses [sequelize.js](https://sequelize.org) to import a GTFS feed and query the DB. I don't use it because (as of 2021-02-18) it doesn't provide much tooling for analyzing all arrivals/departures.
+
+---
+
+Other related projects:
+
 - [gtfs_SQL_importer](https://github.com/cbick/gtfs_SQL_importer) – Quick & easy import of GTFS data into a SQL database. (Python)
 - [gtfsdb](https://github.com/OpenTransitTools/gtfsdb) – Python library for converting GTFS files into a relational database. (Python)
 - [gtfspy](https://github.com/CxAalto/gtfspy) – Public transport network analysis using Python and SQLite.
 - [GTFS Kit](https://github.com/mrcagney/gtfs_kit) – A Python 3.6+ tool kit for analyzing General Transit Feed Specification (GTFS) data.
 - [GtfsToSql](https://github.com/OpenMobilityData/GtfsToSql) – Parses a GTFS feed into an SQL database (Java)
 - [gtfs-to-sqlite](https://github.com/aytee17/gtfs-to-sqlite) – A tool for generating an SQLite database from a GTFS feed. (Java)
+- [gtfs-schema](https://github.com/tyleragreen/gtfs-schema) – PostgreSQL schemas for GTFS feeds. (plain SQL)
 - [markusvalo/HSLtraffic](https://github.com/markusvalo/HSLtraffic) – Scripts to create a PostgreSQL database for HSL GTFS-data. (plain SQL)
 
 

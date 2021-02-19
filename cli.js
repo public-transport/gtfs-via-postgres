@@ -25,7 +25,8 @@ Options:
                                 requires trips.txt). Default: false
     --ignore-unsupported    -u  Ignore unsupported files. Default: false
 Examples:
-    gtfs-to-sql -u some-gtfs/*.txt >gtfs.sql
+    gtfs-to-sql some-gtfs/*.txt | psql -b # import into PostgreSQL
+    gtfs-to-sql -u some-gtfs/*.txt | gzip >gtfs.sql # generate a gzipped SQL dump
 \n`)
 	process.exit(0)
 }
