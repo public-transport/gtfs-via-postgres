@@ -127,9 +127,32 @@ Some notable limitations mentioned in the [PostgreSQL 13 documentation on date/t
 This means that, while you can run queries with date+time values in any timezone (offset) and they will be processed correctly, the output will always be in the database timezone (offset), unless you have explicitly used `AT TIME ZONE`.
 
 
-## Performance
+## Correctness vs. Speed regarding GTFS Time Values
 
-On my Macbook 13" 2015 (Intel i5-5257U), converting the [457mb `2020-09-04` VBB GTFS feed](https://vbb-gtfs.jannisr.de/2020-09-04/) took ~2:15.
+When matching time values from `stop_times` against dates from `calendar`/`calendar_dates`, you have to take into account that **GTFS Time values can be >24h and [are not relative to the beginning of the day but relative to noon - 12h](https://gist.github.com/derhuerst/574edc94981a21ef0ce90713f1cff7f6)**.
+
+This means that, in order to determine all *absolute* points in time where a particular trip departs at a particular stop, you *cannot* just loop over all "service dates" and add the time value (as in `beginning_of_date + departure_time`); Instead, for each date, you have to determine noon, subtract 12h and then apply the time, which might extend arbitrarily far into the following days.
+
+Let's consider two examples:
+
+- A `departure_time` of `26:59` with a trip running on `2021-03-01`: The time, applied to this specific date, "extends" into the following day, so it actually departs at `2021-03-02T02:59+01`.
+- A departure time of `03:01` with a trip running on `2021-03-28`: This is where the standard -> DST switch happens in the `Europe/Berlin` timezone. Because the time refers to noon - 12h (*not* to midnight), it actually happens at `2021-03-28T03:01+02` which is *not* 3h1m after `2021-03-28T00:00+01`.
+
+`gtfs-via-postgres` always prioritizes correctness over speed. Because it follows the GTFS semantics, when filtering `arrivals_departures` by *absolute* departure date+time, it cannot filter `service_days` (which a processed form of `calendar` & `calendar_dates`), because **even a date *before* the desired departure date+time range might still end up within when combined with a `departure_time` of e.g. `27:30`**; Instead, it has to consider all `service_days` and apply the `departure_time` to all of them to check if they're within the range.
+
+However, values >48h are really rare. If you know (or want to assume) that your feed doesn't have unsually large `arrival_time`/`departure_time` values larger than a certain amount, you can filter on `date` when querying `arrivals_departures`; This allows PostgreSQL to reduce the number of joins and calendar calculations by *a lot*.
+
+For example, when querying all *absolute* departures at `900000120003` (*S Ostkrez Bhf (Berlin)*) between `2021-02-23T12:30+01` and  `2021-02-23T12:35+01` with the [2021-02-05 *VBB* feed](https://vbb-gtfs.jannisr.de/2021-02-05/), filtering `date` speeds it up nicely:
+
+`station_id` filter | `date` filter | query time
+-|-|-
+`900000120003` | *none* | 970ms
+`900000120003` | `2021-02-13` >= `date` < `2021-03-08` | 200ms
+`900000120003` | `2021-02-23` >= `date` < `2021-02-24` | 160ms
+`900000120003` | `2021-02-22` > `date` < `2021-02-24` | 155ms
+*none* | *none* | 280s
+*none* | `2021-02-13` >= `date` < `2021-03-08` | 18s
+*none* | `2021-02-22` > `date` < `2021-02-24` | 1.5s
 
 
 ## Related Projects
