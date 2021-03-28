@@ -70,12 +70,13 @@ npm exec -- gtfs-to-sql --require-dependencies gtfs/*.csv | psql -b
 # COMMIT
 ```
 
-Importing will take a 10s to 10m, depending on the size of the feed. On my laptop, importing the above feed takes about 4m.
+Importing will take 10s to 10m, depending on the size of the feed. On my laptop, importing the above feed takes about 4m.
 
 `gtfs-via-postgres` adds these views:
 
 - `service_days` ([materialized](https://www.postgresql.org/docs/13/sql-creatematerializedview.html)) "applies" [`calendar_dates`](https://gtfs.org/reference/static/#calendar_datestxt) to [`calendar`](https://gtfs.org/reference/static/#calendartxt) to give you all days of operation for each "service" defined in [`calendar`](https://gtfs.org/reference/static/#calendartxt).
-- `arrivals_departures` "applies" [`stop_times`](https://gtfs.org/reference/static/#stop_timestxt) to [`trips`](https://gtfs.org/reference/static/#tripstxt) and `service_days` to give you all arrivals/departures with their *absolute* dates & times. It also resolves each stop's parent station ID & name.
+- `arrivals_departures` "applies" [`stop_times`](https://gtfs.org/reference/static/#stop_timestxt) to [`trips`](https://gtfs.org/reference/static/#tripstxt) and `service_days` to give you all arrivals/departures at each stop with their *absolute* dates & times. It also resolves each stop's parent station ID & name.
+- `connections` "applies" [`stop_times`](https://gtfs.org/reference/static/#stop_timestxt) to [`trips`](https://gtfs.org/reference/static/#tripstxt) and `service_days`, just like `arrivals_departures`, but gives you departure (at stop A) & arrival (at stop B) *pairs*.
 - `shapes_aggregates` aggregates individual shape points in [`shapes`](https://gtfs.org/reference/static/#shapestxt) into a [PostGIS `LineString`](http://postgis.net/workshops/postgis-intro/geometries.html#linestrings).
 
 As an example, we're going to use the `arrivals_departures` view to query all *absolute* departures at `900000120003` (*S Ostkreuz Bhf (Berlin)*) between `2021-02-23T12:30+01` and  `2021-02-23T12:35+01`:
@@ -133,13 +134,13 @@ This means that, in order to determine all *absolute* points in time where a par
 Let's consider two examples:
 
 - A `departure_time` of `26:59` with a trip running on `2021-03-01`: The time, applied to this specific date, "extends" into the following day, so it actually departs at `2021-03-02T02:59+01`.
-- A departure time of `03:01` with a trip running on `2021-03-28`: This is where the standard -> DST switch happens in the `Europe/Berlin` timezone. Because the time refers to noon - 12h (*not* to midnight), it actually happens at `2021-03-28T03:01+02` which is *not* 3h1m after `2021-03-28T00:00+01`.
+- A departure time of `03:01` with a trip running on `2021-03-28`: This is where the standard -> DST switch happens in the `Europe/Berlin` timezone. Because the dep. time refers to noon - 12h (*not* to midnight), it actually happens at `2021-03-28T03:01+02` which is *not* `3h1m` after `2021-03-28T00:00+01`.
 
 `gtfs-via-postgres` always prioritizes correctness over speed. Because it follows the GTFS semantics, when filtering `arrivals_departures` by *absolute* departure date+time, it cannot filter `service_days` (which a processed form of `calendar` & `calendar_dates`), because **even a date *before* the desired departure date+time range might still end up within when combined with a `departure_time` of e.g. `27:30`**; Instead, it has to consider all `service_days` and apply the `departure_time` to all of them to check if they're within the range.
 
 However, values >48h are really rare. If you know (or want to assume) that your feed *does not* have `arrival_time`/`departure_time` values larger than a certain amount, you can filter on `date` when querying `arrivals_departures`; This allows PostgreSQL to reduce the number of joins and calendar calculations by *a lot*.
 
-For example, when querying all *absolute* departures at `900000120003` (*S Ostkreuz Bhf (Berlin)*) between `2021-02-23T12:30+01` and  `2021-02-23T12:35+01` with the [2021-02-12 *VBB* feed](https://vbb-gtfs.jannisr.de/2021-02-12/), filtering `date` speeds it up nicely:
+For example, when querying all *absolute* departures at `900000120003` (*S Ostkreuz Bhf (Berlin)*) between `2021-02-23T12:30+01` and  `2021-02-23T12:35+01` within the [2021-02-12 *VBB* feed](https://vbb-gtfs.jannisr.de/2021-02-12/), filtering by `date` speeds it up nicely:
 
 `station_id` filter | `date` filter | query time
 -|-|-
