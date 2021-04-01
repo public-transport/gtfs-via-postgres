@@ -11,6 +11,7 @@ const argv = mri(process.argv.slice(2), {
 		'silent', 's',
 		'require-dependencies', 'd',
 		'ignore-unsupported', 'u',
+		'trips-without-shape-id',
 	]
 })
 
@@ -19,11 +20,12 @@ if (argv.help || argv.h) {
 Usage:
     gtfs-to-sql <gtfs-file> ...
 Options:
-    --silent                -s  Don't show files being converted.
-    --require-dependencies  -d  Require files that the specified GTFS files depend
-                                on to be specified as well (e.g. stop_times.txt
-                                requires trips.txt). Default: false
-    --ignore-unsupported    -u  Ignore unsupported files. Default: false
+    --silent                  -s  Don't show files being converted.
+    --require-dependencies    -d  Require files that the specified GTFS files depend
+                                  on to be specified as well (e.g. stop_times.txt
+                                  requires trips.txt). Default: false
+    --ignore-unsupported      -u  Ignore unsupported files. Default: false
+    --trips-without-shape-id      Don't add a shape_id to each trips.txt item.
 Examples:
     gtfs-to-sql some-gtfs/*.txt | psql -b # import into PostgreSQL
     gtfs-to-sql -u some-gtfs/*.txt | gzip >gtfs.sql # generate a gzipped SQL dump
@@ -48,6 +50,7 @@ convertGtfsToSql(files, {
 	silent: !!(argv.silent || argv.s),
 	requireDependencies: !!(argv['require-dependencies'] || argv.d),
 	ignoreUnsupportedFiles: !!(argv['ignore-unsupported'] || argv.u),
+	tripsWithoutShapeId: !!argv['trips-without-shape-id'],
 })
 .catch((err) => {
 	if (err && err.code !== 'EPIPE') console.error(err)
