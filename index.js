@@ -4,7 +4,7 @@ const sequencify = require('sequencify')
 const readCsv = require('gtfs-utils/read-csv')
 const {PassThrough, pipeline} = require('stream')
 const formatters = require('./lib')
-const deps = require('./lib/deps')
+const getDependencies = require('./lib/deps')
 const pkg = require('./package.json')
 const converter = require('./lib/converter')
 
@@ -20,6 +20,7 @@ const convertGtfsToSql = async (files, opt = {}) => {
 		...opt,
 	}
 
+	const deps = getDependencies(opt)
 	if (ignoreUnsupportedFiles) {
 		files = files.filter(f => !!formatters[f.name])
 	}

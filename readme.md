@@ -125,6 +125,17 @@ Some notable limitations mentioned in the [PostgreSQL 13 documentation on date/t
 You can run queries with date+time values in any timezone (offset) and they will be processed correctly, but the output will always be in the database timezone (offset), unless you have explicitly used `AT TIME ZONE`.
 
 
+### Exporting data efficiently
+
+If you want to export data from the database, use the [`COPY` command](https://www.postgresql.org/docs/13/sql-copy.html); On my laptop, PostgreSQL 13 can export about 250k `connections` rows per second.
+
+```shell
+psql -c 'COPY (SELECT * FROM connections) TO STDOUT csv HEADER' | node transform-data.js >connections.csv
+```
+
+In the nested `SELECT` query, you can use features like `WHERE`, `ORDER BY` and `LIMIT`. Because `psql` passes on the exported data right away, you could stream it into another process.
+
+
 ## Correctness vs. Speed regarding GTFS Time Values
 
 When matching time values from `stop_times` against dates from `calendar`/`calendar_dates`, you have to take into account that **GTFS Time values can be >24h and [are not relative to the beginning of the day but relative to noon - 12h](https://gist.github.com/derhuerst/574edc94981a21ef0ce90713f1cff7f6)**.
