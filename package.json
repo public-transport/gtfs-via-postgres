@@ -1,7 +1,7 @@
 {
 	"name": "gtfs-via-postgres",
 	"description": "Process GTFS using PostgreSQL.",
-	"version": "2.7.0",
+	"version": "2.8.0",
 	"main": "lib/index.js",
 	"bin": {
 		"gtfs-to-sql": "cli.js"
@@ -55,7 +55,7 @@
 	"devDependencies": {
 		"eslint": "^6.8.0",
 		"pkg": "^4.5.1",
-		"sample-gtfs-feed": "^0.7.0"
+		"sample-gtfs-feed": "^0.9.0"
 	},
 	"scripts": {
 		"test": "./test/psql.sh",
