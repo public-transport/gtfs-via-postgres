@@ -54,11 +54,13 @@
 	},
 	"devDependencies": {
 		"eslint": "^6.8.0",
+		"pkg": "^4.5.1",
 		"sample-gtfs-feed": "^0.7.0"
 	},
 	"scripts": {
 		"test": "./test/psql.sh",
 		"lint": "eslint .",
+		"build-binaries": "pkg --public -t latest-macos-x64,latest-linux-x64 -o dist/gtfs-via-postgres cli.js",
 		"prepublishOnly": "npm test && npm run lint"
 	}
 }

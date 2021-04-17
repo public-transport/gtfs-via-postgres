@@ -1,0 +1,42 @@
+name: build & upload binaries
+on:
+  push:
+    tags:
+      - '*'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: setup Node
+      uses: actions/setup-node@v1
+    - run: npm install
+    - name: build binaries
+      run: npm run build-binaries
+    - name: create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: gtfs-via-postgres@${{ github.ref }}
+    - name: upload macOS binary
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/gtfs-via-postgres-macos
+        asset_name: gtfs-via-postgres_${{ github.ref }}_macos
+        asset_content_type: application/octet-stream
+    - name: upload Linux binary
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/gtfs-via-postgres-linux
+        asset_name: gtfs-via-postgres_${{ github.ref }}_linux
+        asset_content_type: application/octet-stream

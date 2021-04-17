@@ -4,6 +4,7 @@
 
 [![npm version](https://img.shields.io/npm/v/gtfs-via-postgres.svg)](https://www.npmjs.com/package/gtfs-via-postgres)
 [![build status](https://api.travis-ci.org/derhuerst/gtfs-via-postgres.svg?branch=master)](https://travis-ci.org/derhuerst/gtfs-via-postgres)
+[![binary build status](https://img.shields.io/github/workflow/status/derhuerst/gtfs-via-postgres/build/master)](https://github.com/derhuerst/gtfs-via-postgres/actions)
 [![Prosperity/Apache license](https://img.shields.io/static/v1?label=license&message=Prosperity%2FApache&color=0997E8)](#license)
 ![minimum Node.js version](https://img.shields.io/node/v/gtfs-via-postgres.svg)
 [![support me via GitHub Sponsors](https://img.shields.io/badge/support%20me-donate-fa7664.svg)](https://github.com/sponsors/derhuerst)
