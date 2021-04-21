@@ -29,7 +29,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./dist/gtfs-via-postgres-macos
-        asset_name: gtfs-via-postgres_${{ github.ref }}_macos
+        asset_name: gtfs-via-postgres_macos
         asset_content_type: application/octet-stream
     - name: upload Linux binary
       uses: actions/upload-release-asset@v1
@@ -38,5 +38,5 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./dist/gtfs-via-postgres-linux
-        asset_name: gtfs-via-postgres_${{ github.ref }}_linux
+        asset_name: gtfs-via-postgres_linux
         asset_content_type: application/octet-stream
