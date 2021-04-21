@@ -109,11 +109,12 @@ AND t_departure >= '2021-02-23T12:30+01' AND t_departure <= '2021-02-23T12:35+01
 Usage:
     gtfs-to-sql <gtfs-file> ...
 Options:
-    --silent                -s  Don't show files being converted.
-    --require-dependencies  -d  Require files that the specified GTFS files depend
-                                on to be specified as well (e.g. stop_times.txt
-                                requires trips.txt). Default: false
-    --ignore-unsupported    -u  Ignore unsupported files. Default: false
+    --silent                  -s  Don't show files being converted.
+    --require-dependencies    -d  Require files that the specified GTFS files depend
+                                  on to be specified as well (e.g. stop_times.txt
+                                  requires trips.txt). Default: false
+    --ignore-unsupported      -u  Ignore unsupported files. Default: false
+    --trips-without-shape-id      Don't add a shape_id to each trips.txt item.
 Examples:
     gtfs-to-sql some-gtfs/*.txt | psql -b # import into PostgreSQL
     gtfs-to-sql -u some-gtfs/*.txt | gzip >gtfs.sql # generate a gzipped SQL dump

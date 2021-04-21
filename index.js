@@ -62,7 +62,7 @@ BEGIN;
 
 		const {file} = tasks[name]
 		const src = readCsv(file)
-		const convert = converter(formatters[name])
+		const convert = converter(formatters[name], opt)
 
 		// This is ugly, but I'm a bit overwhelmed with the number of
 		// edges cases in the stream/stdio logic.

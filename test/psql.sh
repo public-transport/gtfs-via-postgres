@@ -8,7 +8,7 @@ cd "$(dirname $0)"
 
 env | grep '^PG' || true
 
-../cli.js \
+../cli.js -d --trips-without-shape-id -- \
 	../node_modules/sample-gtfs-feed/gtfs/agency.txt \
 	../node_modules/sample-gtfs-feed/gtfs/calendar.txt \
 	../node_modules/sample-gtfs-feed/gtfs/calendar_dates.txt \
