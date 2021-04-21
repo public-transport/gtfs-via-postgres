@@ -18,7 +18,7 @@ const argv = mri(process.argv.slice(2), {
 if (argv.help || argv.h) {
 	process.stdout.write(`
 Usage:
-    gtfs-to-sql <gtfs-file> ...
+    gtfs-to-sql [options] [--] <gtfs-file> ...
 Options:
     --silent                  -s  Don't show files being converted.
     --require-dependencies    -d  Require files that the specified GTFS files depend
@@ -28,7 +28,7 @@ Options:
     --trips-without-shape-id      Don't add a shape_id to each trips.txt item.
 Examples:
     gtfs-to-sql some-gtfs/*.txt | psql -b # import into PostgreSQL
-    gtfs-to-sql -u some-gtfs/*.txt | gzip >gtfs.sql # generate a gzipped SQL dump
+    gtfs-to-sql -u -- some-gtfs/*.txt | gzip >gtfs.sql # generate a gzipped SQL dump
 \n`)
 	process.exit(0)
 }
