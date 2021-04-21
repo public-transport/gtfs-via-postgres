@@ -12,6 +12,22 @@ jobs:
     - name: setup Node
       uses: actions/setup-node@v1
     - run: npm install
+
+    - name: install & start PostgreSQL with PostGIS
+      uses: huaxk/postgis-action@v1
+      with:
+        postgresql password: password
+        postgresql user: postgres
+        postgresql db: postgres
+    - name: npm test
+      run : npm test
+      env:
+        PGHOST: localhost
+        PGPORT: '5432'
+        PGUSER: postgres
+        PGPASSWORD: password
+        PGDATABASE: postgres
+
     - name: build binaries
       run: npm run build-binaries
     - name: create release
