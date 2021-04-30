@@ -135,15 +135,15 @@ Instead of installing via `npm`, you can use [the `gtfs-via-postgres` Docker ima
 ```shell
 # variant A: use Docker image just to convert GTFS to SQL
 docker run --rm --volume /path/to/gtfs:/gtfs \
-	gtfs-via-postgres --require-dependencies -- stops.csv | psql -b
+	derhuerst/gtfs-via-postgres --require-dependencies -- stops.csv | psql -b
 ```
 
 Keep in mind that this will run `psql -b` *outside* of the Docker container, so your host machine needs access to PostgreSQL.
 
-If you want to directly import the GTFS data *from within the Docker container*, you need add `psql` to the image and use call inside. To do that, write a new Dockerfile that extends the `gtfs-via-postgres` image:
+If you want to directly import the GTFS data *from within the Docker container*, you need add `psql` to the image and use call inside. To do that, write a new Dockerfile that extends the `derhuerst/gtfs-via-postgres` image:
 
 ```Dockerfile
-FROM gtfs-via-postgres
+FROM derhuerst/gtfs-via-postgres
 RUN apk add --no-cache postgresql-client
 ENV PGPORT=5432 PGUSER=postgres PGPASSWORD=password
 WORKDIR /gtfs
@@ -153,7 +153,7 @@ ENTRYPOINT ["/bin/sh", "-c", "env | grep PG; gtfs-via-postgres $0 $@ | psql -b"]
 
 ```shell
 # start PostgreSQL DB in another container "db"
-docker run docker run --name db -p 5432:5432 -e POSTGRES_PASSWORD=password postgres:alpine
+docker run docker run --name db -p 5432:5432 -e POSTGRES_PASSWORD=password postgis/postgis
 
 # variant B: use Docker image to convert GTFS to SQL and import it directly
 docker build -t import-gtfs . # build helper Docker image from Dockerfile

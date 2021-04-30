@@ -51,4 +51,4 @@ if [[ "$dst1" != "0,1553993880" ]]; then
 	exit 1
 fi
 
-echo ✔︎
+echo -e "\n\n✔︎ tests passing"

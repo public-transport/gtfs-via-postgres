@@ -11,9 +11,9 @@ WORKDIR /app
 
 ADD package.json /app
 RUN npm install --production && npm cache clean --force
-RUN ln -s /app/cli.js /usr/local/bin/gtfs-via-postgres
 
 ADD . /app
+RUN ln -s /app/cli.js /usr/local/bin/gtfs-via-postgres
 
 WORKDIR /gtfs
 ENTRYPOINT ["/app/cli.js"]
