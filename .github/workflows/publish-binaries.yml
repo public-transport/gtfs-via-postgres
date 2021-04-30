@@ -19,6 +19,7 @@ jobs:
         postgresql password: password
         postgresql user: postgres
         postgresql db: postgres
+    - run: sleep 10
     - name: npm test
       run : npm test
       env:
