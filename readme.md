@@ -114,7 +114,7 @@ Options:
                                   on to be specified as well (e.g. stop_times.txt
                                   requires trips.txt). Default: false
     --ignore-unsupported      -u  Ignore unsupported files. Default: false
-    --trips-without-shape-id      Don't add a shape_id to each trips.txt item.
+    --trips-without-shape-id      Don't require trips.txt items to have a shape_id.
     --routes-without-agency-id    Don't require routes.txt items to have an agency_id.
 Examples:
     gtfs-to-sql some-gtfs/*.txt | psql -b # import into PostgreSQL
