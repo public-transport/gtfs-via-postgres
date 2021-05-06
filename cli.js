@@ -26,6 +26,7 @@ Options:
                                   requires trips.txt). Default: false
     --ignore-unsupported      -u  Ignore unsupported files. Default: false
     --trips-without-shape-id      Don't add a shape_id to each trips.txt item.
+    --routes-without-agency-id    Don't require routes.txt items to have an agency_id.
 Examples:
     gtfs-to-sql some-gtfs/*.txt | psql -b # import into PostgreSQL
     gtfs-to-sql -u -- some-gtfs/*.txt | gzip >gtfs.sql # generate a gzipped SQL dump
@@ -51,6 +52,7 @@ convertGtfsToSql(files, {
 	requireDependencies: !!(argv['require-dependencies'] || argv.d),
 	ignoreUnsupportedFiles: !!(argv['ignore-unsupported'] || argv.u),
 	tripsWithoutShapeId: !!argv['trips-without-shape-id'],
+	routesWithoutAgencyId: !!argv['--routes-without-agency-id'],
 })
 .catch((err) => {
 	if (err && err.code !== 'EPIPE') console.error(err)

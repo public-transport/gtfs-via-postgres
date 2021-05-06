@@ -115,6 +115,7 @@ Options:
                                   requires trips.txt). Default: false
     --ignore-unsupported      -u  Ignore unsupported files. Default: false
     --trips-without-shape-id      Don't add a shape_id to each trips.txt item.
+    --routes-without-agency-id    Don't require routes.txt items to have an agency_id.
 Examples:
     gtfs-to-sql some-gtfs/*.txt | psql -b # import into PostgreSQL
     gtfs-to-sql -u -- some-gtfs/*.txt | gzip >gtfs.sql # generate a gzipped SQL dump
