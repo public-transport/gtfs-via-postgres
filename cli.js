@@ -52,7 +52,7 @@ convertGtfsToSql(files, {
 	requireDependencies: !!(argv['require-dependencies'] || argv.d),
 	ignoreUnsupportedFiles: !!(argv['ignore-unsupported'] || argv.u),
 	tripsWithoutShapeId: !!argv['trips-without-shape-id'],
-	routesWithoutAgencyId: !!argv['--routes-without-agency-id'],
+	routesWithoutAgencyId: !!argv['routes-without-agency-id'],
 })
 .catch((err) => {
 	if (err && err.code !== 'EPIPE') console.error(err)
