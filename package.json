@@ -55,7 +55,7 @@
 	"devDependencies": {
 		"eslint": "^7.24.0",
 		"pkg": "^4.5.1",
-		"sample-gtfs-feed": "^0.9.0"
+		"sample-gtfs-feed": "^0.10.3"
 	},
 	"scripts": {
 		"test": "./test/psql.sh",
