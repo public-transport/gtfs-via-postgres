@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:16.8.0-alpine3.13
 LABEL org.opencontainers.image.title="gtfs-via-postgres"
 LABEL org.opencontainers.image.description="Process GTFS using PostgreSQL."
 LABEL org.opencontainers.image.authors="Jannis R <mail@jannisr.de>"
