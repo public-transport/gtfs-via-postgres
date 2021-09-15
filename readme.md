@@ -75,7 +75,7 @@ npm exec -- gtfs-to-sql --require-dependencies -- gtfs/*.csv | psql -b
 
 Importing will take 10s to 10m, depending on the size of the feed. On my laptop, importing the above feed takes about 4m.
 
-`gtfs-via-postgres` adds these views:
+In addition to a table for each GTFS file, `gtfs-via-postgres` adds these views to help with real-world analysis:
 
 - `service_days` ([materialized](https://www.postgresql.org/docs/13/sql-creatematerializedview.html)) "applies" [`calendar_dates`](https://gtfs.org/reference/static/#calendar_datestxt) to [`calendar`](https://gtfs.org/reference/static/#calendartxt) to give you all days of operation for each "service" defined in [`calendar`](https://gtfs.org/reference/static/#calendartxt).
 - `arrivals_departures` "applies" [`stop_times`](https://gtfs.org/reference/static/#stop_timestxt) to [`trips`](https://gtfs.org/reference/static/#tripstxt) and `service_days` to give you all arrivals/departures at each stop with their *absolute* dates & times. It also resolves each stop's parent station ID & name.
