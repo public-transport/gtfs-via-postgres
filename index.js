@@ -9,16 +9,17 @@ const pkg = require('./package.json')
 const converter = require('./lib/converter')
 
 const convertGtfsToSql = async (files, opt = {}) => {
-	const {
-		silent,
-		requireDependencies,
-		ignoreUnsupportedFiles,
-	} = {
+	opt = {
 		silent: false,
 		requireDependencies: false,
 		ignoreUnsupportedFiles: false,
 		...opt,
 	}
+	const {
+		silent,
+		requireDependencies,
+		ignoreUnsupportedFiles,
+	} = opt
 
 	const deps = getDependencies(opt)
 	if (ignoreUnsupportedFiles) {
