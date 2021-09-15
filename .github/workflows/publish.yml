@@ -4,7 +4,8 @@ on:
     tags:
       - '*'
 jobs:
-  build:
+  test:
+    name: run tests
     runs-on: ubuntu-latest
     steps:
     - name: checkout
@@ -28,6 +29,17 @@ jobs:
         PGUSER: postgres
         PGPASSWORD: password
         PGDATABASE: postgres
+
+  binaries:
+    name: build binaries & publish as GitHub release
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: setup Node
+      uses: actions/setup-node@v1
+    - run: npm install
 
     - name: build binaries
       run: npm run build-binaries
@@ -57,3 +69,23 @@ jobs:
         asset_path: ./dist/gtfs-via-postgres-linux
         asset_name: gtfs-via-postgres_linux
         asset_content_type: application/octet-stream
+
+  docker-image:
+    name: build & publish Docker image
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+
+      - name: log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      - name: build Docker image & push to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: |
+            derhuerst/gtfs-via-postgres:latest
