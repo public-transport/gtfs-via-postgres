@@ -39,7 +39,7 @@ fi
 
 connection_during_dst=$(cat << EOF
 	SELECT
-		stop_sequence,
+		from_stop_sequence,
 		extract(epoch from t_departure) as dep
 	FROM connections
 	WHERE trip_id = 'during-dst-1'
