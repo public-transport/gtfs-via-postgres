@@ -2,11 +2,10 @@
 
 const sequencify = require('sequencify')
 const readCsv = require('gtfs-utils/read-csv')
-const {PassThrough, pipeline} = require('stream')
+const {Stringifier} = require('csv-stringify')
 const formatters = require('./lib')
 const getDependencies = require('./lib/deps')
 const pkg = require('./package.json')
-const converter = require('./lib/converter')
 
 const convertGtfsToSql = async (files, opt = {}) => {
 	opt = {
@@ -57,34 +56,36 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 BEGIN;
 \n`)
 
+	const csv = new Stringifier({quoted: true})
+
 	for (const name of order) {
 		if (!silent) console.error(name)
 		process.stdout.write(`-- ${name}\n-----------------\n\n`)
 
 		const {file} = tasks[name]
-		const src = readCsv(file)
-		const convert = converter(formatters[name], opt)
+		const {
+			beforeAll,
+			formatRow,
+			afterAll,
+		} = formatters[name]
 
-		// This is ugly, but I'm a bit overwhelmed with the number of
-		// edges cases in the stream/stdio logic.
-		// https://gist.github.com/derhuerst/42ab81b6d8ea5e05b4e2bfe83f702216
-		const dest = new PassThrough()
-		dest.pipe(process.stdout)
+		if ('string' === typeof beforeAll && beforeAll) {
+			process.stdout.write(beforeAll)
+		} else if ('function' === typeof beforeAll) {
+			process.stdout.write(beforeAll(opt))
+		}
 
-		await new Promise((resolve, reject) => {
-			const destroyDest = err => dest.destroy(err)
-			process.stdout.on('error', destroyDest)
-			pipeline(
-				src,
-				convert,
-				dest,
-				(err) => {
-					process.stdout.removeListener('error', destroyDest)
-					if (err) reject(err)
-					else setTimeout(resolve, 100)
-				},
-			)
-		})
+		let n = 0
+		for await (const row of readCsv(file)) {
+			const formatted = csv.stringify(formatRow(row, opt))
+			process.stdout.write(formatted + '\n')
+		}
+
+		if ('string' === typeof afterAll && afterAll) {
+			process.stdout.write(afterAll + ';\n')
+		} else if ('function' === typeof afterAll) {
+			process.stdout.write(afterAll(opt) + ';\n')
+		}
 	}
 
 	process.stdout.write(`\
