@@ -40,6 +40,7 @@ if (argv.version || argv.v) {
 }
 
 const {basename, extname} = require('path')
+const {pipeline} = require('stream')
 const convertGtfsToSql = require('./index')
 
 const files = argv._.map((file) => {
@@ -47,14 +48,20 @@ const files = argv._.map((file) => {
 	return {name, file}
 })
 
-convertGtfsToSql(files, {
+const opt = {
 	silent: !!(argv.silent || argv.s),
 	requireDependencies: !!(argv['require-dependencies'] || argv.d),
 	ignoreUnsupportedFiles: !!(argv['ignore-unsupported'] || argv.u),
 	tripsWithoutShapeId: !!argv['trips-without-shape-id'],
 	routesWithoutAgencyId: !!argv['routes-without-agency-id'],
-})
-.catch((err) => {
-	if (err && err.code !== 'EPIPE') console.error(err)
-	process.exit(1)
-})
+}
+
+pipeline(
+	convertGtfsToSql(files, opt),
+	process.stdout,
+	(err) => {
+		if (!err) return;
+		if (err.code !== 'EPIPE') console.error(err)
+		process.exit(1)
+	}
+)
