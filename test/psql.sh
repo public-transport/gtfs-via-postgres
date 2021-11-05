@@ -19,7 +19,7 @@ env | grep '^PG' || true
 	| psql -b
 
 query=$(cat << EOF
-select extract(epoch from t_arrival) as t_arrival
+select extract(epoch from t_arrival)::integer as t_arrival
 from arrivals_departures
 where route_id = 'D'
 order by t_arrival
@@ -40,7 +40,7 @@ fi
 connection_during_dst=$(cat << EOF
 	SELECT
 		from_stop_sequence,
-		extract(epoch from t_departure) as dep
+		extract(epoch from t_departure)::integer as dep
 	FROM connections
 	WHERE trip_id = 'during-dst-1'
 	AND t_departure = '2019-03-31T01:58+01'
