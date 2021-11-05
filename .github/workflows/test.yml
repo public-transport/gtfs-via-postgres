@@ -30,6 +30,8 @@ jobs:
         postgresql db: postgres
 
     - run: npm install
+
+    - run: npm run lint
     - name: npm test
       run : npm test
       env:
