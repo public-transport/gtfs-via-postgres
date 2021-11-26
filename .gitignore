@@ -10,3 +10,5 @@ pnpm-debug.log
 /shrinkwrap.yaml
 
 /dist
+
+/test/amtrak-gtfs-2021-10-06

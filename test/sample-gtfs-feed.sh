@@ -2,11 +2,13 @@
 
 set -e
 set -o pipefail
+cd "$(dirname $0)"
 set -x
 
-cd "$(dirname $0)"
-
 env | grep '^PG' || true
+
+psql -c 'create database sample_gtfs_feed'
+export PGDATABASE='sample_gtfs_feed'
 
 ../cli.js -d --trips-without-shape-id -- \
 	../node_modules/sample-gtfs-feed/gtfs/agency.txt \
@@ -50,5 +52,3 @@ if [[ "$dst1" != "0,1553993880" ]]; then
 	echo "invalid/missing DST t_departure: $dst1" 1>&2
 	exit 1
 fi
-
-echo -e "\n\n✔︎ tests passing"
