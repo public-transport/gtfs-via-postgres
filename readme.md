@@ -73,7 +73,7 @@ npm exec -- gtfs-to-sql --require-dependencies -- gtfs/*.csv | psql -b
 # COMMIT
 ```
 
-Importing will take 10s to 10m, depending on the size of the feed. On my laptop, importing the above feed takes about 4m.
+Importing will take 10s to 10m, depending on the size of the feed. On my laptop, importing the above feed takes about 4m; Importing the [260kb 2021-10-06 Amtrak feed](https://transitfeeds.com/p/amtrak/1136/20211006) takes 6s.
 
 In addition to a table for each GTFS file, `gtfs-via-postgres` adds these views to help with real-world analysis:
 
