@@ -27,6 +27,10 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 
 	const fileNames = files.map(f => f.name)
 	const tasks = { // file name -> [dep name]
+		'is_timezone': {
+			dep: [],
+		},
+
 		// special handling of calendar/calendar_dates:
 		// service_days relies on *both* calendar's & calendar_dates' tables to
 		// be present, so we add mock tasks here. Each of these mock tasks get
@@ -71,6 +75,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 \\set ON_ERROR_STOP True
 CREATE EXTENSION IF NOT EXISTS postgis;
 BEGIN;
+
 \n`
 
 	const csv = new Stringifier({quoted: true})
