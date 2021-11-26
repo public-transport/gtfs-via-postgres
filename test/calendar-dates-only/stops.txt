@@ -1,0 +1,11 @@
+stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,stop_url,location_type,stop_timezone,wheelchair_boarding,parent_station,level_id,platform_code
+airport,🛫,International Airport (ABC),train station at the Internationl Airport (ABC),52.365,13.511,https://fta.example.org/stations/airport.html,1,Europe/Berlin,1,,,
+airport-1,,Platform 1,Platform 1,52.36396,13.5087,,0,,2,airport,airport-level-1,
+airport-1-access,,,,52.36454,13.51114,,3,,2,airport,airport-level-1,1
+airport-2,,Platform 2,Platform 2,52.36417,13.50878,,0,,0,airport,airport-level-3,2
+airport-2-access,,,,52.36471,13.51103,,3,,1,airport,airport-level-3,
+airport-2-boarding,,pl. 2 boarding,platform 2 boarding area,52.36426,13.50915,,4,,1,airport-2,airport-level-3,
+airport-entrance,,Entrance,,52.364509,13.510582,,2,,1,airport,airport-level-0,
+center,,City Center,,52.5,13.5,,,,,,,
+lake,🏊‍,Lake,,52,13,https://fta.example.org/stations/lake.html,,,,,,
+museum,🎫,Awesome Museum,The Awesome Museum displays awesome stuff.,52.44572,13.43657,https://fta.example.org/stations/museum.html,1,,,,,

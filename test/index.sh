@@ -5,6 +5,7 @@ set -o pipefail
 cd "$(dirname $0)"
 set -x
 
+./calendar-dates-only.sh
 ./sample-gtfs-feed.sh
 ./amtrak-gtfs-2021-10-06.sh
 

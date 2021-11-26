@@ -1,0 +1,2 @@
+route_id,agency_id,route_short_name,route_long_name,route_type,route_desc,route_url,route_color,route_text_color,route_sort_order
+A,MTA,Ada,Ada Lovelace Bus Line,3,,,,,

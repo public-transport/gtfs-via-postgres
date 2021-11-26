@@ -1,0 +1,5 @@
+service_id,date,exception_type
+some-days,20190715,1
+some-days,20190716,1
+some-days,20190719,1
+some-days,20190720,1
