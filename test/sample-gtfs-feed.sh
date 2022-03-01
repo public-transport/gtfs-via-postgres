@@ -85,3 +85,16 @@ if [[ "$pw1" != "escalator,f" ]]; then
 	echo "invalid/missing DST t_departure: $pw1" 1>&2
 	exit 1
 fi
+
+timepoint_exact=$(cat << EOF
+	SELECT timepoint
+	FROM stop_times
+	WHERE timepoint = 'exact'
+	AND stop_sequence_consec = 0
+	LIMIT 1
+EOF)
+exact1=$(psql --csv -t -c "$timepoint_exact" | head -n 1)
+if [[ "$exact1" != "exact" ]]; then
+	echo "invalid/missing DST t_departure: $exact1" 1>&2
+	exit 1
+fi
