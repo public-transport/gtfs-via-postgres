@@ -116,6 +116,8 @@ Options:
     --ignore-unsupported      -u  Ignore unsupported files. Default: false
     --trips-without-shape-id      Don't require trips.txt items to have a shape_id.
     --routes-without-agency-id    Don't require routes.txt items to have an agency_id.
+    --stops-without-level-id      Don't require stops.txt items to have a level_id.
+                                  Default if levels.txt has not been provided.
 Examples:
     gtfs-to-sql some-gtfs/*.txt | psql -b # import into PostgreSQL
     gtfs-to-sql -u -- some-gtfs/*.txt | gzip >gtfs.sql # generate a gzipped SQL dump
