@@ -26,25 +26,27 @@ There are also [prebuilt binaries available](https://github.com/derhuerst/gtfs-v
 
 If you have a `.zip` GTFS feed, unzip it into individual files.
 
-We're going to use the [2021-02-12 *VBB* feed](https://vbb-gtfs.jannisr.de/2021-02-12/) as an example, which consists of individual files already.
+We're going to use the [2022-02-25 *VBB* feed](https://vbb-gtfs.jannisr.de/2022-02-25/) as an example, which consists of individual files already.
 
 ```sh
-wget -r --no-parent --no-directories -P gtfs -N 'https://vbb-gtfs.jannisr.de/2021-02-12/'
+wget -r --no-parent --no-directories -P gtfs -N 'https://vbb-gtfs.jannisr.de/2022-02-25/'
 # …
-# Downloaded 13 files in 20s.
+# Downloaded 14 files in 20s.
 ls -lh gtfs
-# 3.5K agency.csv
-#  87K calendar.csv
-# 1.0M calendar_dates.csv
+# 3.3K agency.csv
+#  97K calendar.csv
+# 1.1M calendar_dates.csv
+# 2.5K datapackage.json
 #  64B frequencies.csv
+# 5.9K levels.csv
 # 246B license
-# 140B pathways.csv
-#  47K routes.csv
-# 135M shapes.csv
-# 273M stop_times.csv
-# 4.5M stops.csv
-# 4.0M transfers.csv
-#  14M trips.csv
+# 8.3M pathways.csv
+#  49K routes.csv
+# 146M shapes.csv
+# 368M stop_times.csv
+# 5.0M stops.csv
+# 4.7M transfers.csv
+#  16M trips.csv
 ```
 
 Depending on your specific setup, configure access to the PostgreSQL database via [`PG*` environment variables](https://www.postgresql.org/docs/13/libpq-envars.html):
@@ -52,8 +54,8 @@ Depending on your specific setup, configure access to the PostgreSQL database vi
 ```sh
 export PGUSER=postgres
 export PGPASSWORD=password
-env PGDATABASE=postgres psql -c 'create database vbb_2021_02_12'
-export PGDATABASE=vbb_2021_02_12
+env PGDATABASE=postgres psql -c 'create database vbb_2022_02_25'
+export PGDATABASE=vbb_2022_02_25
 ```
 
 Install `gtfs-via-postgres` and use it to import the GTFS data:
@@ -82,25 +84,27 @@ In addition to a table for each GTFS file, `gtfs-via-postgres` adds these views 
 - `connections` "applies" [`stop_times`](https://gtfs.org/reference/static/#stop_timestxt) to [`trips`](https://gtfs.org/reference/static/#tripstxt) and `service_days`, just like `arrivals_departures`, but gives you departure (at stop A) & arrival (at stop B) *pairs*.
 - `shapes_aggregates` aggregates individual shape points in [`shapes`](https://gtfs.org/reference/static/#shapestxt) into a [PostGIS `LineString`](http://postgis.net/workshops/postgis-intro/geometries.html#linestrings).
 
-As an example, we're going to use the `arrivals_departures` view to query all *absolute* departures at `900000120003` (*S Ostkreuz Bhf (Berlin)*) between `2021-02-23T12:30+01` and  `2021-02-23T12:35+01`:
+As an example, we're going to use the `arrivals_departures` view to query all *absolute* departures at `de:11000:900120003` (*S Ostkreuz Bhf (Berlin)*) between `2022-03-23T12:30+01` and  `2022-03-23T12:35+01`:
 
 ```sql
 SELECT *
 FROM arrivals_departures
-WHERE station_id = '900000120003'
-AND t_departure >= '2021-02-23T12:30+01' AND t_departure <= '2021-02-23T12:35+01'
+WHERE station_id = 'de:11000:900120003'
+AND t_departure >= '2022-03-23T12:30+01' AND t_departure <= '2022-03-23T12:35+01'
 ```
 
 `route_id` | `route_short_name` | `route_type` | `trip_id` | `date` | `stop_sequence` | `t_arrival` | `t_departure` | `stop_id` | `stop_name` | `station_id` | `station_name`
 -|-|-|-|-|-|-|-|-|-|-|-
-`10148_109` | `S3 ` | `109` | `145825009` | `2021-02-23 00:00:00` | `19` | `2021-02-23 12:31:24+01` | `2021-02-23 12:32:12+01` | `060120003653` | `S Ostkreuz Bhf (Berlin)` | `900000120003` | `S Ostkreuz Bhf (Berlin)`
-`10148_109` | `S3` | `109` | `145825160` | `2021-02-23 00:00:00` | `10` | `2021-02-23 12:33:06+01` | `2021-02-23 12:33:54+01` | `060120003654` | `S Ostkreuz Bhf (Berlin)` | `900000120003` | `S Ostkreuz Bhf (Berlin)`
-`10162_109` | `S7` | `109` | `145888587` | `2021-02-23 00:00:00` | `19` | `2021-02-23 12:33:54+01` | `2021-02-23 12:34:42+01` | `060120003653` | `S Ostkreuz Bhf (Berlin)` | `900000120003` | `S Ostkreuz Bhf (Berlin)`
-`10162_109` | `S7` | `109` | `145888694` | `2021-02-23 00:00:00` | `9` | `2021-02-23 12:30:36+01` | `2021-02-23 12:31:24+01` | `060120003654` | `S Ostkreuz Bhf (Berlin)` | `900000120003` | `S Ostkreuz Bhf (Berlin)`
-`10223_109` | `S41` | `109` | `151221298` | `2021-02-23 00:00:00` | `21` | `2021-02-23 12:30:24+01` | `2021-02-23 12:31:12+01` | `060120901551` | `S Ostkreuz Bhf (Berlin)` | `900000120003` | `S Ostkreuz Bhf (Berlin)`
-`17398_700` | `347` | `700` | `151089751` | `2021-02-23 00:00:00` | `15` | `2021-02-23 12:32:00+01` | `2021-02-23 12:32:00+01` | `070101006976` | `S Ostkreuz Bhf (Berlin)` | `900000120003` | `S Ostkreuz Bhf (Berlin)`
-`19040_100` | `RB14` | `100` | `151311540` | `2021-02-23 00:00:00` | `12` | `2021-02-23 12:26:00+01` | `2021-02-23 12:30:00+01` | `000008011162` | `S Ostkreuz Bhf (Berlin)` | `900000120003` | `S Ostkreuz Bhf (Berlin)`
-`22664_2` | `FEX` | `2` | `151311081` | `2021-02-23 00:00:00` | `1` | `2021-02-23 12:32:00+01` | `2021-02-23 12:34:00+01` | `000008011162` | `S Ostkreuz Bhf (Berlin)` | `900000120003` | `S Ostkreuz Bhf (Berlin)`
+`route_id` | `route_short_name` | `route_type` | `trip_id` | `date` | `stop_sequence` | `t_arrival` | `t_departure` | `stop_id` | `stop_name` | `station_id` | `station_name`
+-|-|-|-|-|-|-|-|-|-|-|-
+`10148_109` | `S3` | `109` | `169035756` | `2022-03-23 00:00:00` | `19` | `2022-03-23 12:31:24+01` | `2022-03-23 12:32:12+01` | `de:11000:900120003:2:53` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
+`10148_109` | `S3` | `109` | `169035899` | `2022-03-23 00:00:00` | `10` | `2022-03-23 12:33:06+01` | `2022-03-23 12:33:54+01` | `de:11000:900120003:3:55` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
+`10162_109` | `S7` | `109` | `169128381` | `2022-03-23 00:00:00` | `19` | `2022-03-23 12:33:54+01` | `2022-03-23 12:34:42+01` | `de:11000:900120003:2:53` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
+`10162_109` | `S7` | `109` | `169128495` | `2022-03-23 00:00:00` | `9` | `2022-03-23 12:30:36+01` | `2022-03-23 12:31:24+01` | `de:11000:900120003:3:55` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
+`10223_109` | `S41` | `109` | `169054370` | `2022-03-23 00:00:00` | `21` | `2022-03-23 12:30:24+01` | `2022-03-23 12:31:12+01` | `de:11000:900120003:5:58` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
+`10227_109` | `S42` | `109` | `169071882` | `2022-03-23 00:00:00` | `6` | `2022-03-23 12:30:30+01` | `2022-03-23 12:31:12+01` | `de:11000:900120003:5:59` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
+`19040_100` | `RB14` | `100` | `178748721` | `2022-03-23 00:00:00` | `13` | `2022-03-23 12:30:00+01` | `2022-03-23 12:30:00+01` | `de:11000:900120003:1:50` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
+`22664_2` | `FEX` | `2` | `178748125` | `2022-03-23 00:00:00` | `1` | `2022-03-23 12:32:00+01` | `2022-03-23 12:34:00+01` | `de:11000:900120003:4:57` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
 
 
 ## Usage
@@ -191,17 +195,17 @@ Let's consider two examples:
 
 However, values >48h are really rare. If you know (or want to assume) that your feed *does not* have `arrival_time`/`departure_time` values larger than a certain amount, you can filter on `date` when querying `arrivals_departures`; This allows PostgreSQL to reduce the number of joins and calendar calculations by *a lot*.
 
-For example, when querying all *absolute* departures at `900000120003` (*S Ostkreuz Bhf (Berlin)*) between `2021-02-23T12:30+01` and  `2021-02-23T12:35+01` within the [2021-02-12 *VBB* feed](https://vbb-gtfs.jannisr.de/2021-02-12/), filtering by `date` speeds it up nicely:
+For example, when querying all *absolute* departures at `de:11000:900120003` (*S Ostkreuz Bhf (Berlin)*) between `2022-03-23T12:30+01` and  `2022-03-23T12:35+01` within the [2022-02-25 *VBB* feed](https://vbb-gtfs.jannisr.de/2022-02-25/), filtering by `date` speeds it up nicely (Apple M1):
 
-`station_id` filter | `date` filter | query time
--|-|-
-`900000120003` | *none* | 970ms
-`900000120003` | `2021-02-13` >= `date` < `2021-03-08` | 200ms
-`900000120003` | `2021-02-23` >= `date` < `2021-02-24` | 160ms
-`900000120003` | `2021-02-22` > `date` < `2021-02-24` | 155ms
-*none* | *none* | 280s
-*none* | `2021-02-13` >= `date` < `2021-03-08` | 18s
-*none* | `2021-02-22` > `date` < `2021-02-24` | 1.5s
+`station_id` filter | `date` filter | query time | nr of results
+-|-|-|-
+`de:11000:900120003` | *none* | 230ms | ~574k
+`de:11000:900120003` | `2022-03-13` >= `date` < `2022-04-08` | 90ms | ~51k
+`de:11000:900120003` | `2022-03-23` >= `date` < `2022-03-24` | 60ms | ~2k
+`de:11000:900120003` | `2022-03-22` > `date` < `2022-03-24` | 60ms | ~2k
+*none* | *none* | 192s | 370m
+*none* | `2022-03-13` >= `date` < `2022-04-08` | 1.4s | ~1523k
+*none* | `2022-03-22` > `date` < `2022-03-24` | 1.2s | ~1523k
 
 
 ## Related Projects
