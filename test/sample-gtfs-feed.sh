@@ -19,6 +19,7 @@ export PGDATABASE='sample_gtfs_feed'
 	../node_modules/sample-gtfs-feed/gtfs/trips.txt \
 	../node_modules/sample-gtfs-feed/gtfs/stop_times.txt \
 	../node_modules/sample-gtfs-feed/gtfs/levels.txt \
+	../node_modules/sample-gtfs-feed/gtfs/pathways.txt \
 	| psql -b
 
 query=$(cat << EOF
@@ -67,5 +68,20 @@ EOF)
 lvl1=$(psql --csv -t -c "$airport_levels" | head -n 1)
 if [[ "$lvl1" != "airport-level-0,0,ground level" ]]; then
 	echo "invalid/missing lowest airport-% level: $lvl1" 1>&2
+	exit 1
+fi
+
+airportPathway=$(cat << EOF
+	SELECT
+		pathway_mode,
+		is_bidirectional
+	FROM pathways
+	WHERE from_stop_id = 'airport-entrance'
+	AND to_stop_id = 'airport-1-access'
+	LIMIT 1
+EOF)
+pw1=$(psql --csv -t -c "$airportPathway" | head -n 1)
+if [[ "$pw1" != "escalator,f" ]]; then
+	echo "invalid/missing DST t_departure: $pw1" 1>&2
 	exit 1
 fi
