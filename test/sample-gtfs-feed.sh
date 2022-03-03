@@ -14,6 +14,7 @@ export PGDATABASE='sample_gtfs_feed'
 	../node_modules/sample-gtfs-feed/gtfs/agency.txt \
 	../node_modules/sample-gtfs-feed/gtfs/calendar.txt \
 	../node_modules/sample-gtfs-feed/gtfs/calendar_dates.txt \
+	../node_modules/sample-gtfs-feed/gtfs/frequencies.txt \
 	../node_modules/sample-gtfs-feed/gtfs/stops.txt \
 	../node_modules/sample-gtfs-feed/gtfs/routes.txt \
 	../node_modules/sample-gtfs-feed/gtfs/trips.txt \
@@ -38,6 +39,22 @@ fi
 arr2=$(psql --csv -t -c "$query" | head -n 2 | tail -n 1)
 if [[ "$arr2" != "1553994180" ]]; then
 	echo "invalid 2nd t_arrival: $arr2" 1>&2
+	exit 1
+fi
+
+arrs_deps_b_downtown_on_working_days=$(cat << EOF
+	SELECT
+		stop_sequence,
+		extract(epoch from t_arrival)::integer as arr,
+		extract(epoch from t_departure)::integer as dep
+	FROM arrivals_departures
+	WHERE trip_id = 'b-downtown-on-working-days'
+	ORDER BY t_departure
+	LIMIT 1
+EOF)
+freq_arr_dep1=$(psql --csv -t -c "$arrs_deps_b_downtown_on_working_days")
+if [[ "$freq_arr_dep1" != "1,1552028340,1552028400" ]]; then
+	echo "invalid/missing frequencies-based arrival/departure: $freq_arr_dep1" 1>&2
 	exit 1
 fi
 
