@@ -10,6 +10,9 @@
 [![support me via GitHub Sponsors](https://img.shields.io/badge/support%20me-donate-fa7664.svg)](https://github.com/sponsors/derhuerst)
 [![chat with me on Twitter](https://img.shields.io/badge/chat%20with%20me-on%20Twitter-1da1f2.svg)](https://twitter.com/derhuerst)
 
+- ✅ handles [daylight saving time correctly]()
+- ✅ supports `frequencies.txt`
+
 
 ## Installation
 
@@ -97,8 +100,6 @@ AND t_departure >= '2022-03-23T12:30+01' AND t_departure <= '2022-03-23T12:35+01
 
 `route_id` | `route_short_name` | `route_type` | `trip_id` | `date` | `stop_sequence` | `t_arrival` | `t_departure` | `stop_id` | `stop_name` | `station_id` | `station_name`
 -|-|-|-|-|-|-|-|-|-|-|-
-`route_id` | `route_short_name` | `route_type` | `trip_id` | `date` | `stop_sequence` | `t_arrival` | `t_departure` | `stop_id` | `stop_name` | `station_id` | `station_name`
--|-|-|-|-|-|-|-|-|-|-|-
 `10148_109` | `S3` | `109` | `169035756` | `2022-03-23 00:00:00` | `19` | `2022-03-23 12:31:24+01` | `2022-03-23 12:32:12+01` | `de:11000:900120003:2:53` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
 `10148_109` | `S3` | `109` | `169035899` | `2022-03-23 00:00:00` | `10` | `2022-03-23 12:33:06+01` | `2022-03-23 12:33:54+01` | `de:11000:900120003:3:55` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
 `10162_109` | `S7` | `109` | `169128381` | `2022-03-23 00:00:00` | `19` | `2022-03-23 12:33:54+01` | `2022-03-23 12:34:42+01` | `de:11000:900120003:2:53` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
@@ -129,7 +130,7 @@ Examples:
     gtfs-to-sql -u -- some-gtfs/*.txt | gzip >gtfs.sql # generate a gzipped SQL dump
 ```
 
-Some notable limitations mentioned in the [PostgreSQL 13 documentation on date/time types](https://www.postgresql.org/docs/13/datatype-datetime.html):
+Some notable limitations mentioned in the [PostgreSQL 14 documentation on date/time types](https://www.postgresql.org/docs/14/datatype-datetime.html):
 
 > For `timestamp with time zone`, the internally stored value is always in UTC (Universal Coordinated Time, traditionally known as Greenwich Mean Time, GMT). An input value that has an explicit time zone specified is converted to UTC using the appropriate offset for that time zone.
 
@@ -147,12 +148,13 @@ docker run --rm --volume /path/to/gtfs:/gtfs \
 	derhuerst/gtfs-via-postgres --require-dependencies -- stops.csv | psql -b
 ```
 
-Keep in mind that this will run `psql -b` *outside* of the Docker container, so your host machine needs access to PostgreSQL.
+Keep in mind that `psql -b` will run *outside* of the Docker container, so your host machine needs access to PostgreSQL.
 
-If you want to directly import the GTFS data *from within the Docker container*, you need add `psql` to the image and use call inside. To do that, write a new Dockerfile that extends the `derhuerst/gtfs-via-postgres` image:
+If you want to directly import the GTFS data *from within the Docker container*, you need add `psql` to the image and run it from inside. To do that, write a new Dockerfile that extends the `derhuerst/gtfs-via-postgres` image:
 
 ```Dockerfile
 FROM derhuerst/gtfs-via-postgres
+# add psql CLI tool
 RUN apk add --no-cache postgresql-client
 ENV PGPORT=5432 PGUSER=postgres PGPASSWORD=password
 WORKDIR /gtfs
@@ -168,12 +170,12 @@ docker run docker run --name db -p 5432:5432 -e POSTGRES_PASSWORD=password postg
 docker build -t import-gtfs . # build helper Docker image from Dockerfile
 docker run --rm --volume /path/to/gtfs:/gtfs \
 	--link db -e PGHOST=db \
-	import-gtfs -d -- stops.txt calendar.txt
+	import-gtfs --require-dependencies -- stops.csv
 ```
 
 ### Exporting data efficiently
 
-If you want to export data from the database, use the [`COPY` command](https://www.postgresql.org/docs/13/sql-copy.html); On my laptop, PostgreSQL 13 can export about 250k `connections` rows per second.
+If you want to export data from the database, use the [`COPY` command](https://www.postgresql.org/docs/13/sql-copy.html); On my laptop, PostgreSQL 13 can export about 500k `connections` rows per second.
 
 ```shell
 psql -c 'COPY (SELECT * FROM connections) TO STDOUT csv HEADER' | node transform-data.js >connections.csv
@@ -197,34 +199,44 @@ Let's consider two examples:
 
 However, values >48h are really rare. If you know (or want to assume) that your feed *does not* have `arrival_time`/`departure_time` values larger than a certain amount, you can filter on `date` when querying `arrivals_departures`; This allows PostgreSQL to reduce the number of joins and calendar calculations by *a lot*.
 
-For example, when querying all *absolute* departures at `de:11000:900120003` (*S Ostkreuz Bhf (Berlin)*) between `2022-03-23T12:30+01` and  `2022-03-23T12:35+01` within the [2022-02-25 *VBB* feed](https://vbb-gtfs.jannisr.de/2022-02-25/), filtering by `date` speeds it up nicely (Apple M1):
+For example, when querying all *absolute* departures at `de:11000:900120003` (*S Ostkreuz Bhf (Berlin)*) between `2022-03-23T12:30+01` and  `2022-03-23T12:35+01` within the [2022-02-25 *VBB* feed](https://vbb-gtfs.jannisr.de/2022-02-25/), filtering by `date` speeds it up nicely (Apple M1, PostgreSQL 14.2):
 
 `station_id` filter | `date` filter | query time | nr of results
 -|-|-|-
 `de:11000:900120003` | *none* | 230ms | ~574k
-`de:11000:900120003` | `2022-03-13` >= `date` < `2022-04-08` | 90ms | ~51k
-`de:11000:900120003` | `2022-03-23` >= `date` < `2022-03-24` | 60ms | ~2k
-`de:11000:900120003` | `2022-03-22` > `date` < `2022-03-24` | 60ms | ~2k
+`de:11000:900120003` | `2022-03-13` >= `date` < `2022-04-08` | 105ms | ~51k
+`de:11000:900120003` | `2022-03-23` >= `date` < `2022-03-24` | 55ms | ~2k
+`de:11000:900120003` | `2022-03-22` > `date` < `2022-03-24` | 55ms | ~2k
 *none* | *none* | 192s | 370m
-*none* | `2022-03-13` >= `date` < `2022-04-08` | 1.4s | ~1523k
-*none* | `2022-03-22` > `date` < `2022-03-24` | 1.2s | ~1523k
+*none* | `2022-03-13` >= `date` < `2022-04-08` | 34s | ~35m
+*none* | `2022-03-22` > `date` < `2022-03-24` | 2.4s | ~1523k
 
 
 ## Related Projects
 
-There are two projects that are very similar to `gtfs-via-postgres`:
+There are some projects that are very similar to `gtfs-via-postgres`:
 
-[Node-GTFS (`gtfs` npm package)](https://github.com/BlinkTagInc/node-gtfs) is widely used. It covers three use cases: importing GTFS into an [SQLite](https://sqlite.org/) DB, exporting GTFS/GeoJSON from it, and generating HTML or charts for humans. I don't use it though because
+### Node-GTFS
 
-- doesn't handle GTFS Time values correctly ([1](https://github.com/BlinkTagInc/node-gtfs/blob/master/lib/utils.js#L36-L46)/[2](https://github.com/BlinkTagInc/node-gtfs/blob/4d5e5369d5d94052a5004204182a2582ced8f619/lib/import.js#L233)) (checked on 2022-03-01).
+[Node-GTFS (`gtfs` npm package)](https://github.com/BlinkTagInc/node-gtfs) is widely used. It covers three use cases: importing GTFS into an [SQLite](https://sqlite.org/) DB, exporting GTFS/GeoJSON from it, and generating HTML or charts for humans.
+
+I don't use it though because
+
+- it doesn't handle GTFS Time values correctly ([1](https://github.com/BlinkTagInc/node-gtfs/blob/master/lib/utils.js#L36-L46)/[2](https://github.com/BlinkTagInc/node-gtfs/blob/4d5e5369d5d94052a5004204182a2582ced8f619/lib/import.js#L233), checked on 2022-03-01)
 - it doesn't always work in a streaming/iterative way ([1](https://github.com/BlinkTagInc/node-gtfs/blob/4d5e5369d5d94052a5004204182a2582ced8f619/lib/export.js#L65)/[2](https://github.com/BlinkTagInc/node-gtfs/blob/4d5e5369d5d94052a5004204182a2582ced8f619/lib/geojson-utils.js#L118-L126), checked on 2022-03-01)
 - sometimes does synchronous fs calls ([1](https://github.com/BlinkTagInc/node-gtfs/blob/4d5e5369d5d94052a5004204182a2582ced8f619/lib/import.js#L65)/[2](https://github.com/BlinkTagInc/node-gtfs/blob/4d5e5369d5d94052a5004204182a2582ced8f619/lib/import.js#L298), checked on 2022-03-01)
 
-[gtfs-squelize](https://github.com/evansiroky/gtfs-sequelize) uses [sequelize.js](https://sequelize.org) to import a GTFS feed and query the DB. I don't use it because (as of 2022-03-01) it doesn't provide much tooling for analyzing all arrivals/departures.
+### gtfs-sequelize
 
----
+[gtfs-squelize](https://github.com/evansiroky/gtfs-sequelize) uses [sequelize.js](https://sequelize.org) to import a GTFS feed and query the DB.
 
-Other related projects:
+I don't use it because
+
+- it doesn't handle GTFS Time values correctly ([1](https://github.com/evansiroky/gtfs-sequelize/blob/ba101fa82e730694c536c43e615ff38fd264a65b/lib/gtfsLoader.js#L616-L617)/[2](https://github.com/evansiroky/gtfs-sequelize/blob/ba101fa82e730694c536c43e615ff38fd264a65b/lib/gtfsLoader.js#L24-L33), cheked on 2022-03-01)
+- it doesn't provide much tooling for analyzing all arrivals/departures (checked on 2022-03-01)
+- some of its operations are quite slow, because they fetch relatved records of a record via JS instead of using `JOIN`s
+
+### other related projects
 
 - [gtfs_SQL_importer](https://github.com/cbick/gtfs_SQL_importer) – Quick & easy import of GTFS data into a SQL database. (Python)
 - [gtfsdb](https://github.com/OpenTransitTools/gtfsdb) – Python library for converting GTFS files into a relational database. (Python)
