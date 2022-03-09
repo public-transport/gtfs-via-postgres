@@ -58,6 +58,23 @@ if [[ "$freq_arr_dep1" != "1,1552028340,1552028400" ]]; then
 	exit 1
 fi
 
+cons_b_downtown_on_working_days=$(cat << EOF
+	SELECT
+		from_stop_sequence,
+		extract(epoch from t_departure)::integer as dep,
+		to_stop_sequence,
+		extract(epoch from t_arrival)::integer as arr
+	FROM connections
+	WHERE trip_id = 'b-downtown-on-working-days'
+	ORDER BY t_departure
+	LIMIT 1
+EOF)
+freq_con1=$(psql --csv -t -c "$cons_b_downtown_on_working_days")
+if [[ "$freq_con1" != "1,1552028400,3,1552028760" ]]; then
+	echo "invalid/missing frequencies-based connection: $freq_con1" 1>&2
+	exit 1
+fi
+
 connection_during_dst=$(cat << EOF
 	SELECT
 		from_stop_sequence,
