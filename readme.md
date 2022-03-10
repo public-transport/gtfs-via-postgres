@@ -236,9 +236,16 @@ I don't use it because
 - it doesn't provide much tooling for analyzing all arrivals/departures (checked on 2022-03-01)
 - some of its operations are quite slow, because they fetch relatved records of a record via JS instead of using `JOIN`s
 
+### gtfs-sql-importer
+
+There are several forks of the [original outdated project](https://github.com/cbick/gtfs_SQL_importer); [fitnr's fork](https://github.com/fitnr/gtfs-sql-importer) seems to be the most recent one.
+
+The project has a slightly different goal than `gtfs-via-postgres`: While `gtfs-sql-importer` is designed to import multiple versions of a GTFS dataset in an idempotent fashion, `gtfs-via-postgres` assumes that *one* (version of a) GTFS dataset is imported into *one* DB exactly once.
+
+`gtfs-via-postgres` aims to provide more tools – e.g. the `arrivals_departures` & `connections` views – to help with the analysis of a GTFS dataset, whereas `gtfs-sql-importer` just imports the data.
+
 ### other related projects
 
-- [gtfs_SQL_importer](https://github.com/cbick/gtfs_SQL_importer) – Quick & easy import of GTFS data into a SQL database. (Python)
 - [gtfsdb](https://github.com/OpenTransitTools/gtfsdb) – Python library for converting GTFS files into a relational database. (Python)
 - [gtfspy](https://github.com/CxAalto/gtfspy) – Public transport network analysis using Python and SQLite.
 - [GTFS Kit](https://github.com/mrcagney/gtfs_kit) – A Python 3.6+ tool kit for analyzing General Transit Feed Specification (GTFS) data.
