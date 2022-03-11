@@ -23,11 +23,21 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: install & start PostgreSQL with PostGIS
-      uses: huaxk/postgis-action@v1
-      with:
-        postgresql password: password
-        postgresql user: postgres
-        postgresql db: postgres
+      # todo: currently, is uses mdillon, which doesn't have PostgreSQL 14
+      # uses: huaxk/postgis-action@v1
+      # with:
+      #   postgresql version: '14-3.2-alpine'
+      #   postgresql password: password
+      #   postgresql user: postgres
+      #   postgresql db: postgres
+      run: |
+        docker run -d \
+          -e POSTGRES_USER=$PGUSER -e POSTGRES_PASSWORD=$PGPASSWORD -e POSTGRES_DB=$PGDATABASE \
+          -p 5432:5432 postgis/postgis:14-3.2-alpine
+      env:
+        PGUSER: postgres
+        PGPASSWORD: password
+        PGDATABASE: postgres
 
     - run: npm install
 
