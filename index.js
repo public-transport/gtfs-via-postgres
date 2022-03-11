@@ -45,6 +45,13 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		'service_days': {
 			dep: ['calendar', 'calendar_dates'],
 		},
+
+		// The arrivals_departures & connections views rely on frequencies' table
+		// to be present, so we add a mock task here. It gets replaced by a
+		// file-based on below if the file has been passed.
+		'frequencies': {
+			dep: [...deps.frequencies],
+		},
 	}
 
 	for (const file of files) {
