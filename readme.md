@@ -10,8 +10,9 @@
 [![support me via GitHub Sponsors](https://img.shields.io/badge/support%20me-donate-fa7664.svg)](https://github.com/sponsors/derhuerst)
 [![chat with me on Twitter](https://img.shields.io/badge/chat%20with%20me-on%20Twitter-1da1f2.svg)](https://twitter.com/derhuerst)
 
-- ✅ handles [daylight saving time correctly]()
+- ✅ handles [daylight saving time correctly](#correctness-vs-speed-regarding-gtfs-time-values) but keeps reasonable lookup performance
 - ✅ supports `frequencies.txt`
+- ✅ joins `stop_times.txt`/`frequencies.txt`, `calendar.txt`/`calendar_dates.txt`, `trips.txt`, `route.txt` & `stops.txt` into [views](https://www.postgresql.org/docs/14/sql-createview.html) straightforward data analysis
 
 
 ## Installation
@@ -23,6 +24,8 @@ npm install -g gtfs-via-postgres
 Or use [`npx`](https://npmjs.com/package/npx). ✨
 
 There are also [prebuilt binaries available](https://github.com/derhuerst/gtfs-via-postgres/releases/latest).
+
+*Note:* `gtfs-via-postgres` **needs PostgreSQL >=14** to work, as it uses the [`WITH … AS NOT MATERIALIZED`](https://www.postgresql.org/docs/14/queries-with.html#id-1.5.6.12.7) syntax. You can check your PostgreSQL server's version with `psql -t -c 'SELECT version()'`.
 
 
 ## Getting Started

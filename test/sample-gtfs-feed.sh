@@ -132,3 +132,5 @@ if [[ "$exact1" != "exact" ]]; then
 	echo "invalid/missing DST t_departure: $exact1" 1>&2
 	exit 1
 fi
+
+echo 'works ✔'
