@@ -48,6 +48,7 @@
 	},
 	"dependencies": {
 		"csv-stringify": "^5.5.1",
+		"debug": "^4.3.3",
 		"gtfs-utils": "^5.1.0",
 		"mri": "^1.1.5",
 		"sequencify": "0.0.7"
