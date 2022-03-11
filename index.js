@@ -99,7 +99,7 @@ BEGIN;
 
 		if (task.file) {
 			const {formatRow} = formatters[name]
-			for await (const row of readCsv(task.file)) {
+			for await (const row of await readCsv(task.file)) {
 				const formatted = csv.stringify(formatRow(row, opt))
 				yield formatted + '\n'
 			}
