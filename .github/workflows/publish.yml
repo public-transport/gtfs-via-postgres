@@ -65,23 +65,41 @@ jobs:
       with:
         tag_name: ${{ github.ref }}
         release_name: gtfs-via-postgres@${{ github.ref }}
-    - name: upload macOS binary
+    - name: upload x64 macOS binary
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./dist/gtfs-via-postgres-macos
-        asset_name: gtfs-via-postgres_macos
+        asset_path: ./dist/gtfs-via-postgres-macos-x64
+        asset_name: gtfs-via-postgres-macos-x64
         asset_content_type: application/octet-stream
-    - name: upload Linux binary
+    - name: upload arm64 macOS binary
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./dist/gtfs-via-postgres-linux
-        asset_name: gtfs-via-postgres_linux
+        asset_path: ./dist/gtfs-via-postgres-macos-arm64
+        asset_name: gtfs-via-postgres-macos-arm64
+        asset_content_type: application/octet-stream
+    - name: upload x64 Linux binary
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/gtfs-via-postgres-linux-x64
+        asset_name: gtfs-via-postgres-linux-x64
+        asset_content_type: application/octet-stream
+    - name: upload arm64 Linux binary
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/gtfs-via-postgres-linux-arm64
+        asset_name: gtfs-via-postgres-linux-arm64
         asset_content_type: application/octet-stream
 
   docker-image:

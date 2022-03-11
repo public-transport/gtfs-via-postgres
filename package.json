@@ -61,7 +61,7 @@
 	"scripts": {
 		"test": "./test/index.sh",
 		"lint": "eslint .",
-		"build-binaries": "pkg --public -t latest-macos-x64,latest-linux-x64 -o dist/gtfs-via-postgres cli.js",
+		"build-binaries": "pkg --public -t latest-macos-x64,latest-macos-arm64,latest-linux-x64,latest-linux-arm64 -o dist/gtfs-via-postgres cli.js",
 		"prepublishOnly": "npm test && npm run lint"
 	}
 }
