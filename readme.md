@@ -10,9 +10,9 @@
 [![support me via GitHub Sponsors](https://img.shields.io/badge/support%20me-donate-fa7664.svg)](https://github.com/sponsors/derhuerst)
 [![chat with me on Twitter](https://img.shields.io/badge/chat%20with%20me-on%20Twitter-1da1f2.svg)](https://twitter.com/derhuerst)
 
-- ✅ handles [daylight saving time correctly](#correctness-vs-speed-regarding-gtfs-time-values) but keeps reasonable lookup performance
+- ✅ handles [daylight saving time correctly](#correctness-vs-speed-regarding-gtfs-time-values) but provides a reasonable lookup performance
 - ✅ supports `frequencies.txt`
-- ✅ joins `stop_times.txt`/`frequencies.txt`, `calendar.txt`/`calendar_dates.txt`, `trips.txt`, `route.txt` & `stops.txt` into [views](https://www.postgresql.org/docs/14/sql-createview.html) straightforward data analysis
+- ✅ joins `stop_times.txt`/`frequencies.txt`, `calendar.txt`/`calendar_dates.txt`, `trips.txt`, `route.txt` & `stops.txt` into [views](https://www.postgresql.org/docs/14/sql-createview.html) for straightforward data analysis
 
 
 ## Installation

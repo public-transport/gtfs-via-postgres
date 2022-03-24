@@ -15,5 +15,6 @@ RUN npm install --production && npm cache clean --force
 ADD . /app
 RUN ln -s /app/cli.js /usr/local/bin/gtfs-via-postgres
 
+VOLUME /gtfs
 WORKDIR /gtfs
 ENTRYPOINT ["/app/cli.js"]
