@@ -11,7 +11,7 @@ const argv = mri(process.argv.slice(2), {
 		'silent', 's',
 		'require-dependencies', 'd',
 		'ignore-unsupported', 'u',
-		'trips-without-shape-id',
+		'trips-without-shape-id'
 	]
 })
 
@@ -29,6 +29,7 @@ Options:
     --routes-without-agency-id    Don't require routes.txt items to have an agency_id.
     --stops-without-level-id      Don't require stops.txt items to have a level_id.
                                   Default if levels.txt has not been provided.
+	--schema 					  The schema to use for the database.
 Examples:
     gtfs-to-sql some-gtfs/*.txt | psql -b # import into PostgreSQL
     gtfs-to-sql -u -- some-gtfs/*.txt | gzip >gtfs.sql # generate a gzipped SQL dump
@@ -56,6 +57,7 @@ const opt = {
 	ignoreUnsupportedFiles: !!(argv['ignore-unsupported'] || argv.u),
 	tripsWithoutShapeId: !!argv['trips-without-shape-id'],
 	routesWithoutAgencyId: !!argv['routes-without-agency-id'],
+	schema: 'gtfs' //TODO: FIX THIS
 }
 if ('stops-without-level-id' in argv) {
 	opt.stopsWithoutLevelId = !!argv['stops-without-level-id']

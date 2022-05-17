@@ -55,6 +55,7 @@
 	},
 	"devDependencies": {
 		"eslint": "^7.24.0",
+		"gtfs-via-postgres": "^4.1.0",
 		"pkg": "^5.3.2",
 		"sample-gtfs-feed": "^0.10.3"
 	},
