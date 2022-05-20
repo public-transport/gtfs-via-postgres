@@ -1,7 +1,0 @@
-FROM majkshkurti/gtfs-via-postgres
-# add psql CLI tool
-RUN apk add --no-cache postgresql-client
-ENV PGPORT=5432 PGUSER=postgres PGPASSWORD=password
-WORKDIR /gtfs
-# pass all arguments into gtfs-via-postgres, pipe output into psql:
-ENTRYPOINT ["/bin/sh", "-c", "env | grep PG; gtfs-via-postgres $0 $@ | psql -b"]
