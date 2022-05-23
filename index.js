@@ -3,7 +3,7 @@
 const debug = require('debug')('gtfs-via-postgres')
 const sequencify = require('sequencify')
 const readCsv = require('gtfs-utils/read-csv')
-const {Stringifier} = require('csv-stringify')
+const { Stringifier } = require('csv-stringify')
 const formatters = require('./lib')
 const getDependencies = require('./lib/deps')
 const pkg = require('./package.json')
@@ -87,12 +87,12 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 -- ${pkg.homepage}
 \\set ON_ERROR_STOP True
 CREATE EXTENSION IF NOT EXISTS postgis;
-CREATE SCHEMA IF NOT EXISTS ${opt.schema};
+CREATE SCHEMA IF NOT EXISTS "${opt.schema}";
 BEGIN;
 
 \n`
 
-	const csv = new Stringifier({quoted: true})
+	const csv = new Stringifier({ quoted: true })
 
 	for (const name of order) {
 		if (!silent) console.error(name)
@@ -111,7 +111,7 @@ BEGIN;
 		}
 
 		if (task.file) {
-			const {formatRow} = formatters[name]
+			const { formatRow } = formatters[name]
 			for await (const row of await readCsv(task.file)) {
 				const formatted = csv.stringify(formatRow(row, opt))
 				yield formatted + '\n'
