@@ -87,7 +87,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 -- ${pkg.homepage}
 \\set ON_ERROR_STOP True
 CREATE EXTENSION IF NOT EXISTS postgis;
-CREATE SCHEMA IF NOT EXISTS "${opt.schema}";
+${opt.schema !== 'public' ? 'CREATE SCHEMA IF NOT EXISTS "' + opt.schema + '";' : ''}
 BEGIN;
 
 \n`
