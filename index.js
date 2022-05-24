@@ -18,6 +18,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 	}
 	const {
 		silent,
+		tripsWithoutShapeId,
 		requireDependencies,
 		ignoreUnsupportedFiles,
 	} = opt
@@ -34,9 +35,11 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		'is_timezone': {
 			dep: [],
 		},
-		'shape_exists': {
-			dep: [...deps.shape_exists],
-		},
+		...(tripsWithoutShapeId ? {} : {
+			'shape_exists': {
+				dep: [...deps.shape_exists],
+			},
+		}),
 
 		// special handling of calendar/calendar_dates:
 		// service_days relies on *both* calendar's & calendar_dates' tables to
