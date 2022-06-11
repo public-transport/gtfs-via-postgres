@@ -12,6 +12,7 @@ const argv = mri(process.argv.slice(2), {
 		'require-dependencies', 'd',
 		'ignore-unsupported', 'u',
 		'trips-without-shape-id',
+		'stops-location-index',
 	]
 })
 
@@ -29,6 +30,8 @@ Options:
     --routes-without-agency-id    Don't require routes.txt items to have an agency_id.
     --stops-without-level-id      Don't require stops.txt items to have a level_id.
                                   Default if levels.txt has not been provided.
+    --stops-location-index        Create a spatial index on stops.stop_loc for efficient
+                                    queries by geolocation.
     --schema                      The schema to use for the database. Default: public
 Examples:
     gtfs-to-sql some-gtfs/*.txt | psql -b # import into PostgreSQL
@@ -57,6 +60,7 @@ const opt = {
 	ignoreUnsupportedFiles: !!(argv['ignore-unsupported'] || argv.u),
 	tripsWithoutShapeId: !!argv['trips-without-shape-id'],
 	routesWithoutAgencyId: !!argv['routes-without-agency-id'],
+	stopsLocationIndex: argv['stops-location-index'],
 	schema: argv['schema'] || 'public',
 }
 if ('stops-without-level-id' in argv) {

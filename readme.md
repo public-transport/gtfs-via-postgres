@@ -187,6 +187,9 @@ psql -c 'COPY (SELECT * FROM connections) TO STDOUT csv HEADER' | node transform
 
 In the nested `SELECT` query, you can use features like `WHERE`, `ORDER BY` and `LIMIT`. Because `psql` passes on the exported data right away, you could stream it into another process.
 
+### Querying stops by location efficiently
+
+If you want to find stops by (geo)location, run `gtfs-via-postgres` with `--stops-location-index`. This will create a [spatial index](https://postgis.net/workshops/postgis-intro/indexing.html) on `stops.stop_loc`, so that most [PostGIS functions & operators](https://postgis.net/docs/manual-3.2/reference.html#Measurement_Functions) make use of it.
 
 ## Correctness vs. Speed regarding GTFS Time Values
 
