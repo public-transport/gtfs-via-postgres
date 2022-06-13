@@ -1,7 +1,7 @@
 {
 	"name": "gtfs-via-postgres",
 	"description": "Process GTFS using PostgreSQL.",
-	"version": "4.2.0",
+	"version": "4.3.0",
 	"main": "lib/index.js",
 	"bin": {
 		"gtfs-to-sql": "cli.js"
@@ -62,6 +62,6 @@
 		"test": "./test/index.sh",
 		"lint": "eslint .",
 		"build-binaries": "pkg --public -t node16-macos-x64,node16-macos-arm64,node16-linux-x64,node16-linux-arm64 -o dist/gtfs-via-postgres cli.js",
-		"prepublishOnly": "npm test && npm run lint"
+		"prepublishOnly": "npm run lint && npm test"
 	}
 }

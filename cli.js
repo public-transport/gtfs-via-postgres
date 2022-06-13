@@ -12,6 +12,7 @@ const argv = mri(process.argv.slice(2), {
 		'require-dependencies', 'd',
 		'ignore-unsupported', 'u',
 		'trips-without-shape-id',
+		'stops-without-level-id',
 		'stops-location-index',
 	]
 })
