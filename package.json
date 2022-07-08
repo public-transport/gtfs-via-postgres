@@ -54,6 +54,7 @@
 		"sequencify": "0.0.7"
 	},
 	"devDependencies": {
+		"csv-parser": "^3.0.0",
 		"eslint": "^7.24.0",
 		"pkg": "^5.3.2",
 		"sample-gtfs-feed": "^0.10.3"
@@ -61,6 +62,7 @@
 	"scripts": {
 		"test": "./test/index.sh",
 		"lint": "eslint .",
+		"benchmark": "./benchmark/run.sh",
 		"build-binaries": "pkg --public -t node16-macos-x64,node16-macos-arm64,node16-linux-x64,node16-linux-arm64 -o dist/gtfs-via-postgres cli.js",
 		"prepublishOnly": "npm run lint && npm test"
 	}
