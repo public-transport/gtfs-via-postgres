@@ -224,6 +224,8 @@ For example, when querying all *absolute* departures at `de:11000:900120003` (*S
 
 With all use cases I could think of, `gtfs-via-postgres` is reasonably fast. If there's a particular kind of query that you think should be faster, please [open an Issue](https://github.com/derhuerst/gtfs-via-postgres/issues/new)!
 
+The following benchmarks were run with the [2022-07-01 VBB GTFS dataset](https://vbb-gtfs.jannisr.de/2022-07-01/) (41k `stops`, 6m `stop_times`, 207m arrivals/departures); All measurements are in milliseconds.
+
 | query | avg | min | p25 | p50 | p75 | p95 | p99 | max | iterations |
 | - | - | - | - | - | - | - | - | - | - |
 | <pre>SELECT *<br>FROM stops<br>ORDER BY ST_Distance(stop_loc::geometry, ST_SetSRID(ST_MakePoint(9.7, 50.547), 4326)) ASC<br>LIMIT 100</pre> | 16.35 | 16.314 | 16.33 | 16.33 | 16.35 | 16.4 | 16.67 | 16.755 | 100 |
@@ -232,11 +234,13 @@ With all use cases I could think of, `gtfs-via-postgres` is reasonably fast. If 
 | <pre>SELECT *<br>FROM arrivals_departures<br>WHERE station_id = 'de:11000:900100001' -- S+U Friedrichstr. (Berlin)<br>AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date > '2022-08-08' AND date <= '2022-08-09'<br>AND stop_sequence = 0</pre> | 202.75 | 197.608 | 200.25 | 200.92 | 201.76 | 213.51 | 213.73 | 213.762 | 50 |
 | <pre>SELECT *<br>FROM arrivals_departures<br>WHERE stop_id = 'de:11000:900100001::4' -- S+U Friedrichstr. (Berlin)<br>AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date > '2022-08-08' AND date <= '2022-08-09'</pre> | 8.29 | 8.11 | 8.16 | 8.18 | 8.21 | 8.67 | 9.93 | 14.049 | 100 |
 | <pre>SELECT *<br>FROM arrivals_departures<br>WHERE trip_id = '168977951'<br>AND date > '2022-08-08' AND date <= '2022-08-09'</pre> | 2.17 | 2.126 | 2.14 | 2.14 | 2.15 | 2.33 | 2.52 | 3.085 | 100 |
+| <pre>SELECT *<br>FROM arrivals_departures<br>WHERE t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date > '2022-08-08' AND date <= '2022-08-09'</pre> | 1113.49 | 1099.137 | 1103.84 | 1108.57 | 1120.34 | 1137.23 | 1142.86 | 1144.273 |         10 |
 | <pre>SELECT *<br>FROM connections<br>WHERE route_short_name = 'S1'<br>AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date > '2022-08-08' AND date <= '2022-08-09'</pre> | 88.59 | 84.752 | 85.17 | 85.37 | 95.56 | 96.69 | 101.01 | 107.993 | 100 |
 | <pre>SELECT *<br>FROM connections<br>WHERE from_station_id = 'de:11000:900100001' -- S+U Friedrichstr. (Berlin)<br>AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date > '2022-08-08' AND date <= '2022-08-09'</pre> | 302.45 | 290.906 | 292.08 | 293.58 | 300.24 | 340.4 | 344.37 | 345.193 | 40 |
 | <pre>SELECT *<br>FROM connections<br>WHERE from_station_id = 'de:11000:900100001' -- S+U Friedrichstr. (Berlin)<br>AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date > '2022-08-08' AND date <= '2022-08-09'<br>AND from_stop_sequence = 0</pre> | 226.6 | 222.491 | 224.11 | 225.21 | 226.67 | 235.45 | 239.91 | 242.461 | 50 |
 | <pre>SELECT *<br>FROM connections<br>WHERE from_stop_id = 'de:11000:900100001::4' -- S+U Friedrichstr. (Berlin)<br>AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date > '2022-08-08' AND date <= '2022-08-09'</pre> | 23.55 | 23.184 | 23.42 | 23.5 | 23.6 | 23.98 | 24.52 | 24.535 | 100 |
 | <pre>SELECT *<br>FROM connections<br>WHERE trip_id = '168977951'<br>AND date > '2022-08-08' AND date <= '2022-08-09'</pre> | 3.01 | 2.959 | 2.97 | 2.98 | 3.03 | 3.09 | 3.45 | 3.51 | 100 |
+| <pre>SELECT *<br>FROM connections<br>WHERE t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date > '2022-08-08' AND date <= '2022-08-09'<br>ORDER BY t_departure<br>LIMIT 100</pre> | 7072.81 | 6961 | 7017 | 7058 | 7134 | 7179 | 7187 | 7189 | 7 |
 
 
 ## Related Projects
