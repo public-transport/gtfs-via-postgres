@@ -1,9 +1,8 @@
 # gtfs-via-postgres
 
-**Import GTFS into PostgreSQL** to allow for efficient analysis/processing of large GTFS datasets.
+**Import [GTFS Static/Schedule](https://gtfs.org/schedule/) datasets into a [PostgreSQL database](https://www.postgresql.org)**, to allow for efficient querying and analysis.
 
 [![npm version](https://img.shields.io/npm/v/gtfs-via-postgres.svg)](https://www.npmjs.com/package/gtfs-via-postgres)
-[![build status](https://api.travis-ci.org/derhuerst/gtfs-via-postgres.svg?branch=master)](https://travis-ci.org/derhuerst/gtfs-via-postgres)
 [![binary build status](https://img.shields.io/github/workflow/status/derhuerst/gtfs-via-postgres/build%20&%20upload%20binaries?label=binary%20build)](https://github.com/derhuerst/gtfs-via-postgres/actions)
 [![Prosperity/Apache license](https://img.shields.io/static/v1?label=license&message=Prosperity%2FApache&color=0997E8)](#license)
 ![minimum Node.js version](https://img.shields.io/node/v/gtfs-via-postgres.svg)
@@ -12,7 +11,7 @@
 
 - ✅ handles [daylight saving time correctly](#correctness-vs-speed-regarding-gtfs-time-values) but provides a reasonable lookup performance
 - ✅ supports `frequencies.txt`
-- ✅ joins `stop_times.txt`/`frequencies.txt`, `calendar.txt`/`calendar_dates.txt`, `trips.txt`, `route.txt` & `stops.txt` into [views](https://www.postgresql.org/docs/14/sql-createview.html) for straightforward data analysis
+- ✨ joins `stop_times.txt`/`frequencies.txt`, `calendar.txt`/`calendar_dates.txt`, `trips.txt`, `route.txt` & `stops.txt` into [views](https://www.postgresql.org/docs/14/sql-createview.html) for straightforward data analysis (see below)
 - 🚀 is carefully optimised to let PostgreSQL's query planner do its magic, yielding quick lookups even with large datasets (see [performance section](#performance))
 
 
@@ -203,7 +202,7 @@ Let's consider two examples:
 - A `departure_time` of `26:59:00` with a trip running on `2021-03-01`: The time, applied to this specific date, "extends" into the following day, so it actually departs at `2021-03-02T02:59+01`.
 - A departure time of `03:01:00` with a trip running on `2021-03-28`: This is when the standard -> DST switch happens in the `Europe/Berlin` timezone. Because the dep. time refers to noon - 12h (*not* to midnight), it actually happens at `2021-03-28T03:01+02` which is *not* `3h1m` after `2021-03-28T00:00+01`.
 
-`gtfs-via-postgres` always prioritizes correctness over speed. Because it follows the GTFS semantics, when filtering `arrivals_departures` by *absolute* departure date+time, it cannot filter `service_days` (which a processed form of `calendar` & `calendar_dates`), because **even a date *before* the desired departure date+time range might still end up within when combined with a `departure_time` of e.g. `27:30:00`**; Instead, it has to consider all `service_days` and apply the `departure_time` to all of them to check if they're within the range.
+`gtfs-via-postgres` always prioritizes correctness over speed. Because it follows the GTFS semantics, when filtering `arrivals_departures` by *absolute* departure date+time, it cannot filter `service_days` (which is `calendar` and `calendar_dates` combined), because **even a date *before* the date of the desired departure date+time range might still end up within the range, when combined with a `departure_time` of e.g. `27:30:00`**; Instead, it has to consider all `service_days` and apply the `departure_time` to all of them to check if they're within the range.
 
 However, values >48h are really rare. If you know (or want to assume) that your feed *does not* have `arrival_time`/`departure_time` values larger than a certain amount, you can filter on `date` when querying `arrivals_departures`; This allows PostgreSQL to reduce the number of joins and calendar calculations by *a lot*.
 
