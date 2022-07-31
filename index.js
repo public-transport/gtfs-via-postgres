@@ -32,6 +32,9 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 
 	const fileNames = files.map(f => f.name)
 	const tasks = { // file name -> [dep name]
+		'is_bcp_47_code': {
+			dep: [],
+		},
 		'is_timezone': {
 			dep: [],
 		},
