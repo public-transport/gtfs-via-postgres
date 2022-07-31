@@ -47,7 +47,7 @@
 		"node": ">=16"
 	},
 	"dependencies": {
-		"csv-stringify": "^5.5.1",
+		"csv-stringify": "^6.2.0",
 		"debug": "^4.3.3",
 		"gtfs-utils": "^5.1.0",
 		"mri": "^1.1.5",

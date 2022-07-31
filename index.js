@@ -118,9 +118,13 @@ BEGIN;
 
 		if (task.file) {
 			const {formatRow} = formatters[name]
-			for await (const row of await readCsv(task.file)) {
-				const formatted = csv.stringify(formatRow(row, opt))
-				yield formatted + '\n'
+			for await (const rawRow of await readCsv(task.file)) {
+				const row = formatRow(rawRow, opt)
+				let formattedRow = null
+				csv.api.__transform(row, (_formattedRow) => {
+					formattedRow = _formattedRow
+				})
+				yield formattedRow
 			}
 		}
 
