@@ -1,24 +1,54 @@
 #!/usr/bin/env node
 'use strict'
 
-const mri = require('mri')
+const {parseArgs} = require('util')
 const pkg = require('./package.json')
 
-const argv = mri(process.argv.slice(2), {
-	boolean: [
-		'help', 'h',
-		'version', 'v',
-		'silent', 's',
-		'require-dependencies', 'd',
-		'ignore-unsupported', 'u',
-		'trips-without-shape-id',
-		'stops-without-level-id',
-		'stops-location-index',
-		'postgraphile',
-	]
+const {
+	values: flags,
+	positionals: args,
+} = parseArgs({
+	options: {
+		'help': {
+			type: 'boolean',
+			short: 'h',
+		},
+		'version': {
+			type: 'boolean',
+			short: 'v',
+		},
+		'silent': {
+			type: 'boolean',
+			short: 's',
+		},
+		'require-dependencies': {
+			type: 'boolean',
+			short: 'd',
+		},
+		'ignore-unsupported': {
+			type: 'boolean',
+			short: 'u',
+		},
+		'trips-without-shape-id': {
+			type: 'boolean',
+		},
+		'stops-without-level-id': {
+			type: 'boolean',
+		},
+		'stops-location-index': {
+			type: 'boolean',
+		},
+		'schema': {
+			type: 'string',
+		},
+		'postgraphile': {
+			type: 'boolean',
+		},
+	},
+	allowPositionals: true,
 })
 
-if (argv.help || argv.h) {
+if (flags.help) {
 	process.stdout.write(`
 Usage:
     gtfs-to-sql [options] [--] <gtfs-file> ...
@@ -44,7 +74,7 @@ Examples:
 	process.exit(0)
 }
 
-if (argv.version || argv.v) {
+if (flags.version) {
 	process.stdout.write(`${pkg.name} v${pkg.version}\n`)
 	process.exit(0)
 }
@@ -53,24 +83,22 @@ const {basename, extname} = require('path')
 const {pipeline} = require('stream')
 const convertGtfsToSql = require('./index')
 
-const files = argv._.map((file) => {
+const files = args.map((file) => {
 	const name = basename(file, extname(file))
 	return {name, file}
 })
 
 const opt = {
-	silent: !!(argv.silent || argv.s),
-	requireDependencies: !!(argv['require-dependencies'] || argv.d),
-	ignoreUnsupportedFiles: !!(argv['ignore-unsupported'] || argv.u),
-	tripsWithoutShapeId: !!argv['trips-without-shape-id'],
-	routesWithoutAgencyId: !!argv['routes-without-agency-id'],
-	stopsLocationIndex: !!argv['stops-location-index'],
-	schema: argv['schema'] || 'public',
-	postgraphile: !!argv.postgraphile,
+	silent: !!flags.silent,
+	requireDependencies: !!flags['require-dependencies'],
+	ignoreUnsupportedFiles: !!flags['ignore-unsupported'],
+	tripsWithoutShapeId: !!flags['trips-without-shape-id'],
+	routesWithoutAgencyId: !!flags['routes-without-agency-id'],
+	stopsLocationIndex: !!flags['stops-location-index'],
+	schema: flags['schema'] || 'public',
+	postgraphile: !!flags.postgraphile,
 }
-if ('stops-without-level-id' in argv) {
-	opt.stopsWithoutLevelId = !!argv['stops-without-level-id']
-}
+opt.stopsWithoutLevelId = !flags['stops-without-level-id']
 
 pipeline(
 	convertGtfsToSql(files, opt),
