@@ -21,6 +21,7 @@ export PGDATABASE='sample_gtfs_feed'
 	../node_modules/sample-gtfs-feed/gtfs/stop_times.txt \
 	../node_modules/sample-gtfs-feed/gtfs/levels.txt \
 	../node_modules/sample-gtfs-feed/gtfs/pathways.txt \
+	../node_modules/sample-gtfs-feed/gtfs/translations.txt \
 	| psql -b
 
 query=$(cat << EOF
@@ -130,6 +131,19 @@ EOF)
 exact1=$(psql --csv -t -c "$timepoint_exact" | head -n 1)
 if [[ "$exact1" != "exact" ]]; then
 	echo "invalid/missing DST t_departure: $exact1" 1>&2
+	exit 1
+fi
+
+stops_translations=$(cat << EOF
+	SELECT translation, language
+	FROM translations
+	WHERE table_name = 'stops' AND field_name = 'stop_name'
+	AND language = 'de-DE'
+	AND record_id = 'airport-entrance'
+EOF)
+airport_entrance_translation=$(psql --csv -t -c "$stops_translations")
+if [[ "$airport_entrance_translation" != "Eingang,de-DE" ]]; then
+	echo "invalid/missing stop translation: $airport_entrance_translation" 1>&2
 	exit 1
 fi
 

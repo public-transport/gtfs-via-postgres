@@ -13,6 +13,7 @@
 - ✅ supports `frequencies.txt`
 - ✨ joins `stop_times.txt`/`frequencies.txt`, `calendar.txt`/`calendar_dates.txt`, `trips.txt`, `route.txt` & `stops.txt` into [views](https://www.postgresql.org/docs/14/sql-createview.html) for straightforward data analysis (see below)
 - 🚀 is carefully optimised to let PostgreSQL's query planner do its magic, yielding quick lookups even with large datasets (see [performance section](#performance))
+- ✅ validates and imports `translations.txt`
 
 
 ## Installation
@@ -111,6 +112,24 @@ AND t_departure >= '2022-03-23T12:30+01' AND t_departure <= '2022-03-23T12:35+01
 `10227_109` | `S42` | `109` | `169071882` | `2022-03-23 00:00:00` | `6` | `2022-03-23 12:30:30+01` | `2022-03-23 12:31:12+01` | `de:11000:900120003:5:59` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
 `19040_100` | `RB14` | `100` | `178748721` | `2022-03-23 00:00:00` | `13` | `2022-03-23 12:30:00+01` | `2022-03-23 12:30:00+01` | `de:11000:900120003:1:50` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
 `22664_2` | `FEX` | `2` | `178748125` | `2022-03-23 00:00:00` | `1` | `2022-03-23 12:32:00+01` | `2022-03-23 12:34:00+01` | `de:11000:900120003:4:57` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
+
+### translations
+
+There are some `…_translated` views (e.g. `stops_translated`, `arrivals_departures_translated`) that
+- join their respective source table with `translations`, so that each (translatable) field is translated in every provided language,
+- add a `…_lang` column for each translated column (e.g. `stop_name_lang` for `stop_name`) that indicates the language of the translation.
+
+Assuming a dataset with `translations.csv`, let's query all stops with a `de-CE` translation, falling back to the untranslated values:
+
+```sql
+SELECT
+    stop_id,
+    stop_name, stop_name_lang,
+    stop_url,
+FROM stops_translated
+WHERE (stop_name_lang = 'de-CH' OR stop_name_lang IS NULL)
+AND (stop_url_lang = 'de-CH' OR stop_url_lang IS NULL)
+```
 
 
 ## Usage

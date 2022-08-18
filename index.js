@@ -23,14 +23,15 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		ignoreUnsupportedFiles,
 	} = opt
 
-	const deps = getDependencies(opt)
-	debug('deps', deps)
 	if (ignoreUnsupportedFiles) {
 		files = files.filter(f => !!formatters[f.name])
 	}
 	debug('files', files)
 
 	const fileNames = files.map(f => f.name)
+	const deps = getDependencies(opt, fileNames)
+	debug('deps', deps)
+
 	const tasks = { // file name -> [dep name]
 		'is_bcp_47_code': {
 			dep: [],
