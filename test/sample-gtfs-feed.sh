@@ -147,4 +147,19 @@ if [[ "$airport_entrance_translation" != "Eingang,de-DE" ]]; then
 	exit 1
 fi
 
+stops_translated=$(cat << EOF
+	SELECT
+		stop_id,
+		stop_name,
+		stop_name_lang
+	FROM stops_translated
+	WHERE (stop_name_lang IS NULL or stop_name_lang = 'de-DE')
+	AND stop_id = 'airport-entrance'
+EOF)
+translated_airport_entrance=$(psql --csv -t -c "$stops_translated")
+if [[ "$translated_airport_entrance" != "airport-entrance,Eingang,de-DE" ]]; then
+	echo "invalid/missing translated stop: $translated_airport_entrance" 1>&2
+	exit 1
+fi
+
 echo 'works ✔'
