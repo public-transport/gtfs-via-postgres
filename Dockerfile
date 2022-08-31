@@ -2,8 +2,8 @@ FROM node:alpine
 LABEL org.opencontainers.image.title="gtfs-via-postgres"
 LABEL org.opencontainers.image.description="Process GTFS using PostgreSQL."
 LABEL org.opencontainers.image.authors="Jannis R <mail@jannisr.de>"
-LABEL org.opencontainers.image.documentation="https://github.com/derhuerst/gtfs-via-postgres"
-LABEL org.opencontainers.image.source="https://github.com/derhuerst/gtfs-via-postgres"
+LABEL org.opencontainers.image.documentation="https://github.com/public-transport/gtfs-via-postgres"
+LABEL org.opencontainers.image.source="https://github.com/public-transport/gtfs-via-postgres"
 LABEL org.opencontainers.image.revision="4.0.0"
 LABEL org.opencontainers.image.licenses="(Apache-2.0 AND Prosperity-3.0.0)"
 

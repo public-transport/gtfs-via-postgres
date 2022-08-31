@@ -3,7 +3,7 @@
 **Import [GTFS Static/Schedule](https://gtfs.org/schedule/) datasets into a [PostgreSQL database](https://www.postgresql.org)**, to allow for efficient querying and analysis.
 
 [![npm version](https://img.shields.io/npm/v/gtfs-via-postgres.svg)](https://www.npmjs.com/package/gtfs-via-postgres)
-[![binary build status](https://img.shields.io/github/workflow/status/derhuerst/gtfs-via-postgres/build%20&%20upload%20binaries?label=binary%20build)](https://github.com/derhuerst/gtfs-via-postgres/actions)
+[![binary build status](https://img.shields.io/github/workflow/status/public-transport/gtfs-via-postgres/build%20&%20upload%20binaries?label=binary%20build)](https://github.com/public-transport/gtfs-via-postgres/actions)
 [![Prosperity/Apache license](https://img.shields.io/static/v1?label=license&message=Prosperity%2FApache&color=0997E8)](#license)
 ![minimum Node.js version](https://img.shields.io/node/v/gtfs-via-postgres.svg)
 [![support me via GitHub Sponsors](https://img.shields.io/badge/support%20me-donate-fa7664.svg)](https://github.com/sponsors/derhuerst)
@@ -24,7 +24,7 @@ npm install -g gtfs-via-postgres
 
 Or use [`npx`](https://npmjs.com/package/npx). ✨
 
-There are also [prebuilt binaries available](https://github.com/derhuerst/gtfs-via-postgres/releases/latest).
+There are also [prebuilt binaries available](https://github.com/public-transport/gtfs-via-postgres/releases/latest).
 
 *Note:* `gtfs-via-postgres` **needs PostgreSQL >=14** to work, as it uses the [`WITH … AS NOT MATERIALIZED`](https://www.postgresql.org/docs/14/queries-with.html#id-1.5.6.12.7) syntax. You can check your PostgreSQL server's version with `psql -t -c 'SELECT version()'`.
 
@@ -84,7 +84,7 @@ npm exec -- gtfs-to-sql --require-dependencies -- gtfs/*.csv | psql -b
 # COMMIT
 ```
 
-Importing will take 10s to 10m, depending on the size of the feed. On my laptop, importing the above feed takes about 4m; Importing the [260kb 2021-10-06 Amtrak feed](https://transitfeeds.com/p/amtrak/1136/20211006) takes 6s.
+Importing will take 10s to 10m, depending on the size of the feed. On an [M1 MacBook Air](https://en.wikipedia.org/wiki/MacBook_Air_(Apple_silicon)#Third_generation_(Retina_with_Apple_silicon)), importing the above feed takes about 4m; Importing the [260kb 2021-10-06 Amtrak feed](https://transitfeeds.com/p/amtrak/1136/20211006) takes 6s.
 
 In addition to a table for each GTFS file, `gtfs-via-postgres` adds these views to help with real-world analysis:
 
@@ -198,7 +198,7 @@ docker run --rm --volume /path/to/gtfs:/gtfs \
 
 ### Exporting data efficiently
 
-If you want to export data from the database, use the [`COPY` command](https://www.postgresql.org/docs/13/sql-copy.html); On my laptop, PostgreSQL 13 can export about 500k `connections` rows per second.
+If you want to export data from the database, use the [`COPY` command](https://www.postgresql.org/docs/13/sql-copy.html); On an [M1 MacBook Air](https://en.wikipedia.org/wiki/MacBook_Air_(Apple_silicon)#Third_generation_(Retina_with_Apple_silicon)), PostgreSQL 13 can export about 500k `connections` rows per second.
 
 ```shell
 psql -c 'COPY (SELECT * FROM connections) TO STDOUT csv HEADER' | node transform-data.js >connections.csv
@@ -240,7 +240,7 @@ For example, when querying all *absolute* departures at `de:11000:900120003` (*S
 
 ## Performance
 
-With all use cases I could think of, `gtfs-via-postgres` is reasonably fast. If there's a particular kind of query that you think should be faster, please [open an Issue](https://github.com/derhuerst/gtfs-via-postgres/issues/new)!
+With all use cases I could think of, `gtfs-via-postgres` is reasonably fast. If there's a particular kind of query that you think should be faster, please [open an Issue](https://github.com/public-transport/gtfs-via-postgres/issues/new)!
 
 The following benchmarks were run with the [2022-07-01 VBB GTFS dataset](https://vbb-gtfs.jannisr.de/2022-07-01/) (41k `stops`, 6m `stop_times`, 207m arrivals/departures); All measurements are in milliseconds.
 
@@ -307,7 +307,7 @@ The project has a slightly different goal than `gtfs-via-postgres`: While `gtfs-
 
 ## License
 
-This project is dual-licensed: **My contributions are licensed under the [*Prosperity Public License*](https://prosperitylicense.com), [contributions of other people](https://github.com/derhuerst/gtfs-via-postgres/graphs/contributors) are licensed as [Apache 2.0](https://apache.org/licenses/LICENSE-2.0)**.
+This project is dual-licensed: **My ([@derhuerst](https://github.com/derhuerst)) contributions are licensed under the [*Prosperity Public License*](https://prosperitylicense.com), [contributions of other people](https://github.com/public-transport/gtfs-via-postgres/graphs/contributors) are licensed as [Apache 2.0](https://apache.org/licenses/LICENSE-2.0)**.
 
 > This license allows you to use and share this software for noncommercial purposes for free and to try this software for commercial purposes for thirty days.
 
@@ -318,6 +318,6 @@ This project is dual-licensed: **My contributions are licensed under the [*Prosp
 
 ## Contributing
 
-If you have a question or need support using `gtfs-via-postgres`, please double-check your code and setup first. If you think you have found a bug or want to propose a feature, use [the issues page](https://github.com/derhuerst/gtfs-via-postgres/issues).
+If you have a question or need support using `gtfs-via-postgres`, please double-check your code and setup first. If you think you have found a bug or want to propose a feature, use [the issues page](https://github.com/public-transport/gtfs-via-postgres/issues).
 
 By contributing, you agree to release your modifications under the [Apache 2.0 license](LICENSE-APACHE).
