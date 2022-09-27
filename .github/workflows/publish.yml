@@ -119,5 +119,6 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
+        # todo!
         tags: |
-          derhuerst/gtfs-via-postgres:latest
+          publictransport/gtfs-via-postgres:latest

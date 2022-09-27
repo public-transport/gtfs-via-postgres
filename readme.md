@@ -163,20 +163,20 @@ You can run queries with date+time values in any timezone (offset) and they will
 
 ### With Docker
 
-Instead of installing via `npm`, you can use [the `gtfs-via-postgres` Docker image](https://hub.docker.com/r/derhuerst/gtfs-via-postgres):
+Instead of installing via `npm`, you can use [the `publictransport/gtfs-via-postgres` Docker image](https://hub.docker.com/r/publictransport/gtfs-via-postgres):
 
 ```shell
 # variant A: use Docker image just to convert GTFS to SQL
 docker run --rm --volume /path/to/gtfs:/gtfs \
-	derhuerst/gtfs-via-postgres --require-dependencies -- stops.csv | psql -b
+	publictransport/gtfs-via-postgres --require-dependencies -- stops.csv | psql -b
 ```
 
 Keep in mind that `psql -b` will run *outside* of the Docker container, so your host machine needs access to PostgreSQL.
 
-If you want to directly import the GTFS data *from within the Docker container*, you need add `psql` to the image and run it from inside. To do that, write a new Dockerfile that extends the `derhuerst/gtfs-via-postgres` image:
+If you want to directly import the GTFS data *from within the Docker container*, you need add `psql` to the image and run it from inside. To do that, write a new Dockerfile that extends the `publictransport/gtfs-via-postgres` image:
 
 ```Dockerfile
-FROM derhuerst/gtfs-via-postgres
+FROM publictransport/gtfs-via-postgres
 # add psql CLI tool
 RUN apk add --no-cache postgresql-client
 ENV PGPORT=5432 PGUSER=postgres PGPASSWORD=password
