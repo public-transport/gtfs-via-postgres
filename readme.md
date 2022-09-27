@@ -9,7 +9,7 @@
 [![support me via GitHub Sponsors](https://img.shields.io/badge/support%20me-donate-fa7664.svg)](https://github.com/sponsors/derhuerst)
 [![chat with me on Twitter](https://img.shields.io/badge/chat%20with%20me-on%20Twitter-1da1f2.svg)](https://twitter.com/derhuerst)
 
-- ✅ handles [daylight saving time correctly](#correctness-vs-speed-regarding-gtfs-time-values) but provides a reasonable lookup performance
+- ✅ handles [daylight saving time correctly](#correctness-vs-speed-regarding-gtfs-time-values) but retains reasonable lookup performance
 - ✅ supports `frequencies.txt`
 - ✨ joins `stop_times.txt`/`frequencies.txt`, `calendar.txt`/`calendar_dates.txt`, `trips.txt`, `route.txt` & `stops.txt` into [views](https://www.postgresql.org/docs/14/sql-createview.html) for straightforward data analysis (see below)
 - 🚀 is carefully optimised to let PostgreSQL's query planner do its magic, yielding quick lookups even with large datasets (see [performance section](#performance))
@@ -147,6 +147,8 @@ Options:
     --routes-without-agency-id    Don't require routes.txt items to have an agency_id.
     --stops-without-level-id      Don't require stops.txt items to have a level_id.
                                   Default if levels.txt has not been provided.
+    --stops-location-index        Create a spatial index on stops.stop_loc for efficient
+                                    queries by geolocation.
     --schema                      The schema to use for the database. Default: public
 Examples:
     gtfs-to-sql some-gtfs/*.txt | psql -b # import into PostgreSQL
@@ -201,7 +203,7 @@ docker run --rm --volume /path/to/gtfs:/gtfs \
 If you want to export data from the database, use the [`COPY` command](https://www.postgresql.org/docs/13/sql-copy.html); On an [M1 MacBook Air](https://en.wikipedia.org/wiki/MacBook_Air_(Apple_silicon)#Third_generation_(Retina_with_Apple_silicon)), PostgreSQL 13 can export about 500k `connections` rows per second.
 
 ```shell
-psql -c 'COPY (SELECT * FROM connections) TO STDOUT csv HEADER' | node transform-data.js >connections.csv
+psql -c 'COPY (SELECT * FROM connections) TO STDOUT csv HEADER' >connections.csv
 ```
 
 In the nested `SELECT` query, you can use features like `WHERE`, `ORDER BY` and `LIMIT`. Because `psql` passes on the exported data right away, you could stream it into another process.
