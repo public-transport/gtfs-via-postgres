@@ -1,6 +1,7 @@
 {
 	"data": {
 		"stopByStopId": {
+			"translatedStopName": "Gleis 1",
 			"stopId": "airport-1"
 		},
 		"routeByRouteId": {
@@ -10,6 +11,8 @@
 			},
 			"routeShortName": "Babbage",
 			"routeLongName": "Charles Babbage Tram Line",
+			"at": "Tram-Linie Charles Babbage",
+			"de": null,
 			"trips": {
 				"nodes": [
 					{
@@ -54,6 +57,9 @@
 					}
 				]
 			}
+		},
+		"tripByTripId": {
+			"translatedTripHeadsign": "Babbage (auswärts)"
 		}
 	}
 }

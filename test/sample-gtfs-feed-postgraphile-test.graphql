@@ -1,5 +1,6 @@
 query SampleGtfsFeedPostgraphileTest {
 	stopByStopId(stopId: "airport-1") {
+		translatedStopName(language: "de-DE")
 		stopId
 	}
 
@@ -10,6 +11,8 @@ query SampleGtfsFeedPostgraphileTest {
 		}
 		routeShortName
 		routeLongName
+		at: translatedRouteLongName(language: "de-AT")
+		de: translatedRouteLongName(language: "de-DE")
 		trips(first: 3, orderBy: TRIP_ID_ASC) {
 			nodes {
 				tripId
@@ -26,5 +29,8 @@ query SampleGtfsFeedPostgraphileTest {
 				toStopSequence
 			}
 		}
+	}
+	tripByTripId(tripId: "b-outbound-on-weekends") {
+		translatedTripHeadsign(language: "de-DE")
 	}
 }
