@@ -1,0 +1,59 @@
+{
+	"data": {
+		"stopByStopId": {
+			"stopId": "airport-1"
+		},
+		"routeByRouteId": {
+			"agency": {
+				"agencyName": "Full Transit Agency",
+				"agencyEmail": "contact@fta.example.org"
+			},
+			"routeShortName": "Babbage",
+			"routeLongName": "Charles Babbage Tram Line",
+			"trips": {
+				"nodes": [
+					{
+						"tripId": "b-downtown-on-weekends"
+					},
+					{
+						"tripId": "b-downtown-on-working-days"
+					},
+					{
+						"tripId": "b-outbound-on-weekends"
+					}
+				]
+			},
+			"connections": {
+				"nodes": [
+					{
+						"tripId": "b-downtown-on-weekends",
+						"fromStopSequence": 3,
+						"fromStopId": "lake",
+						"tDeparture": "2019-03-09T12:24:00+00:00",
+						"tArrival": "2019-03-09T12:30:00+00:00",
+						"toStopId": "center",
+						"toStopSequence": 5
+					},
+					{
+						"tripId": "b-downtown-on-weekends",
+						"fromStopSequence": 1,
+						"fromStopId": "airport",
+						"tDeparture": "2019-03-10T12:14:00+00:00",
+						"tArrival": "2019-03-10T12:22:00+00:00",
+						"toStopId": "lake",
+						"toStopSequence": 3
+					},
+					{
+						"tripId": "b-downtown-on-weekends",
+						"fromStopSequence": 3,
+						"fromStopId": "lake",
+						"tDeparture": "2019-03-10T12:24:00+00:00",
+						"tArrival": "2019-03-10T12:30:00+00:00",
+						"toStopId": "center",
+						"toStopSequence": 5
+					}
+				]
+			}
+		}
+	}
+}

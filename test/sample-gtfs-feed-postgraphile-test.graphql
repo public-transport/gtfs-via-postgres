@@ -1,0 +1,30 @@
+query SampleGtfsFeedPostgraphileTest {
+	stopByStopId(stopId: "airport-1") {
+		stopId
+	}
+
+	routeByRouteId(routeId: "B") {
+		agency {
+			agencyName
+			agencyEmail
+		}
+		routeShortName
+		routeLongName
+		trips(first: 3, orderBy: TRIP_ID_ASC) {
+			nodes {
+				tripId
+			}
+		}
+		connections(orderBy: PRIMARY_KEY_ASC, offset: 3, first: 3) {
+			nodes {
+				tripId
+				fromStopSequence
+				fromStopId
+				tDeparture
+				tArrival
+				toStopId
+				toStopSequence
+			}
+		}
+	}
+}

@@ -234,6 +234,8 @@ The `serve-gtfs-via-graphql` helper script configures and runs PostGraphile. Wit
 env NODE_ENV=development npm exec -- serve-gtfs-via-graphql
 ```
 
+**As an example for the GraphQL API, check out the [test query](test/sample-gtfs-feed-postgraphile-test.graphql)** or open GraphiQL via [`localhost:3000/graphiql`](http://localhost:3000/graphiql).
+
 
 ## Correctness vs. Speed regarding GTFS Time Values
 
