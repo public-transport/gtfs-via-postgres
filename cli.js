@@ -14,6 +14,7 @@ const argv = mri(process.argv.slice(2), {
 		'trips-without-shape-id',
 		'stops-without-level-id',
 		'stops-location-index',
+		'postgraphile',
 	]
 })
 
@@ -34,6 +35,8 @@ Options:
     --stops-location-index        Create a spatial index on stops.stop_loc for efficient
                                     queries by geolocation.
     --schema                      The schema to use for the database. Default: public
+    --postgraphile                Tweak generated SQL for PostGraphile usage.
+                                    https://www.graphile.org/postgraphile/
 Examples:
     gtfs-to-sql some-gtfs/*.txt | psql -b # import into PostgreSQL
     gtfs-to-sql -u -- some-gtfs/*.txt | gzip >gtfs.sql # generate a gzipped SQL dump
@@ -63,6 +66,7 @@ const opt = {
 	routesWithoutAgencyId: !!argv['routes-without-agency-id'],
 	stopsLocationIndex: !!argv['stops-location-index'],
 	schema: argv['schema'] || 'public',
+	postgraphile: !!argv.postgraphile,
 }
 if ('stops-without-level-id' in argv) {
 	opt.stopsWithoutLevelId = !!argv['stops-without-level-id']

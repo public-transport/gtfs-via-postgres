@@ -19,6 +19,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		stopsWithoutLevelId: !files.some(f => f.name === 'levels'),
 		stopsLocationIndex: false,
 		schema: 'public',
+		postgraphile: false,
 		...opt,
 	}
 	debug('opt', opt)
@@ -149,6 +150,28 @@ BEGIN;
 	}
 
 	yield `\
+
+${opt.postgraphile ? `\
+-- seal imported data
+-- todo:
+-- > Be careful with public schema.It already has a lot of default privileges that you maybe don't want... See documentation[1].
+-- > [1]: postgresql.org/docs/11/ddl-schemas.html#DDL-SCHEMAS-PRIV
+CREATE ROLE postgraphile LOGIN PASSWORD 'todo'; -- todo: postgraphile password?
+DO $$
+    DECLARE
+        db TEXT := current_database();
+    BEGIN
+        EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', db, 'postgraphile');
+    END
+$$;
+GRANT USAGE ON SCHEMA "${opt.schema}" TO postgraphile;
+-- https://stackoverflow.com/questions/760210/how-do-you-create-a-read-only-user-in-postgresql#comment50679407_762649
+REVOKE CREATE ON SCHEMA "${opt.schema}" FROM PUBLIC;
+GRANT SELECT ON ALL TABLES IN SCHEMA "${opt.schema}" TO postgraphile;
+-- ALTER DEFAULT PRIVILEGES IN SCHEMA "${opt.schema}" GRANT SELECT ON TABLES TO postgraphile;
+-- todo: set search_path? https://stackoverflow.com/questions/760210/how-do-you-create-a-read-only-user-in-postgresql#comment33535263_762649
+` : ''}
+
 COMMIT;`
 }
 
