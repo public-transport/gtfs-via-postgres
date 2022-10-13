@@ -33,4 +33,70 @@ query SampleGtfsFeedPostgraphileTest {
 	tripByTripId(tripId: "b-outbound-on-weekends") {
 		translatedTripHeadsign(language: "de-DE")
 	}
+
+	# stop_times-based -> no frequencies_{row,it}
+	aOutboundAllDay20190301ArrDep: arrivalDepartureByArrivalDepartureId(
+		id: "YS1vdXRib3VuZC1hbGwtZGF5:MjAxOS0wMy0wMQ==:Mw==:LTE=:LTE="
+	) {
+		# tripId: "a-outbound-all-day"
+		# date: "2019-03-01"
+		# stopSequence: 3
+		# frequenciesRow: -1
+		# frequenciesIt: -1
+		arrivalDepartureId
+		tripId
+		date
+		stopSequence
+		frequenciesRow
+		frequenciesIt
+	}
+	# frequencies-based -> has frequencies_{row,it}
+	bDowntownOnWorkingDays20190608ArrDep: arrivalDepartureByArrivalDepartureId(
+		id: "Yi1kb3dudG93bi1vbi13b3JraW5nLWRheXM=:MjAxOS0wMy0wOA==:Mw==:MQ==:Mg=="
+	) {
+		# tripId: "b-downtown-on-working-days"
+		# date: "2019-06-08"
+		# stopSequence: 3
+		# frequenciesRow: 1
+		# frequenciesIt: 2
+		arrivalDepartureId
+		tripId
+		date
+		stopSequence
+		frequenciesRow
+		frequenciesIt
+	}
+
+	# stop_times-based -> no frequencies_{row,it}
+	aOutboundAllDay20190301Con: connectionByConnectionId(
+		id: "YS1vdXRib3VuZC1hbGwtZGF5:MjAxOS0wMy0wMQ==:Mw==:LTE=:LTE="
+	) {
+		# tripId: "a-outbound-all-day"
+		# date: "2019-03-01"
+		# fromStopSequence: 3
+		# frequenciesRow: -1
+		# frequenciesIt: -1
+		connectionId
+		tripId
+		date
+		fromStopSequence
+		frequenciesRow
+		frequenciesIt
+	}
+	# frequencies-based -> has frequencies_{row,it}
+	bDowntownOnWorkingDays20190608Con: connectionByConnectionId(
+		id: "Yi1kb3dudG93bi1vbi13b3JraW5nLWRheXM=:MjAxOS0wMy0wOA==:Mw==:MQ==:Mg=="
+	) {
+		# tripId: "b-downtown-on-working-days"
+		# date: "2019-06-08"
+		# fromStopSequence: 3
+		# frequenciesRow: 1
+		# frequenciesIt: 2
+		connectionId
+		tripId
+		date
+		fromStopSequence
+		frequenciesRow
+		frequenciesIt
+	}
 }

@@ -47,14 +47,20 @@ arrs_deps_b_downtown_on_working_days=$(cat << EOF
 	SELECT
 		stop_sequence,
 		extract(epoch from t_arrival)::integer as arr,
-		extract(epoch from t_departure)::integer as dep
+		extract(epoch from t_departure)::integer as dep,
+		frequencies_row, frequencies_it
 	FROM arrivals_departures
 	WHERE trip_id = 'b-downtown-on-working-days'
 	ORDER BY t_departure
-	LIMIT 1
+	LIMIT 2
 EOF)
-freq_arr_dep1=$(psql --csv -t -c "$arrs_deps_b_downtown_on_working_days")
-if [[ "$freq_arr_dep1" != "1,1552028340,1552028400" ]]; then
+freq_arr_dep1=$(psql --csv -t -c "$arrs_deps_b_downtown_on_working_days" | head -n 1)
+if [[ "$freq_arr_dep1" != "1,1552028340,1552028400,1,1" ]]; then
+	echo "invalid/missing frequencies-based arrival/departure: $freq_arr_dep1" 1>&2
+	exit 1
+fi
+freq_arr_dep2=$(psql --csv -t -c "$arrs_deps_b_downtown_on_working_days" | head -n 2 | tail -n 1)
+if [[ "$freq_arr_dep2" != "1,1552028640,1552028700,1,1" ]]; then
 	echo "invalid/missing frequencies-based arrival/departure: $freq_arr_dep1" 1>&2
 	exit 1
 fi

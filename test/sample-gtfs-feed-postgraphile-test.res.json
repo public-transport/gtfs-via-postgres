@@ -60,6 +60,38 @@
 		},
 		"tripByTripId": {
 			"translatedTripHeadsign": "Babbage (auswärts)"
+		},
+		"aOutboundAllDay20190301ArrDep": {
+			"arrivalDepartureId": "YS1vdXRib3VuZC1hbGwtZGF5:MjAxOS0wMy0wMQ==:Mw==:LTE=:LTE=",
+			"tripId": "a-outbound-all-day",
+			"date": "2019-03-01T00:00:00",
+			"stopSequence": 3,
+			"frequenciesRow": -1,
+			"frequenciesIt": -1
+		},
+		"bDowntownOnWorkingDays20190608ArrDep": {
+			"arrivalDepartureId": "Yi1kb3dudG93bi1vbi13b3JraW5nLWRheXM=:MjAxOS0wMy0wOA==:Mw==:MQ==:Mg==",
+			"tripId": "b-downtown-on-working-days",
+			"date": "2019-03-08T00:00:00",
+			"stopSequence": 3,
+			"frequenciesRow": 1,
+			"frequenciesIt": 2
+		},
+		"aOutboundAllDay20190301Con": {
+			"connectionId": "YS1vdXRib3VuZC1hbGwtZGF5:MjAxOS0wMy0wMQ==:Mw==:LTE=:LTE=",
+			"tripId": "a-outbound-all-day",
+			"date": "2019-03-01T00:00:00",
+			"fromStopSequence": 3,
+			"frequenciesRow": -1,
+			"frequenciesIt": -1
+		},
+		"bDowntownOnWorkingDays20190608Con": {
+			"connectionId": "Yi1kb3dudG93bi1vbi13b3JraW5nLWRheXM=:MjAxOS0wMy0wOA==:Mw==:MQ==:Mg==",
+			"tripId": "b-downtown-on-working-days",
+			"date": "2019-03-08T00:00:00",
+			"fromStopSequence": 3,
+			"frequenciesRow": 1,
+			"frequenciesIt": 2
 		}
 	}
 }
