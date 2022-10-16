@@ -61,7 +61,7 @@ const opt = {
 	ignoreUnsupportedFiles: !!(argv['ignore-unsupported'] || argv.u),
 	tripsWithoutShapeId: !!argv['trips-without-shape-id'],
 	routesWithoutAgencyId: !!argv['routes-without-agency-id'],
-	stopsLocationIndex: argv['stops-location-index'],
+	stopsLocationIndex: !!argv['stops-location-index'],
 	schema: argv['schema'] || 'public',
 }
 if ('stops-without-level-id' in argv) {
