@@ -2,6 +2,7 @@
 
 const {createServer} = require('http')
 const {postgraphile} = require('postgraphile')
+const postgisPlugin = require('@graphile/postgis').default
 const simplifyInflectorPlugin = require('@graphile-contrib/pg-simplify-inflector')
 
 const DEV = process.env.NODE_ENV === 'development'
@@ -11,6 +12,9 @@ const SCHEMA = process.env.PGSCHEMA || 'public'
 
 const pg = postgraphile({}, SCHEMA, {
 	appendPlugins: [
+		// PostGIS support for PostGraphile
+		postgisPlugin,
+
 		// Simplifies the graphile-build-pg inflector to trim the `ByFooIdAndBarId` from relations
 		simplifyInflectorPlugin,
 	],

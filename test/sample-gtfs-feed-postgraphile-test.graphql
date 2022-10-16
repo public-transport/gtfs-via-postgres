@@ -2,6 +2,11 @@ query SampleGtfsFeedPostgraphileTest {
 	stopByStopId(stopId: "airport-1") {
 		translatedStopName(language: "de-DE")
 		stopId
+		stopLoc {
+			geojson
+			latitude
+			longitude
+		}
 	}
 
 	routeByRouteId(routeId: "B") {
@@ -30,8 +35,16 @@ query SampleGtfsFeedPostgraphileTest {
 			}
 		}
 	}
-	tripByTripId(tripId: "b-outbound-on-weekends") {
+	bOutboundOnWeekends: tripByTripId(tripId: "b-outbound-on-weekends") {
 		translatedTripHeadsign(language: "de-DE")
+	}
+	aDowntownAllDay: tripByTripId(tripId: "a-downtown-all-day") {
+		shape {
+			shape {
+				__typename
+				geojson
+			}
+		}
 	}
 
 	# stop_times-based -> no frequencies_{row,it}
