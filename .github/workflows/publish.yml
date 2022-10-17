@@ -122,3 +122,4 @@ jobs:
         # todo!
         tags: |
           publictransport/gtfs-via-postgres:latest
+          publictransport/gtfs-via-postgres:4
