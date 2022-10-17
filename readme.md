@@ -58,7 +58,7 @@ ls -lh gtfs
 #  16M trips.csv
 ```
 
-Depending on your specific setup, configure access to the PostgreSQL database via [`PG*` environment variables](https://www.postgresql.org/docs/13/libpq-envars.html):
+Depending on your specific setup, configure access to the PostgreSQL database via [`PG*` environment variables](https://www.postgresql.org/docs/14/libpq-envars.html):
 
 ```sh
 export PGUSER=postgres
@@ -200,7 +200,7 @@ docker run --rm --volume /path/to/gtfs:/gtfs \
 
 ### Exporting data efficiently
 
-If you want to export data from the database, use the [`COPY` command](https://www.postgresql.org/docs/13/sql-copy.html); On an [M1 MacBook Air](https://en.wikipedia.org/wiki/MacBook_Air_(Apple_silicon)#Third_generation_(Retina_with_Apple_silicon)), PostgreSQL 13 can export about 500k `connections` rows per second.
+If you want to export data from the database, use the [`COPY` command](https://www.postgresql.org/docs/14/sql-copy.html); On an [M1 MacBook Air](https://en.wikipedia.org/wiki/MacBook_Air_(Apple_silicon)#Third_generation_(Retina_with_Apple_silicon)), PostgreSQL 14 can export about 500k `connections` rows per second.
 
 ```shell
 psql -c 'COPY (SELECT * FROM connections) TO STDOUT csv HEADER' >connections.csv

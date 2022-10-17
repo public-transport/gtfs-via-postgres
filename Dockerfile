@@ -9,6 +9,8 @@ LABEL org.opencontainers.image.licenses="(Apache-2.0 AND Prosperity-3.0.0)"
 
 WORKDIR /app
 
+RUN apk add --no-cache postgresql-client
+
 ADD package.json /app
 RUN npm install --production && npm cache clean --force
 
