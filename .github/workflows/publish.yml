@@ -7,26 +7,34 @@ jobs:
   test:
     name: run tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version:
+          - '16.x'
+        postgis-docker-tag:
+          - '14-3.3-alpine'
+          - '15-3.3-alpine'
+
     steps:
     - name: checkout
       uses: actions/checkout@v2
     - name: setup Node
       uses: actions/setup-node@v1
       with:
-        node-version: 16.x
+        node-version: ${{ matrix.node-version }}
 
     - name: install & start PostgreSQL with PostGIS
-      # todo: currently, is uses mdillon, which doesn't have PostgreSQL 14
+      # todo: currently, it uses mdillon, which doesn't have PostgreSQL 14
       # uses: huaxk/postgis-action@v1
       # with:
-      #   postgresql version: '14-3.2-alpine'
+      #   postgresql version: '${{ matrix.postgis-docker-tag }}'
       #   postgresql password: password
       #   postgresql user: postgres
       #   postgresql db: postgres
       run: |
         docker run -d \
           -e POSTGRES_USER=$PGUSER -e POSTGRES_PASSWORD=$PGPASSWORD -e POSTGRES_DB=$PGDATABASE \
-          -p 5432:5432 postgis/postgis:14-3.2-alpine
+          -p 5432:5432 postgis/postgis:${{ matrix.postgis-docker-tag }}
       env:
         PGUSER: postgres
         PGPASSWORD: password
@@ -53,6 +61,8 @@ jobs:
       uses: actions/checkout@v2
     - name: setup Node
       uses: actions/setup-node@v1
+      with:
+        node-version: 16.x
     - run: npm install
 
     - name: build binaries
