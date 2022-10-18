@@ -156,7 +156,19 @@ ${opt.postgraphile ? `\
 -- todo:
 -- > Be careful with public schema.It already has a lot of default privileges that you maybe don't want... See documentation[1].
 -- > [1]: postgresql.org/docs/11/ddl-schemas.html#DDL-SCHEMAS-PRIV
-CREATE ROLE postgraphile LOGIN PASSWORD 'todo'; -- todo: postgraphile password?
+DO $$
+BEGIN
+	-- https://stackoverflow.com/questions/8092086/create-postgresql-role-user-if-it-doesnt-exist#8099557
+	IF EXISTS (
+		SELECT FROM pg_catalog.pg_roles
+		WHERE rolname = 'postgraphile'
+	) THEN
+		RAISE NOTICE 'Role "postgraphile" already exists, skipping creation.';
+	ELSE
+		CREATE ROLE postgraphile LOGIN PASSWORD 'todo'; -- todo: postgraphile password?
+	END IF;
+END
+$$;
 DO $$
     DECLARE
         db TEXT := current_database();
