@@ -13,11 +13,11 @@ ls -lh amtrak-gtfs-2021-10-06
 psql -c 'create database amtrak_2021_10_06'
 export PGDATABASE='amtrak_2021_10_06'
 
-../cli.js -d --trips-without-shape-id -- amtrak-gtfs-2021-10-06/*.txt | psql -b
+../cli.js -d --trips-without-shape-id --schema amtrak -- amtrak-gtfs-2021-10-06/*.txt | psql -b
 
 query=$(cat << EOF
 select extract(epoch from t_arrival)::integer as t_arrival
-from arrivals_departures
+from amtrak.arrivals_departures
 where stop_id = 'BHM' -- Birmingham
 and date = '2021-11-26'
 order by t_arrival
