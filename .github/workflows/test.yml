@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - '*'
+    branches-ignore:
+      - ci-smoke-tests
   pull_request:
     branches:
       - '*'
