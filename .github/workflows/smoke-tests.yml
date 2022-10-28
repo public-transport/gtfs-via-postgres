@@ -1,0 +1,24 @@
+name: smoke tests with GTFS datasets
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  smoke-test-vbb:
+    name: run VBB smoke test
+    uses: './.github/workflows/smoke-test.yml'
+    with:
+      feed-name: VBB
+      feed-download-cmd: 'wget -nv --compression auto -r --no-parent --no-directories -R .csv.gz -P gtfs -N "https://vbb-gtfs.jannisr.de/latest/"'
+      feed-extract-cmd: ''
+      feed-import-glob: 'gtfs/*.csv'
+  smoke-test-entur:
+    name: run Entur smoke test
+    uses: './.github/workflows/smoke-test.yml'
+    with:
+      feed-name: Entur
+      feed-download-cmd: 'wget -nv "https://storage.googleapis.com/marduk-production/outbound/gtfs/rb_norway-aggregated-gtfs.zip" -O gtfs.zip'
+      feed-extract-cmd: 'unzip -d gtfs gtfs.zip'
+      feed-import-glob: 'gtfs/*.txt'

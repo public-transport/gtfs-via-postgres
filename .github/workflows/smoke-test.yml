@@ -1,0 +1,79 @@
+name: smoke test with GTFS dataset
+
+on:
+  workflow_call:
+    inputs:
+      feed-name:
+        required: true
+        type: string
+      feed-download-cmd:
+        required: true
+        type: string
+      feed-extract-cmd:
+        required: true
+        type: string
+      feed-import-glob:
+        required: true
+        type: string
+
+jobs:
+  smoke-test:
+    name: run ${{ inputs.feed-name }} smoke test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: setup Node
+      uses: actions/setup-node@v1
+      with:
+        node-version: '16.x'
+
+    - name: install & start PostgreSQL with PostGIS
+      # todo: currently, it uses mdillon, which doesn't have PostgreSQL 14
+      # uses: huaxk/postgis-action@v1
+      # with:
+      #   postgresql version: '${{ matrix.postgis-docker-tag }}'
+      #   postgresql password: password
+      #   postgresql user: postgres
+      #   postgresql db: postgres
+      run: |
+        docker run -d \
+          -e POSTGRES_USER=$PGUSER -e POSTGRES_PASSWORD=$PGPASSWORD -e POSTGRES_DB=$PGDATABASE \
+          -p 5432:5432 postgis/postgis:14-3.3-alpine
+      env:
+        PGUSER: postgres
+        PGPASSWORD: password
+        PGDATABASE: postgres
+
+    - run: npm install
+
+    - name: install prerequisites
+      run: |
+        sudo apt install -y moreutils
+    - name: import ${{ inputs.feed-name }} GTFS
+      env:
+        PGHOST: localhost
+        PGPORT: '5432'
+        PGUSER: postgres
+        PGPASSWORD: password
+      run: |
+        set -e
+        set -o pipefail
+        set -x
+
+        env PGDATABASE=postgres psql -c 'create database gtfs'
+        export PGDATABASE=gtfs
+        # test DB access
+        psql -c 'select 1' >/dev/null
+
+        # download & extract GTFS
+        ${{ inputs.feed-download-cmd }}
+        ${{ inputs.feed-extract-cmd }}
+        # import GTFS
+        ./cli.js -d -- ${{ inputs.feed-import-glob }} | sponge | psql -b
+        # test if data has been imported
+        psql --csv -c 'SELECT * FROM service_days LIMIT 1' | wc -l
+
+        # delete database
+        env PGDATABASE=postgres psql -c 'drop database gtfs'
