@@ -4,4 +4,4 @@ set -e
 set -o pipefail
 cd "$(dirname "$0")"
 
-psql -q -b -f index.sql
+psql -q -b --csv -f index.sql

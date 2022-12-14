@@ -64,12 +64,16 @@ LANGUAGE plpgsql;
 \i arrs_deps_by_station_and_time_seq_0.sql
 \i arrs_deps_by_stop_and_time.sql
 \i arrs_deps_by_trip_and_date.sql
+\i arrs_deps_by_stop.sql
+\i arrs_deps_by_non_existent_stop.sql
 \i arrs_deps_by_time.sql
 \i connections_by_route_name_and_time.sql
 \i connections_by_station_and_time.sql
 \i connections_by_station_and_time_seq_0.sql
 \i connections_by_stop_and_time.sql
 \i connections_by_trip_and_date.sql
+\i connections_by_stop.sql
+\i connections_by_non_existent_stop.sql
 \i connections_by_time.sql
 
 SELECT * FROM _benchmark;
