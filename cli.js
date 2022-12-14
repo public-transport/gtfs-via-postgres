@@ -29,6 +29,9 @@ const {
 			type: 'boolean',
 			short: 'u',
 		},
+		'route-types-scheme': {
+			type: 'string',
+		},
 		'trips-without-shape-id': {
 			type: 'boolean',
 		},
@@ -58,6 +61,10 @@ Options:
                                   on to be specified as well (e.g. stop_times.txt
                                   requires trips.txt). Default: false
     --ignore-unsupported      -u  Ignore unsupported files. Default: false
+    --route-types-scheme          Set of route_type values to support.
+                                    - basic: core route types in the GTFS spec
+                                    - google-extended: Extended GTFS Route Types [1]
+                                    Default: google-extended
     --trips-without-shape-id      Don't require trips.txt items to have a shape_id.
     --routes-without-agency-id    Don't require routes.txt items to have an agency_id.
     --stops-without-level-id      Don't require stops.txt items to have a level_id.
@@ -70,6 +77,8 @@ Options:
 Examples:
     gtfs-to-sql some-gtfs/*.txt | psql -b # import into PostgreSQL
     gtfs-to-sql -u -- some-gtfs/*.txt | gzip >gtfs.sql # generate a gzipped SQL dump
+
+[1] https://developers.google.com/transit/gtfs/reference/extended-route-types
 \n`)
 	process.exit(0)
 }
@@ -92,6 +101,7 @@ const opt = {
 	silent: !!flags.silent,
 	requireDependencies: !!flags['require-dependencies'],
 	ignoreUnsupportedFiles: !!flags['ignore-unsupported'],
+	routeTypesScheme: flags['route-types-scheme'] || 'google-extended',
 	tripsWithoutShapeId: !!flags['trips-without-shape-id'],
 	routesWithoutAgencyId: !!flags['routes-without-agency-id'],
 	stopsLocationIndex: !!flags['stops-location-index'],
