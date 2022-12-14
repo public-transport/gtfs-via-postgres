@@ -15,6 +15,9 @@ on:
       feed-import-glob:
         required: true
         type: string
+      feed-import-flags:
+        required: true
+        type: string
 
 jobs:
   smoke-test:
@@ -71,7 +74,7 @@ jobs:
         ${{ inputs.feed-download-cmd }}
         ${{ inputs.feed-extract-cmd }}
         # import GTFS
-        ./cli.js -d -- ${{ inputs.feed-import-glob }} | sponge | psql -b
+        ./cli.js -d ${{ inputs.feed-import-flags }} -- ${{ inputs.feed-import-glob }} | sponge | psql -b
         # test if data has been imported
         psql --csv -c 'SELECT * FROM service_days LIMIT 1' | wc -l
 

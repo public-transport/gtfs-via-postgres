@@ -146,6 +146,7 @@ Options:
     --route-types-scheme          Set of route_type values to support.
                                     - basic: core route types in the GTFS spec
                                     - google-extended: Extended GTFS Route Types [1]
+                                    - tpeg-pti: proposed TPEG-PTI-based route types [2]
                                     Default: google-extended
     --trips-without-shape-id      Don't require trips.txt items to have a shape_id.
     --routes-without-agency-id    Don't require routes.txt items to have an agency_id.
@@ -161,6 +162,7 @@ Examples:
     gtfs-to-sql -u -- some-gtfs/*.txt | gzip >gtfs.sql # generate a gzipped SQL dump
 
 [1] https://developers.google.com/transit/gtfs/reference/extended-route-types
+[2] https://groups.google.com/g/gtfs-changes/c/keT5rTPS7Y0/m/71uMz2l6ke0J
 ```
 
 Some notable limitations mentioned in the [PostgreSQL 14 documentation on date/time types](https://www.postgresql.org/docs/14/datatype-datetime.html):
