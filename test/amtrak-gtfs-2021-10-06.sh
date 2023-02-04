@@ -15,6 +15,7 @@ export PGDATABASE='amtrak_2021_10_06'
 
 ../cli.js -d --trips-without-shape-id --schema amtrak \
 	--import-metadata \
+	--stats-by-route-date=view \
 	-- amtrak-gtfs-2021-10-06/*.txt | psql -b
 
 query=$(cat << EOF
@@ -48,5 +49,18 @@ fi
 fMin=$(psql --csv -t -c "SELECT amtrak.dates_filter_min('2021-11-27T13:45:00-06')" | tail -n 1)
 if [[ "$fMin" != "2021-11-24" ]]; then
 	echo "invalid dates_filter_min(…): $fMin" 1>&2
+	exit 1
+fi
+
+acelaStatQuery=$(cat << EOF
+SELECT nr_of_trips, nr_of_arrs_deps
+FROM amtrak.stats_by_route_date
+WHERE route_id = '40751' -- Acela
+AND date = '2021-11-26'
+AND is_effective = True
+EOF)
+acelaStat=$(psql --csv -t -c "$acelaStatQuery" | tail -n 1)
+if [[ "$acelaStat" != "16,190" ]]; then
+	echo "invalid stats for route 40751 (Acela) on 2021-11-26: $acelaStat" 1>&2
 	exit 1
 fi

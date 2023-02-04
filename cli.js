@@ -44,6 +44,9 @@ const {
 		'stops-location-index': {
 			type: 'boolean',
 		},
+		'stats-by-route-date': {
+			type: 'string',
+		},
 		'schema': {
 			type: 'string',
 		},
@@ -78,6 +81,12 @@ Options:
                                   Default if levels.txt has not been provided.
     --stops-location-index        Create a spatial index on stops.stop_loc for efficient
                                     queries by geolocation.
+    --stats-by-route-date         Wether to generate a stats_by_route_date view
+                                    letting you analyze all data per routes and/or date:
+                                    - none: Don't generate a view.
+                                    - view: Fast generation, slow access.
+                                    - materialized-view: Slow generation, fast access.
+                                    Default: none
     --schema                      The schema to use for the database. Default: public
     --postgraphile                Tweak generated SQL for PostGraphile usage.
                                     https://www.graphile.org/postgraphile/
@@ -117,6 +126,7 @@ const opt = {
 	tripsWithoutShapeId: !!flags['trips-without-shape-id'],
 	routesWithoutAgencyId: !!flags['routes-without-agency-id'],
 	stopsLocationIndex: !!flags['stops-location-index'],
+	statsByRouteIdAndDate: flags['stats-by-route-date'] || 'none',
 	schema: flags['schema'] || 'public',
 	postgraphile: !!flags.postgraphile,
 	importMetadata: !!flags['import-metadata'],

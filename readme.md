@@ -93,6 +93,7 @@ In addition to a table for each GTFS file, `gtfs-via-postgres` adds these views 
 - `arrivals_departures` "applies" [`stop_times`](https://gtfs.org/reference/static/#stop_timestxt)/[`frequencies`](https://gtfs.org/reference/static/#frequenciestxt) to [`trips`](https://gtfs.org/reference/static/#tripstxt) and `service_days` to give you all arrivals/departures at each stop with their *absolute* dates & times. It also resolves each stop's parent station ID & name.
 - `connections` "applies" [`stop_times`](https://gtfs.org/reference/static/#stop_timestxt)/[`frequencies`](https://gtfs.org/reference/static/#frequenciestxt) to [`trips`](https://gtfs.org/reference/static/#tripstxt) and `service_days`, just like `arrivals_departures`, but gives you departure (at stop A) & arrival (at stop B) *pairs*.
 - `shapes_aggregates` aggregates individual shape points in [`shapes`](https://gtfs.org/reference/static/#shapestxt) into a [PostGIS `LineString`](http://postgis.net/workshops/postgis-intro/geometries.html#linestrings).
+- `stats_by_route_date` provides the number of arrivals/departures by route ID and date. – [read more](docs/analysis/feed-by-route-date.md)
 
 As an example, we're going to use the `arrivals_departures` view to query all *absolute* departures at `de:11000:900120003` (*S Ostkreuz Bhf (Berlin)*) between `2022-03-23T12:30+01` and  `2022-03-23T12:35+01`:
 
@@ -155,6 +156,12 @@ Options:
                                   Default if levels.txt has not been provided.
     --stops-location-index        Create a spatial index on stops.stop_loc for efficient
                                     queries by geolocation.
+    --stats-by-route-date         Wether to generate a stats_by_route_date view
+                                    letting you analyze all data per routes and/or date:
+                                    - none: Don't generate a view.
+                                    - view: Fast generation, slow access.
+                                    - materialized-view: Slow generation, fast access.
+                                    Default: none
     --schema                      The schema to use for the database. Default: public
     --postgraphile                Tweak generated SQL for PostGraphile usage.
                                     https://www.graphile.org/postgraphile/
@@ -261,6 +268,10 @@ env NODE_ENV=development npm exec -- serve-gtfs-via-graphql
 
 **As an example for the GraphQL API, check out the [test query](test/sample-gtfs-feed-postgraphile-test.graphql)** or open the [GraphiQL UI](https://github.com/graphql/graphiql) served at [`localhost:3000/graphiql`](http://localhost:3000/graphiql).
 
+### more guides
+
+The [`docs` directory](docs) contains more instructions on how to use `gtfs-via-postgres`.
+
 
 ## Correctness vs. Speed regarding GTFS Time Values
 
@@ -327,6 +338,7 @@ The following benchmarks were run with the [2022-07-01 VBB GTFS dataset](https:/
 | <pre>SELECT count(*)<br>FROM connections<br>WHERE from_stop_id = 'de:11000:900100001::4' -- S+U Friedrichstr. (Berlin)</pre> | 84.17 | 83.71 | 83.98 | 84.05 | 84.18 | 84.82 | 85.44 | 88.441 | 100 |
 | <pre>SELECT count(*)<br>FROM connections<br>WHERE from_stop_id = 'definitely-non-existent'</pre> | 15.53 | 15.404 | 15.5 | 15.52 | 15.54 | 15.6 | 15.9 | 15.915 | 100 |
 | <pre>SELECT *<br>FROM connections<br>WHERE t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date > '2022-08-08' AND date <= '2022-08-09'<br>ORDER BY t_departure<br>LIMIT 100</pre> | 8414.27 | 7885.369 | 7994.99 | 8364.33 | 8735.64 | 9147.52 | 9180.64 | 9188.92 | 7 |
+| <pre>SELECT *<br>FROM stats_by_route_date<br>WHERE route_id = '17452_900' -- M4<br>AND date >= '2022-08-08' AND date <= '2022-08-14'<br>AND is_effective = true</pre> | 2900.64 | 2888.196 | 2891.65 | 2893.07 | 2905.69 | 2927.44 | 2936.58 | 2938.86 | 10 |
 
 
 ## Related Projects

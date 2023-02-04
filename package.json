@@ -12,6 +12,7 @@
 		"index.js",
 		"scripts",
 		"lib",
+		"docs",
 		"example.sh",
 		"LICENSE",
 		"LICENSE-PROSPERITY.md",
