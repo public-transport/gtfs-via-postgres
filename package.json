@@ -5,7 +5,7 @@
 	"main": "lib/index.js",
 	"bin": {
 		"gtfs-to-sql": "cli.js",
-		"serve-gtfs-via-graphql": "serve/run-postgraphile.js"
+		"serve-gtfs-via-graphql": "scripts/run-postgraphile.js"
 	},
 	"files": [
 		"cli.js",
