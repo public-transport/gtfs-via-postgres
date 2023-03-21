@@ -25,7 +25,7 @@ npm install -g gtfs-via-postgres
 
 Or use [`npx`](https://npmjs.com/package/npx). ✨
 
-There are also [prebuilt binaries available](https://github.com/public-transport/gtfs-via-postgres/releases/latest).
+There are also [prebuilt binaries](https://github.com/public-transport/gtfs-via-postgres/releases/latest) and [Docker images](https://github.com/public-transport/gtfs-via-postgres/pkgs/container/gtfs-via-postgres) available.
 
 *Note:* `gtfs-via-postgres` **needs PostgreSQL >=14** to work, as it uses the [`WITH … AS NOT MATERIALIZED`](https://www.postgresql.org/docs/14/queries-with.html#id-1.5.6.12.7) syntax. You can check your PostgreSQL server's version with `psql -t -c 'SELECT version()'`.
 
@@ -178,22 +178,23 @@ You can run queries with date+time values in any timezone (offset) and they will
 
 *Note:* Just like the `npm`-installed variant, the Docker integration too assumes that your GTFS dataset consists of individual files (i.e. unzipped).
 
-Instead of installing via `npm`, you can use [the `publictransport/gtfs-via-postgres` Docker image](https://hub.docker.com/r/publictransport/gtfs-via-postgres):
+Instead of installing via `npm`, you can use [the `ghcr.io/public-transport/gtfs-via-postgres` Docker image](https://github.com/public-transport/gtfs-via-postgres/pkgs/container/gtfs-via-postgres):
 
 ```shell
 # variant A: use Docker image just to convert GTFS to SQL
 docker run --rm --volume /path/to/gtfs:/gtfs \
-	publictransport/gtfs-via-postgres --require-dependencies -- '/gtfs/*.csv' | psql -b
+	ghcr.io/public-transport/gtfs-via-postgres --require-dependencies -- '/gtfs/*.csv' \
+    | psql -b
 ```
 
 *Note:* Remember to pass the `/gtfs/*.csv` glob as a string (with `'`), so that it gets evaluated *inside* the Docker container.
 
 With the code above, the `psql -b` process will run *outside* of the Docker container, so your host machine needs access to PostgreSQL.
 
-If you want to directly import the GTFS data *from within the Docker container*, you need add `psql` to the image and run it from inside. To do that, write a new Dockerfile that extends the `publictransport/gtfs-via-postgres` image:
+If you want to directly import the GTFS data *from within the Docker container*, you need add `psql` to the image and run it from inside. To do that, write a new Dockerfile that extends the `ghcr.io/public-transport/gtfs-via-postgres` image:
 
 ```Dockerfile
-FROM publictransport/gtfs-via-postgres
+FROM ghcr.io/public-transport/gtfs-via-postgres
 ENV PGPORT=5432 PGUSER=postgres
 WORKDIR /gtfs
 # pass all arguments into gtfs-via-postgres, pipe output into psql:
