@@ -273,9 +273,9 @@ Let's consider two examples:
 - A `departure_time` of `26:59:00` with a trip running on `2021-03-01`: The time, applied to this specific date, "extends" into the following day, so it actually departs at `2021-03-02T02:59+01`.
 - A departure time of `03:01:00` with a trip running on `2021-03-28`: This is when the standard -> DST switch happens in the `Europe/Berlin` timezone. Because the dep. time refers to noon - 12h (*not* to midnight), it actually happens at `2021-03-28T03:01+02` which is *not* `3h1m` after `2021-03-28T00:00+01`.
 
-`gtfs-via-postgres` always prioritizes correctness over speed. Because it follows the GTFS semantics, when filtering `arrivals_departures` by *absolute* departure date+time, it cannot filter `service_days` (which is `calendar` and `calendar_dates` combined), because **even a date *before* the date of the desired departure date+time range might still end up within the range, when combined with a `departure_time` of e.g. `27:30:00`**; Instead, it has to consider all `service_days` and apply the `departure_time` to all of them to check if they're within the range.
+`gtfs-via-postgres` always prioritizes correctness over speed. Because it follows the GTFS semantics, when filtering `arrivals_departures` by *absolute* departure date+time, it cannot automatically filter `service_days` (which is `calendar` and `calendar_dates` combined), because **even a date *before* the date of the desired departure time frame might still end up *within*, when combined with a `departure_time` of e.g. `27:30:00`**; Instead, it has to consider all `service_days` and apply the `departure_time` to all of them to check if they're within the range.
 
-However, values >48h are really rare. If you know (or want to assume) that your feed *does not* have `arrival_time`/`departure_time` values larger than a certain amount, you can filter on `date` when querying `arrivals_departures`; This allows PostgreSQL to reduce the number of joins and calendar calculations by *a lot*.
+However, if you determine your feed's largest `arrival_time`/`departure_time`, you can filter on `date` when querying `arrivals_departures`; This allows PostgreSQL to reduce the number of joins and calendar calculations by orders of magnitude, speeding up your queries significantly.
 
 For example, when querying all *absolute* departures at `de:11000:900120003` (*S Ostkreuz Bhf (Berlin)*) between `2022-03-23T12:30+01` and  `2022-03-23T12:35+01` within the [2022-02-25 *VBB* feed](https://vbb-gtfs.jannisr.de/2022-02-25/), filtering by `date` speeds it up nicely (Apple M1, PostgreSQL 14.2):
 
@@ -288,6 +288,18 @@ For example, when querying all *absolute* departures at `de:11000:900120003` (*S
 *none* | *none* | 192s | 370m
 *none* | `2022-03-13` >= `date` < `2022-04-08` | 34s | ~35m
 *none* | `2022-03-22` > `date` < `2022-03-24` | 2.4s | ~1523k
+
+`gtfs-via-postgres` provides 2 helper functions `dates_filter_min(t_min)` & `dates_filter_max(t_max)` for this. When filtering by `t_departure` (absolute departure date+time), `t_min` is the lower `t_departure` bound, whereas `t_max` is the upper bound. The VBB example above can be queried like this:
+
+```sql
+SELECT *
+FROM arrivals_departures
+-- filter by absolute departure date+time
+WHERE t_departure >= '2022-03-23T12:30+01' AND t_departure <= '2022-03-23T12:35+01'
+-- allow "cutoffs" by filtering by date
+AND "date" >= dates_filter_min('2022-03-23T12:30+01') -- evaluates to 2023-03-22
+AND "date" <= dates_filter_max('2022-03-23T12:35+01') -- evaluates to 2023-03-23
+```
 
 
 ## Performance

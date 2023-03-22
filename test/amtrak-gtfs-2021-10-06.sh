@@ -44,3 +44,9 @@ if [[ "$version" != "4" ]]; then
 	echo "invalid gtfs_via_postgres_version(): $version" 1>&2
 	exit 1
 fi
+
+fMin=$(psql --csv -t -c "SELECT amtrak.dates_filter_min('2021-11-27T13:45:00-06')" | tail -n 1)
+if [[ "$fMin" != "2021-11-24" ]]; then
+	echo "invalid dates_filter_min(…): $fMin" 1>&2
+	exit 1
+fi
