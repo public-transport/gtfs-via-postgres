@@ -67,6 +67,7 @@ LANGUAGE plpgsql;
 \i arrs_deps_by_stop.sql
 \i arrs_deps_by_non_existent_stop.sql
 \i arrs_deps_by_time.sql
+\i arrs_deps_by_time_manual.sql
 \i connections_by_route_name_and_time.sql
 \i connections_by_station_and_time.sql
 \i connections_by_station_and_time_seq_0.sql
@@ -75,6 +76,7 @@ LANGUAGE plpgsql;
 \i connections_by_stop.sql
 \i connections_by_non_existent_stop.sql
 \i connections_by_time.sql
+\i connections_by_time_manual.sql
 \i stats_by_route_id_and_date.sql
 
 SELECT * FROM _benchmark;
