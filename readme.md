@@ -158,6 +158,10 @@ Options:
     --schema                      The schema to use for the database. Default: public
     --postgraphile                Tweak generated SQL for PostGraphile usage.
                                     https://www.graphile.org/postgraphile/
+    --import-metadata             Create functions returning import metadata:
+                                    - gtfs_data_imported_at (timestamp with time zone)
+                                    - gtfs_via_postgres_version (text)
+                                    - gtfs_via_postgres_options (jsonb)
 Examples:
     gtfs-to-sql some-gtfs/*.txt | psql -b # import into PostgreSQL
     gtfs-to-sql -u -- some-gtfs/*.txt | gzip >gtfs.sql # generate a gzipped SQL dump

@@ -13,7 +13,9 @@ ls -lh amtrak-gtfs-2021-10-06
 psql -c 'create database amtrak_2021_10_06'
 export PGDATABASE='amtrak_2021_10_06'
 
-../cli.js -d --trips-without-shape-id --schema amtrak -- amtrak-gtfs-2021-10-06/*.txt | psql -b
+../cli.js -d --trips-without-shape-id --schema amtrak \
+	--import-metadata \
+	-- amtrak-gtfs-2021-10-06/*.txt | psql -b
 
 query=$(cat << EOF
 select extract(epoch from t_arrival)::integer as t_arrival
@@ -34,5 +36,11 @@ fi
 arrN=$(psql --csv -t -c "$query" | tail -n 1)
 if [[ "$arrN" != "1638042300" ]]; then
 	echo "invalid 2nd t_arrival: $arrN" 1>&2
+	exit 1
+fi
+
+version=$(psql --csv -t -c "SELECT split_part(amtrak.gtfs_via_postgres_version(), '.', 1)" | tail -n 1)
+if [[ "$version" != "4" ]]; then
+	echo "invalid gtfs_via_postgres_version(): $version" 1>&2
 	exit 1
 fi
