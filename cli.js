@@ -47,6 +47,9 @@ const {
 		'stats-by-route-date': {
 			type: 'string',
 		},
+		'stats-by-agency-route-stop-hour': {
+			type: 'string',
+		},
 		'schema': {
 			type: 'string',
 		},
@@ -87,6 +90,10 @@ Options:
                                     - view: Fast generation, slow access.
                                     - materialized-view: Slow generation, fast access.
                                     Default: none
+    --stats-by-agency-route-stop-hour
+                                  Generate a view letting you analyze arrivals/
+                                    departures per route, stop and hour.
+                                    The flag works like --stats-by-route-date.
     --schema                      The schema to use for the database. Default: public
     --postgraphile                Tweak generated SQL for PostGraphile usage.
                                     https://www.graphile.org/postgraphile/
@@ -127,6 +134,7 @@ const opt = {
 	routesWithoutAgencyId: !!flags['routes-without-agency-id'],
 	stopsLocationIndex: !!flags['stops-location-index'],
 	statsByRouteIdAndDate: flags['stats-by-route-date'] || 'none',
+	statsByAgencyIdAndRouteIdAndStopAndHour: flags['stats-by-agency-route-stop-hour'] || 'none',
 	schema: flags['schema'] || 'public',
 	postgraphile: !!flags.postgraphile,
 	importMetadata: !!flags['import-metadata'],

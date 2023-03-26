@@ -16,6 +16,7 @@ export PGDATABASE='amtrak_2021_10_06'
 ../cli.js -d --trips-without-shape-id --schema amtrak \
 	--import-metadata \
 	--stats-by-route-date=view \
+	--stats-by-agency-route-stop-hour=view \
 	-- amtrak-gtfs-2021-10-06/*.txt | psql -b
 
 query=$(cat << EOF
@@ -62,5 +63,18 @@ EOF)
 acelaStat=$(psql --csv -t -c "$acelaStatQuery" | tail -n 1)
 if [[ "$acelaStat" != "16,190" ]]; then
 	echo "invalid stats for route 40751 (Acela) on 2021-11-26: $acelaStat" 1>&2
+	exit 1
+fi
+
+acelaPhillyStatQuery=$(cat << EOF
+SELECT nr_of_arrs
+FROM amtrak.stats_by_agency_route_stop_hour
+WHERE route_id = '40751' -- Acela
+AND stop_id = 'PHL' -- Philadelphia
+AND effective_hour = '2022-07-24T09:00-05'
+EOF)
+acelaPhillyStat=$(psql --csv -t -c "$acelaPhillyStatQuery" | tail -n 1)
+if [[ "$acelaPhillyStat" != "2" ]]; then
+	echo "invalid stats for route 40751 (Acela) at PHL (Philadelphia) on 2021-11-26: $acelaPhillyStat" 1>&2
 	exit 1
 fi

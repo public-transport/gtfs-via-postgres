@@ -20,6 +20,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		stopsWithoutLevelId: !files.some(f => f.name === 'levels'),
 		stopsLocationIndex: false,
 		statsByRouteIdAndDate: 'none',
+		statsByAgencyIdAndRouteIdAndStopAndHour: 'none',
 		schema: 'public',
 		postgraphile: false,
 		importMetadata: false,
@@ -33,6 +34,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		ignoreUnsupportedFiles,
 		importMetadata,
 		statsByRouteIdAndDate,
+		statsByAgencyIdAndRouteIdAndStopAndHour,
 	} = opt
 
 	if (ignoreUnsupportedFiles) {
@@ -86,6 +88,11 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 
 		...(statsByRouteIdAndDate !== 'none' ? {
 			'stats_by_route_date': {
+				dep: ['stop_times'],
+			},
+		} : {}),
+		...(statsByAgencyIdAndRouteIdAndStopAndHour !== 'none' ? {
+			'stats_by_agency_route_stop_hour': {
 				dep: ['stop_times'],
 			},
 		} : {}),
