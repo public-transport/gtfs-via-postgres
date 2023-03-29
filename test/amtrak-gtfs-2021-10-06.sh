@@ -23,8 +23,6 @@ and date = '2021-11-26'
 order by t_arrival
 EOF)
 
-psql --csv -t -c "$query"
-
 # 2021-11-26T15:15:00-06:00
 arr1=$(psql --csv -t -c "$query" | head -n 1)
 if [[ "$arr1" != "1637961300" ]]; then

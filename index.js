@@ -69,7 +69,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 
 		// The arrivals_departures & connections views rely on frequencies' table
 		// to be present, so we add a mock task here. It gets replaced by a
-		// file-based on below if the file has been passed.
+		// file-based one below if the file has been passed.
 		'frequencies': {
 			dep: [...deps.frequencies],
 		},
@@ -133,6 +133,7 @@ BEGIN;
 
 		if (task.file) {
 			const {formatRow} = formatters[name]
+			let nrOfRows = 0
 			for await (const rawRow of await readCsv(task.file)) {
 				const row = formatRow(rawRow, opt)
 				let formattedRow = null
@@ -140,7 +141,10 @@ BEGIN;
 					formattedRow = _formattedRow
 				})
 				yield formattedRow
+				nrOfRows++
 			}
+
+			if (!silent) console.error(`  processed ${nrOfRows} rows`)
 		}
 
 		if ('string' === typeof afterAll && afterAll) {
