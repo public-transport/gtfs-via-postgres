@@ -176,6 +176,8 @@ You can run queries with date+time values in any timezone (offset) and they will
 
 ### With Docker
 
+*Note:* Just like the `npm`-installed variant, the Docker integration too assumes that your GTFS dataset consists of individual files (i.e. unzipped).
+
 Instead of installing via `npm`, you can use [the `publictransport/gtfs-via-postgres` Docker image](https://hub.docker.com/r/publictransport/gtfs-via-postgres):
 
 ```shell
@@ -186,18 +188,16 @@ docker run --rm --volume /path/to/gtfs:/gtfs \
 
 *Note:* Remember to pass the `/gtfs/*.csv` glob as a string (with `'`), so that it gets evaluated *inside* the Docker container.
 
-Keep in mind that `psql -b` will run *outside* of the Docker container, so your host machine needs access to PostgreSQL.
+With the code above, the `psql -b` process will run *outside* of the Docker container, so your host machine needs access to PostgreSQL.
 
 If you want to directly import the GTFS data *from within the Docker container*, you need add `psql` to the image and run it from inside. To do that, write a new Dockerfile that extends the `publictransport/gtfs-via-postgres` image:
 
 ```Dockerfile
 FROM publictransport/gtfs-via-postgres
-# add psql CLI tool
-RUN apk add --no-cache postgresql-client
-ENV PGPORT=5432 PGUSER=postgres PGPASSWORD=password
+ENV PGPORT=5432 PGUSER=postgres
 WORKDIR /gtfs
 # pass all arguments into gtfs-via-postgres, pipe output into psql:
-ENTRYPOINT ["/bin/sh", "-c", "env | grep PG; gtfs-via-postgres $0 $@ | psql -b"]
+ENTRYPOINT ["/bin/sh", "-c", "gtfs-via-postgres $0 $@ | psql -b"]
 ```
 
 ```shell
@@ -207,7 +207,7 @@ docker run docker run --name db -p 5432:5432 -e POSTGRES_PASSWORD=password postg
 # variant B: use Docker image to convert GTFS to SQL and import it directly
 docker build -t import-gtfs . # build helper Docker image from Dockerfile
 docker run --rm --volume /path/to/gtfs:/gtfs \
-	--link db -e PGHOST=db \
+	--link db -e PGHOST=db -e PGPASSWORD=password \
 	import-gtfs --require-dependencies -- '/gtfs/*.csv'
 ```
 
