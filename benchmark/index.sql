@@ -42,13 +42,13 @@ BEGIN
 	INSERT INTO _benchmark
 	SELECT
 		_query,
-		round(avg(elapsed)::numeric, 2),
+		round(avg(elapsed)::numeric, 0),
 		min(elapsed),
-		round((percentile_cont(0.25) WITHIN GROUP (ORDER BY elapsed))::numeric, 2),
-		round((percentile_cont(0.50) WITHIN GROUP (ORDER BY elapsed))::numeric, 2),
-		round((percentile_cont(0.75) WITHIN GROUP (ORDER BY elapsed))::numeric, 2),
-		round((percentile_cont(0.95) WITHIN GROUP (ORDER BY elapsed))::numeric, 2),
-		round((percentile_cont(0.99) WITHIN GROUP (ORDER BY elapsed))::numeric, 2),
+		round((percentile_cont(0.25) WITHIN GROUP (ORDER BY elapsed))::numeric, 0),
+		round((percentile_cont(0.50) WITHIN GROUP (ORDER BY elapsed))::numeric, 0),
+		round((percentile_cont(0.75) WITHIN GROUP (ORDER BY elapsed))::numeric, 0),
+		round((percentile_cont(0.95) WITHIN GROUP (ORDER BY elapsed))::numeric, 0),
+		round((percentile_cont(0.99) WITHIN GROUP (ORDER BY elapsed))::numeric, 0),
 		max(elapsed),
 		_iterations
 	FROM _bench_results;
