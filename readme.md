@@ -181,8 +181,10 @@ Instead of installing via `npm`, you can use [the `publictransport/gtfs-via-post
 ```shell
 # variant A: use Docker image just to convert GTFS to SQL
 docker run --rm --volume /path/to/gtfs:/gtfs \
-	publictransport/gtfs-via-postgres --require-dependencies -- stops.csv | psql -b
+	publictransport/gtfs-via-postgres --require-dependencies -- '/gtfs/*.csv' | psql -b
 ```
+
+*Note:* Remember to pass the `/gtfs/*.csv` glob as a string (with `'`), so that it gets evaluated *inside* the Docker container.
 
 Keep in mind that `psql -b` will run *outside* of the Docker container, so your host machine needs access to PostgreSQL.
 
@@ -206,7 +208,7 @@ docker run docker run --name db -p 5432:5432 -e POSTGRES_PASSWORD=password postg
 docker build -t import-gtfs . # build helper Docker image from Dockerfile
 docker run --rm --volume /path/to/gtfs:/gtfs \
 	--link db -e PGHOST=db \
-	import-gtfs --require-dependencies -- stops.csv
+	import-gtfs --require-dependencies -- '/gtfs/*.csv'
 ```
 
 ### Exporting data efficiently

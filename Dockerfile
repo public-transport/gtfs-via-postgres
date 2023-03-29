@@ -19,4 +19,4 @@ RUN ln -s /app/cli.js /usr/local/bin/gtfs-via-postgres
 
 VOLUME /gtfs
 WORKDIR /gtfs
-ENTRYPOINT ["/app/cli.js"]
+ENTRYPOINT ["/bin/sh", "-eu", "-o", "pipefail", "-c", "/app/cli.js $@", "--"]
