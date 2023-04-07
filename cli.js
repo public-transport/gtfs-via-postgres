@@ -35,6 +35,9 @@ const {
 		'trips-without-shape-id': {
 			type: 'boolean',
 		},
+		'routes-without-agency-id': {
+			type: 'boolean',
+		},
 		'stops-without-level-id': {
 			type: 'boolean',
 		},
