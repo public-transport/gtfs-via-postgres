@@ -8,11 +8,15 @@ set -x
 
 env | grep '^PG' || true
 
-psql -c 'create database sample_gtfs_feed'
-export PGDATABASE='sample_gtfs_feed'
+# path_to_db="sample-gtfs-feed.duckdb"
+path_to_db="$(mktemp -d)/sample-gtfs-feed.duckdb"
+# path_to_db=':memory:'
 
+# todo: what about sample-gtfs-feed@0.13?
 # --lower-case-lang-codes: Even though sample-gtfs-feed@0.11.2 *does not* contain invalid-case language codes (e.g. de_aT or de-at), we check that with --lower-case-lang-codes valid ones are still accepted.
 ../cli.js -d --trips-without-shape-id --lower-case-lang-codes -- \
+	"$path_to_db" \
+	../node_modules/sample-gtfs-feed/gtfs/feed_info.txt \
 	../node_modules/sample-gtfs-feed/gtfs/agency.txt \
 	../node_modules/sample-gtfs-feed/gtfs/calendar.txt \
 	../node_modules/sample-gtfs-feed/gtfs/calendar_dates.txt \
@@ -23,47 +27,47 @@ export PGDATABASE='sample_gtfs_feed'
 	../node_modules/sample-gtfs-feed/gtfs/stop_times.txt \
 	../node_modules/sample-gtfs-feed/gtfs/levels.txt \
 	../node_modules/sample-gtfs-feed/gtfs/pathways.txt \
-	../node_modules/sample-gtfs-feed/gtfs/translations.txt \
-	| sponge | psql -b
+	../node_modules/sample-gtfs-feed/gtfs/translations.txt
 
 query=$(cat << EOF
 select extract(epoch from t_arrival)::integer as t_arrival
-from arrivals_departures
+from "main.arrivals_departures"
 where route_id = 'D'
 order by t_arrival
 EOF
 )
 
-arr1=$(psql --csv -t -c "$query" | head -n 1)
+arr1=$(duckdb -csv -noheader -c "$query" "$path_to_db" | head -n 1)
 if [[ "$arr1" != "1553993700" ]]; then
 	echo "invalid 1st t_arrival: $arr1" 1>&2
 	exit 1
 fi
 
-arr2=$(psql --csv -t -c "$query" | head -n 2 | tail -n 1)
+arr2=$(duckdb -csv -noheader -c "$query" "$path_to_db" | head -n 2 | tail -n 1)
 if [[ "$arr2" != "1553994180" ]]; then
 	echo "invalid 2nd t_arrival: $arr2" 1>&2
 	exit 1
 fi
 
+# In sample-gtfs-feed@0.13, the frequencies-based arrivals/departures are earlier (from 8:00 until 8:59) than the stop_times-based ones (13:13), so across all service days, the earliest departure has to be a frequencies-based one.
 arrs_deps_b_downtown_on_working_days=$(cat << EOF
 	SELECT
 		stop_sequence,
 		extract(epoch from t_arrival)::integer as arr,
 		extract(epoch from t_departure)::integer as dep,
 		frequencies_row, frequencies_it
-	FROM arrivals_departures
+	FROM "main.arrivals_departures"
 	WHERE trip_id = 'b-downtown-on-working-days'
 	ORDER BY t_departure
 	LIMIT 2
 EOF
 )
-freq_arr_dep1=$(psql --csv -t -c "$arrs_deps_b_downtown_on_working_days" | head -n 1)
+freq_arr_dep1=$(duckdb -csv -noheader -c "$arrs_deps_b_downtown_on_working_days" "$path_to_db" | head -n 1)
 if [[ "$freq_arr_dep1" != "1,1552028340,1552028400,1,1" ]]; then
 	echo "invalid/missing frequencies-based arrival/departure: $freq_arr_dep1" 1>&2
 	exit 1
 fi
-freq_arr_dep2=$(psql --csv -t -c "$arrs_deps_b_downtown_on_working_days" | head -n 2 | tail -n 1)
+freq_arr_dep2=$(duckdb -csv -noheader -c "$arrs_deps_b_downtown_on_working_days" "$path_to_db" | head -n 2 | tail -n 1)
 if [[ "$freq_arr_dep2" != "1,1552028640,1552028700,1,2" ]]; then
 	echo "invalid/missing frequencies-based arrival/departure: $freq_arr_dep2" 1>&2
 	exit 1
@@ -75,13 +79,13 @@ cons_b_downtown_on_working_days=$(cat << EOF
 		extract(epoch from t_departure)::integer as dep,
 		to_stop_sequence,
 		extract(epoch from t_arrival)::integer as arr
-	FROM connections
+	FROM "main.connections"
 	WHERE trip_id = 'b-downtown-on-working-days'
 	ORDER BY t_departure
 	LIMIT 1
 EOF
 )
-freq_con1=$(psql --csv -t -c "$cons_b_downtown_on_working_days")
+freq_con1=$(duckdb -csv -noheader -c "$cons_b_downtown_on_working_days" "$path_to_db")
 if [[ "$freq_con1" != "1,1552028400,3,1552028760" ]]; then
 	echo "invalid/missing frequencies-based connection: $freq_con1" 1>&2
 	exit 1
@@ -91,12 +95,12 @@ connection_during_dst=$(cat << EOF
 	SELECT
 		from_stop_sequence,
 		extract(epoch from t_departure)::integer as dep
-	FROM connections
+	FROM "main.connections"
 	WHERE trip_id = 'during-dst-1'
-	AND t_departure = '2019-03-31T01:58+01'
+	AND t_departure = '2019-03-31T01:58:00+01:00'
 EOF
 )
-dst1=$(psql --csv -t -c "$connection_during_dst" | head -n 1)
+dst1=$(duckdb -csv -noheader -c "$connection_during_dst" "$path_to_db" | head -n 1)
 if [[ "$dst1" != "0,1553993880" ]]; then
 	echo "invalid/missing DST t_departure: $dst1" 1>&2
 	exit 1
@@ -107,14 +111,14 @@ airport_levels=$(cat << EOF
 		level_id,
 		level_index,
 		level_name
-	FROM levels
+	FROM "main.levels"
 	WHERE level_id LIKE 'airport-%'
 	ORDER BY level_index
 	LIMIT 1
 EOF
 )
-lvl1=$(psql --csv -t -c "$airport_levels" | head -n 1)
-if [[ "$lvl1" != "airport-level-0,0,ground level" ]]; then
+lvl1=$(duckdb -csv -noheader -c "$airport_levels" "$path_to_db" | head -n 1)
+if [[ "$lvl1" != 'airport-level-0,0.0,ground level' ]]; then
 	echo "invalid/missing lowest airport-% level: $lvl1" 1>&2
 	exit 1
 fi
@@ -123,27 +127,27 @@ airportPathway=$(cat << EOF
 	SELECT
 		pathway_mode,
 		is_bidirectional
-	FROM pathways
+	FROM "main.pathways"
 	WHERE from_stop_id = 'airport-entrance'
 	AND to_stop_id = 'airport-1-access'
 	LIMIT 1
 EOF
 )
-pw1=$(psql --csv -t -c "$airportPathway" | head -n 1)
-if [[ "$pw1" != "escalator,f" ]]; then
+pw1=$(duckdb -csv -noheader -c "$airportPathway" "$path_to_db" | head -n 1)
+if [[ "$pw1" != 'escalator,false' ]]; then
 	echo "invalid/missing DST t_departure: $pw1" 1>&2
 	exit 1
 fi
 
 timepoint_exact=$(cat << EOF
 	SELECT timepoint
-	FROM stop_times
+	FROM "main.stop_times"
 	WHERE timepoint = 'exact'
 	AND stop_sequence_consec = 0
 	LIMIT 1
 EOF
 )
-exact1=$(psql --csv -t -c "$timepoint_exact" | head -n 1)
+exact1=$(duckdb -csv -noheader -c "$timepoint_exact" "$path_to_db" | head -n 1)
 if [[ "$exact1" != "exact" ]]; then
 	echo "invalid/missing DST t_departure: $exact1" 1>&2
 	exit 1
@@ -151,13 +155,13 @@ fi
 
 stops_translations=$(cat << EOF
 	SELECT translation, language
-	FROM translations
+	FROM "main.translations"
 	WHERE table_name = 'stops' AND field_name = 'stop_name'
 	AND language = 'de-DE'
 	AND record_id = 'airport-entrance'
 EOF
 )
-airport_entrance_translation=$(psql --csv -t -c "$stops_translations")
+airport_entrance_translation=$(duckdb -csv -noheader -c "$stops_translations" "$path_to_db")
 if [[ "$airport_entrance_translation" != "Eingang,de-DE" ]]; then
 	echo "invalid/missing stop translation: $airport_entrance_translation" 1>&2
 	exit 1
@@ -168,12 +172,12 @@ stops_translated=$(cat << EOF
 		stop_id,
 		stop_name,
 		stop_name_lang
-	FROM stops_translated
+	FROM "main.stops_translated"
 	WHERE (stop_name_lang IS NULL or stop_name_lang = 'de-DE')
 	AND stop_id = 'airport-entrance'
 EOF
 )
-translated_airport_entrance=$(psql --csv -t -c "$stops_translated")
+translated_airport_entrance=$(duckdb -csv -noheader -c "$stops_translated" "$path_to_db")
 if [[ "$translated_airport_entrance" != "airport-entrance,Eingang,de-DE" ]]; then
 	echo "invalid/missing translated stop: $translated_airport_entrance" 1>&2
 	exit 1
@@ -182,15 +186,15 @@ fi
 wheelchair_accessible_arrs_deps_query=$(cat << EOF
 SELECT DISTINCT ON (trip_id)
 	trip_id, wheelchair_accessible
-FROM arrivals_departures
+FROM "main.arrivals_departures"
 WHERE route_id = ANY(ARRAY['A', 'B'])
 ORDER BY trip_id
 EOF
 )
-wheelchair_accessible_arrs_deps_rows="$(psql --csv -t -c "$wheelchair_accessible_arrs_deps_query")"
+wheelchair_accessible_arrs_deps_rows="$(duckdb -csv -noheader -c "$wheelchair_accessible_arrs_deps_query" "$path_to_db")"
 wheelchair_accessible_arrs_deps_expected=$(cat << EOF
-a-downtown-all-day,
-a-outbound-all-day,
+a-downtown-all-day,NULL
+a-outbound-all-day,NULL
 b-downtown-on-weekends,accessible
 b-downtown-on-working-days,accessible
 b-outbound-on-weekends,unknown
@@ -205,15 +209,15 @@ fi
 bikes_allowed_arrs_deps_query=$(cat << EOF
 SELECT DISTINCT ON (trip_id)
 	trip_id, bikes_allowed
-FROM arrivals_departures
+FROM "main.arrivals_departures"
 WHERE route_id = ANY(ARRAY['A', 'B'])
 ORDER BY trip_id
 EOF
 )
-bikes_allowed_arrs_deps_rows="$(psql --csv -t -c "$bikes_allowed_arrs_deps_query")"
+bikes_allowed_arrs_deps_rows="$(duckdb -csv -noheader -c "$bikes_allowed_arrs_deps_query" "$path_to_db")"
 bikes_allowed_arrs_deps_expected=$(cat << EOF
-a-downtown-all-day,
-a-outbound-all-day,
+a-downtown-all-day,NULL
+a-outbound-all-day,NULL
 b-downtown-on-weekends,unknown
 b-downtown-on-working-days,unknown
 b-outbound-on-weekends,allowed
@@ -227,11 +231,12 @@ fi
 
 frequencies_it_query=$(cat << EOF
 SELECT t_departure, stop_sequence, stop_id, frequencies_it
-FROM arrivals_departures
+FROM "main.arrivals_departures"
 WHERE trip_id = 'b-downtown-on-working-days' AND "date" = '2019-05-29' AND frequencies_it = 3
+ORDER BY t_departure
 EOF
 )
-frequencies_it_rows="$(psql --csv -t -c "$frequencies_it_query")"
+frequencies_it_rows="$(duckdb -csv -noheader -c "$frequencies_it_query" "$path_to_db")"
 frequencies_it_expected=$(cat << EOF
 2019-05-29 08:10:00+02,1,airport,3
 2019-05-29 08:18:00+02,3,lake,3
@@ -245,7 +250,7 @@ fi
 
 frequencies_it_connections_query=$(cat << EOF
 SELECT from_stop_sequence, t_departure, t_arrival, frequencies_it
-FROM connections
+FROM "main.connections"
 WHERE trip_id = 'b-downtown-on-working-days'
 AND "date" = '2019-03-08'
 AND frequencies_row = 1
@@ -253,7 +258,7 @@ ORDER BY t_departure ASC
 LIMIT 3
 EOF
 )
-frequencies_it_connections_rows="$(psql --csv -t -c "$frequencies_it_connections_query")"
+frequencies_it_connections_rows="$(duckdb -csv -noheader -c "$frequencies_it_connections_query" "$path_to_db")"
 frequencies_it_connections_expected=$(cat << EOF
 1,2019-03-08 08:00:00+01,2019-03-08 08:06:00+01,1
 1,2019-03-08 08:05:00+01,2019-03-08 08:11:00+01,2
@@ -271,11 +276,12 @@ SELECT
 	stop_name, stop_name_lang,
 	stop_desc, stop_desc_lang,
 	stop_url, stop_url_lang
-FROM stops_translated
+FROM "main.stops_translated"
 WHERE stop_id LIKE 'airport%'
+ORDER BY stop_id, stop_name_lang, stop_desc_lang
 EOF
 )
-stops_translated_rows="$(psql --csv -t -c "$stops_translated_query")"
+stops_translated_rows="$(duckdb -csv -noheader -nullvalue '' -c "$stops_translated_query" "$path_to_db")"
 stops_translated_expected=$(cat << EOF
 airport,International Airport (ABC),,train station at the Internationl Airport (ABC),,https://fta.example.org/stations/airport.html,
 airport-1,Gleis 1,de-DE,Platform 1,,,
