@@ -102,8 +102,8 @@ Options:
                                     - gtfs_via_postgres_version (text)
                                     - gtfs_via_postgres_options (jsonb)
 Examples:
-    gtfs-to-sql some-gtfs/*.txt | psql -b # import into PostgreSQL
-    gtfs-to-sql -u -- some-gtfs/*.txt | gzip >gtfs.sql # generate a gzipped SQL dump
+    gtfs-to-sql some-gtfs/*.txt | sponge | psql -b # import into PostgreSQL
+    gtfs-to-sql -u -- some-gtfs/*.txt | gzip >gtfs.sql.gz # generate a gzipped SQL dump
 
 [1] https://developers.google.com/transit/gtfs/reference/extended-route-types
 [2] https://groups.google.com/g/gtfs-changes/c/keT5rTPS7Y0/m/71uMz2l6ke0J

@@ -5,7 +5,8 @@ set -o pipefail
 
 2>&1 echo "importing into PostgreSQL:"
 ./cli.js --ignore-unsupported --require-dependencies --trips-without-shape-id --silent \
-	node_modules/sample-gtfs-feed/gtfs/*.txt | psql -b
+	node_modules/sample-gtfs-feed/gtfs/*.txt \
+	| sponge | psql -b
 
 2>&1 echo "\nfetching a connection during DST switch:"
 psql -c "$(cat <<- EOM
