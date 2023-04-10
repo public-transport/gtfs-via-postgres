@@ -8,11 +8,12 @@ set -x
 
 env | grep '^PG' || true
 
-psql -c 'create database sample_gtfs_feed'
-export PGDATABASE='sample_gtfs_feed'
+path_to_db="$(mktemp -d -t gtfs)/sample-gtfs-feed.duckdb"
 
+# todo: what about sample-gtfs-feed@0.13?
 # --lower-case-lang-codes: Even though sample-gtfs-feed@0.11.2 *does not* contain invalid-case language codes (e.g. de_aT or de-at), we check that with --lower-case-lang-codes valid ones are still accepted.
 ../cli.js -d --trips-without-shape-id --lower-case-lang-codes -- \
+	"$path_to_db" \
 	../node_modules/sample-gtfs-feed/gtfs/agency.txt \
 	../node_modules/sample-gtfs-feed/gtfs/calendar.txt \
 	../node_modules/sample-gtfs-feed/gtfs/calendar_dates.txt \
@@ -23,8 +24,7 @@ export PGDATABASE='sample_gtfs_feed'
 	../node_modules/sample-gtfs-feed/gtfs/stop_times.txt \
 	../node_modules/sample-gtfs-feed/gtfs/levels.txt \
 	../node_modules/sample-gtfs-feed/gtfs/pathways.txt \
-	../node_modules/sample-gtfs-feed/gtfs/translations.txt \
-	| sponge | psql -b
+	../node_modules/sample-gtfs-feed/gtfs/translations.txt
 
 query=$(cat << EOF
 select extract(epoch from t_arrival)::integer as t_arrival
@@ -34,13 +34,13 @@ order by t_arrival
 EOF
 )
 
-arr1=$(psql --csv -t -c "$query" | head -n 1)
+arr1=$(duckdb -csv -noheader -c "$query" | head -n 1)
 if [[ "$arr1" != "1553993700" ]]; then
 	echo "invalid 1st t_arrival: $arr1" 1>&2
 	exit 1
 fi
 
-arr2=$(psql --csv -t -c "$query" | head -n 2 | tail -n 1)
+arr2=$(duckdb -csv -noheader -c "$query" | head -n 2 | tail -n 1)
 if [[ "$arr2" != "1553994180" ]]; then
 	echo "invalid 2nd t_arrival: $arr2" 1>&2
 	exit 1
@@ -58,12 +58,12 @@ arrs_deps_b_downtown_on_working_days=$(cat << EOF
 	LIMIT 2
 EOF
 )
-freq_arr_dep1=$(psql --csv -t -c "$arrs_deps_b_downtown_on_working_days" | head -n 1)
+freq_arr_dep1=$(duckdb -csv -noheader -c "$arrs_deps_b_downtown_on_working_days" | head -n 1)
 if [[ "$freq_arr_dep1" != "1,1552028340,1552028400,1,1" ]]; then
 	echo "invalid/missing frequencies-based arrival/departure: $freq_arr_dep1" 1>&2
 	exit 1
 fi
-freq_arr_dep2=$(psql --csv -t -c "$arrs_deps_b_downtown_on_working_days" | head -n 2 | tail -n 1)
+freq_arr_dep2=$(duckdb -csv -noheader -c "$arrs_deps_b_downtown_on_working_days" | head -n 2 | tail -n 1)
 if [[ "$freq_arr_dep2" != "1,1552028640,1552028700,1,2" ]]; then
 	echo "invalid/missing frequencies-based arrival/departure: $freq_arr_dep1" 1>&2
 	exit 1
@@ -81,7 +81,7 @@ cons_b_downtown_on_working_days=$(cat << EOF
 	LIMIT 1
 EOF
 )
-freq_con1=$(psql --csv -t -c "$cons_b_downtown_on_working_days")
+freq_con1=$(duckdb -csv -noheader -c "$cons_b_downtown_on_working_days")
 if [[ "$freq_con1" != "1,1552028400,3,1552028760" ]]; then
 	echo "invalid/missing frequencies-based connection: $freq_con1" 1>&2
 	exit 1
@@ -96,7 +96,7 @@ connection_during_dst=$(cat << EOF
 	AND t_departure = '2019-03-31T01:58+01'
 EOF
 )
-dst1=$(psql --csv -t -c "$connection_during_dst" | head -n 1)
+dst1=$(duckdb -csv -noheader -c "$connection_during_dst" | head -n 1)
 if [[ "$dst1" != "0,1553993880" ]]; then
 	echo "invalid/missing DST t_departure: $dst1" 1>&2
 	exit 1
@@ -113,7 +113,7 @@ airport_levels=$(cat << EOF
 	LIMIT 1
 EOF
 )
-lvl1=$(psql --csv -t -c "$airport_levels" | head -n 1)
+lvl1=$(duckdb -csv -noheader -c "$airport_levels" | head -n 1)
 if [[ "$lvl1" != "airport-level-0,0,ground level" ]]; then
 	echo "invalid/missing lowest airport-% level: $lvl1" 1>&2
 	exit 1
@@ -129,7 +129,7 @@ airportPathway=$(cat << EOF
 	LIMIT 1
 EOF
 )
-pw1=$(psql --csv -t -c "$airportPathway" | head -n 1)
+pw1=$(duckdb -csv -noheader -c "$airportPathway" | head -n 1)
 if [[ "$pw1" != "escalator,f" ]]; then
 	echo "invalid/missing DST t_departure: $pw1" 1>&2
 	exit 1
@@ -143,7 +143,7 @@ timepoint_exact=$(cat << EOF
 	LIMIT 1
 EOF
 )
-exact1=$(psql --csv -t -c "$timepoint_exact" | head -n 1)
+exact1=$(duckdb -csv -noheader -c "$timepoint_exact" | head -n 1)
 if [[ "$exact1" != "exact" ]]; then
 	echo "invalid/missing DST t_departure: $exact1" 1>&2
 	exit 1
@@ -157,7 +157,7 @@ stops_translations=$(cat << EOF
 	AND record_id = 'airport-entrance'
 EOF
 )
-airport_entrance_translation=$(psql --csv -t -c "$stops_translations")
+airport_entrance_translation=$(duckdb -csv -noheader -c "$stops_translations")
 if [[ "$airport_entrance_translation" != "Eingang,de-DE" ]]; then
 	echo "invalid/missing stop translation: $airport_entrance_translation" 1>&2
 	exit 1
@@ -173,7 +173,7 @@ stops_translated=$(cat << EOF
 	AND stop_id = 'airport-entrance'
 EOF
 )
-translated_airport_entrance=$(psql --csv -t -c "$stops_translated")
+translated_airport_entrance=$(duckdb -csv -noheader -c "$stops_translated")
 if [[ "$translated_airport_entrance" != "airport-entrance,Eingang,de-DE" ]]; then
 	echo "invalid/missing translated stop: $translated_airport_entrance" 1>&2
 	exit 1
@@ -187,7 +187,7 @@ WHERE route_id = ANY(ARRAY['A', 'B'])
 ORDER BY trip_id
 EOF
 )
-wheelchair_accessible_arrs_deps_rows="$(psql --csv -t -c "$wheelchair_accessible_arrs_deps_query")"
+wheelchair_accessible_arrs_deps_rows="$(duckdb -csv -noheader -c "$wheelchair_accessible_arrs_deps_query")"
 wheelchair_accessible_arrs_deps_expected=$(cat << EOF
 a-downtown-all-day,
 a-outbound-all-day,
@@ -210,7 +210,7 @@ WHERE route_id = ANY(ARRAY['A', 'B'])
 ORDER BY trip_id
 EOF
 )
-bikes_allowed_arrs_deps_rows="$(psql --csv -t -c "$bikes_allowed_arrs_deps_query")"
+bikes_allowed_arrs_deps_rows="$(duckdb -csv -noheader -c "$bikes_allowed_arrs_deps_query")"
 bikes_allowed_arrs_deps_expected=$(cat << EOF
 a-downtown-all-day,
 a-outbound-all-day,
@@ -231,7 +231,7 @@ FROM arrivals_departures
 WHERE trip_id = 'b-downtown-on-working-days' AND "date" = '2019-05-29' AND frequencies_it = 3
 EOF
 )
-frequencies_it_rows="$(psql --csv -t -c "$frequencies_it_query")"
+frequencies_it_rows="$(duckdb -csv -noheader -c "$frequencies_it_query")"
 frequencies_it_expected=$(cat << EOF
 2019-05-29 08:10:00+02,1,airport
 2019-05-29 08:18:00+02,3,lake
@@ -253,7 +253,7 @@ FROM stops_translated
 WHERE stop_id LIKE 'airport%'
 EOF
 )
-stops_translated_rows="$(psql --csv -t -c "$stops_translated_query")"
+stops_translated_rows="$(duckdb -csv -noheader -c "$stops_translated_query")"
 stops_translated_expected=$(cat << EOF
 airport,International Airport (ABC),,train station at the Internationl Airport (ABC),,https://fta.example.org/stations/airport.html,
 airport-1,Gleis 1,de-DE,Platform 1,,,
