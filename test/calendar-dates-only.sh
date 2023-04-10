@@ -10,7 +10,9 @@ env | grep '^PG' || true
 psql -c 'create database calendar_dates_only'
 export PGDATABASE='calendar_dates_only'
 
-../cli.js -d --trips-without-shape-id -- calendar-dates-only/*.txt | psql -b
+../cli.js -d --trips-without-shape-id -- \
+	calendar-dates-only/*.txt \
+	| sponge | psql -b
 
 query=$(cat << EOF
 select extract(epoch from t_arrival)::integer as t_arrival

@@ -12,7 +12,7 @@ export PGDATABASE='postgraphile'
 
 ../cli.js -d --trips-without-shape-id --postgraphile -- \
 	../node_modules/sample-gtfs-feed/gtfs/*.txt \
-	| psql -b
+	| sponge | psql -b
 
 # kill child processes on exit
 # https://stackoverflow.com/questions/360201/how-do-i-kill-background-processes-jobs-when-my-shell-script-exits/2173421#2173421

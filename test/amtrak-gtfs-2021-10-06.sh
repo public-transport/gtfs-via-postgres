@@ -17,7 +17,8 @@ export PGDATABASE='amtrak_2021_10_06'
 	--import-metadata \
 	--stats-by-route-date=view \
 	--stats-by-agency-route-stop-hour=view \
-	-- amtrak-gtfs-2021-10-06/*.txt | psql -b
+	-- amtrak-gtfs-2021-10-06/*.txt \
+	| sponge | psql -b
 
 query=$(cat << EOF
 select extract(epoch from t_arrival)::integer as t_arrival

@@ -22,7 +22,7 @@ export PGDATABASE='sample_gtfs_feed'
 	../node_modules/sample-gtfs-feed/gtfs/levels.txt \
 	../node_modules/sample-gtfs-feed/gtfs/pathways.txt \
 	../node_modules/sample-gtfs-feed/gtfs/translations.txt \
-	| psql -b
+	| sponge | psql -b
 
 query=$(cat << EOF
 select extract(epoch from t_arrival)::integer as t_arrival

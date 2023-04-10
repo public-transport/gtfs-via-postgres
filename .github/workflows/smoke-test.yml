@@ -31,6 +31,8 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: '16.x'
+    - name: install sponge (moreutils)
+      run: sudo apt install -y moreutils
 
     - name: install & start PostgreSQL with PostGIS
       # todo: currently, it uses mdillon, which doesn't have PostgreSQL 14
