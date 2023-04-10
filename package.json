@@ -1,11 +1,11 @@
 {
+	"private": true,
 	"name": "gtfs-via-postgres",
 	"description": "Process GTFS using PostgreSQL.",
 	"version": "4.10.3",
 	"main": "lib/index.js",
 	"bin": {
-		"gtfs-to-sql": "cli.js",
-		"serve-gtfs-via-graphql": "scripts/run-postgraphile.js"
+		"gtfs-to-sql": "cli.js"
 	},
 	"files": [
 		"cli.js",
@@ -55,24 +55,16 @@
 		"node": ">=16.17"
 	},
 	"dependencies": {
-		"csv-stringify": "^6.2.0",
+		"@duckdb/node-api": "^1.2.2-alpha.18",
 		"debug": "^4.3.3",
 		"gtfs-utils": "^5.1.0",
 		"sequencify": "0.0.7"
 	},
 	"devDependencies": {
-		"@graphile-contrib/pg-simplify-inflector": "^6.1.0",
-		"@graphile/postgis": "^0.2.0-0",
 		"@yao-pkg/pkg": "^5.16.1",
 		"csv-parser": "^3.0.0",
 		"eslint": "^8.33.0",
-		"postgraphile": "^4.12.11",
 		"sample-gtfs-feed": "^0.13.0"
-	},
-	"peerDependencies": {
-		"@graphile-contrib/pg-simplify-inflector": "^6.1.0",
-		"@graphile/postgis": "^0.2.0-0",
-		"postgraphile": "^4.12.11"
 	},
 	"scripts": {
 		"test": "./test/index.sh",
