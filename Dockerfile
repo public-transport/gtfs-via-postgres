@@ -9,6 +9,7 @@ LABEL org.opencontainers.image.licenses="(Apache-2.0 AND Prosperity-3.0.0)"
 
 WORKDIR /app
 
+# add psql CLI tool
 RUN apk add --no-cache postgresql-client
 
 ADD package.json /app
@@ -20,3 +21,4 @@ RUN ln -s /app/cli.js /usr/local/bin/gtfs-via-postgres
 VOLUME /gtfs
 WORKDIR /gtfs
 ENTRYPOINT ["/bin/sh", "-eu", "-o", "pipefail", "-c", "/app/cli.js $@", "--"]
+CMD ["/gtfs/*.txt"]
