@@ -27,6 +27,8 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		schema: 'public',
 		postgraphile: false,
 		postgraphilePassword: process.env.POSTGRAPHILE_PGPASSWORD || null,
+		postgrest: false,
+		postgrestPassword: randomBytes(10).toString('hex'),
 		importMetadata: false,
 		...opt,
 	}
@@ -235,6 +237,24 @@ REVOKE CREATE ON SCHEMA "${opt.schema}" FROM PUBLIC;
 GRANT SELECT ON ALL TABLES IN SCHEMA "${opt.schema}" TO postgraphile;
 -- ALTER DEFAULT PRIVILEGES IN SCHEMA "${opt.schema}" GRANT SELECT ON TABLES TO postgraphile;
 -- todo: set search_path? https://stackoverflow.com/questions/760210/how-do-you-create-a-read-only-user-in-postgresql#comment33535263_762649
+` : ''}
+
+${opt.postgrest ? `\
+${opt.schema !== 'public' ? `\
+-- https://postgrest.org/en/stable/tutorials/tut0.html#step-4-create-database-for-api
+-- https://postgrest.org/en/stable/explanations/db_authz.html
+-- todo: is this secure?
+CREATE ROLE web_anon NOLOGIN NOINHERIT;
+GRANT USAGE ON SCHEMA "${opt.schema}" TO web_anon;
+GRANT SELECT ON ALL TABLES IN SCHEMA "${opt.schema}" TO web_anon;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA "${opt.schema}" TO web_anon;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA "${opt.schema}" TO web_anon;
+
+COMMENT ON SCHEMA "${opt.schema}" IS
+$$GTFS REST API
+This REST API is created by running [PostgREST](https://postgrest.org/) on top of a [PostgreSQL](https://www.postgresql.org) DB generated using [gtfs-via-postgres](https://github.com/public-transport/gtfs-via-postgres).
+$$;
+` : ''}
 ` : ''}
 
 COMMIT;`

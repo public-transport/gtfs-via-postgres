@@ -183,6 +183,9 @@ Options:
                                     https://www.graphile.org/postgraphile/
     --postgraphile-password       Password for the PostGraphile PostgreSQL user.
                                     Default: $POSTGRAPHILE_PGPASSWORD, fallback random.
+    --postgrest                   Tweak generated SQL for PostgREST usage.
+                                    Please combine it with --schema.
+                                    https://postgrest.org/
     --import-metadata             Create functions returning import metadata:
                                     - gtfs_data_imported_at (timestamp with time zone)
                                     - gtfs_via_postgres_version (text)
@@ -287,6 +290,12 @@ env NODE_ENV=development npm exec -- serve-gtfs-via-graphql
 ```
 
 **As an example for the GraphQL API, check out the [test query](test/sample-gtfs-feed-postgraphile-test.graphql)** or open the [GraphiQL UI](https://github.com/graphql/graphiql) served at [`localhost:3000/graphiql`](http://localhost:3000/graphiql).
+
+### REST API support
+
+With the `--postgrest` flag, `gtfs-via-postgres` will augment the schema with a `web_anon` role and some comments, so that when running [PostgREST](https://postgrest.org/) on the database, you will get a powerful REST API.
+
+[read more](docs/postgrest.md)
 
 ### more guides
 

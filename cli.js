@@ -65,6 +65,9 @@ const {
 		'postgraphile-password': {
 			type: 'string',
 		},
+		'postgrest': {
+			type: 'boolean',
+		},
 		'import-metadata': {
 			type: 'boolean',
 		}
@@ -118,6 +121,9 @@ Options:
                                     https://www.graphile.org/postgraphile/
     --postgraphile-password       Password for the PostGraphile PostgreSQL user.
                                     Default: $POSTGRAPHILE_PGPASSWORD, fallback random.
+    --postgrest                   Tweak generated SQL for PostgREST usage.
+                                    Please combine it with --schema.
+                                    https://postgrest.org/
     --import-metadata             Create functions returning import metadata:
                                     - gtfs_data_imported_at (timestamp with time zone)
                                     - gtfs_via_postgres_version (text)
@@ -161,6 +167,7 @@ const opt = {
 	schema: flags['schema'] || 'public',
 	postgraphile: !!flags.postgraphile,
 	postgraphilePassword: flags['postgraphile-password'],
+	postgrest: !!flags.postgrest,
 	importMetadata: !!flags['import-metadata'],
 }
 if ('stops-without-level-id' in flags) {
