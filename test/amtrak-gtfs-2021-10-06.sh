@@ -17,6 +17,7 @@ export PGDATABASE='amtrak_2021_10_06'
 	--import-metadata \
 	--stats-by-route-date=view \
 	--stats-by-agency-route-stop-hour=view \
+	--stats-active-trips-by-hour=view \
 	-- amtrak-gtfs-2021-10-06/*.txt \
 	| sponge | psql -b
 
@@ -77,5 +78,22 @@ EOF)
 acelaPhillyStat=$(psql --csv -t -c "$acelaPhillyStatQuery" | tail -n 1)
 if [[ "$acelaPhillyStat" != "2" ]]; then
 	echo "invalid stats for route 40751 (Acela) at PHL (Philadelphia) on 2021-11-26: $acelaPhillyStat" 1>&2
+	exit 1
+fi
+
+nrOfActiveTripsQuery=$(cat << EOF
+SELECT nr_of_active_trips
+FROM amtrak.stats_active_trips_by_hour
+WHERE "hour" = '2021-11-26T04:00-05'
+EOF)
+# Note: I'm not sure if 146 is correct, but it is in the right ballpark. 🙈
+# The following query yields 175 connections, and it doesn't contain those who depart earlier and arrive later.
+# SELECT DISTINCT ON (trip_id) *
+# FROM amtrak.connections
+# WHERE t_departure >= '2021-11-26T02:00-05'
+# AND t_arrival <= '2021-11-26T06:00-05'
+nrOfActiveTrips=$(psql --csv -t -c "$nrOfActiveTripsQuery" | tail -n 1)
+if [[ "$nrOfActiveTrips" != "146" ]]; then
+	echo "unexpected no. of active trips at 2021-11-26T04:00-05: $nrOfActiveTrips" 1>&2
 	exit 1
 fi

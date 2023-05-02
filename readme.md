@@ -95,6 +95,7 @@ In addition to a table for each GTFS file, `gtfs-via-postgres` adds these views 
 - `shapes_aggregates` aggregates individual shape points in [`shapes`](https://gtfs.org/reference/static/#shapestxt) into a [PostGIS `LineString`](http://postgis.net/workshops/postgis-intro/geometries.html#linestrings).
 - `stats_by_route_date` provides the number of arrivals/departures by route ID and date. – [read more](docs/analysis/feed-by-route-date.md)
 - `stats_by_agency_route_stop_hour` provides the number of arrivals/departures by agency ID, route ID, stop ID & hour. – [read more](docs/analysis/feed-by-agency-route-stop-and-hour.md)
+- In contrast to `stats_by_route_date` & `stats_by_agency_route_stop_hour`, `stats_active_trips_by_hour` provides the number of *currently running* trips for each hour in the feeds period of time.
 
 As an example, we're going to use the `arrivals_departures` view to query all *absolute* departures at `de:11000:900120003` (*S Ostkreuz Bhf (Berlin)*) between `2022-03-23T12:30+01` and  `2022-03-23T12:35+01`:
 
@@ -167,6 +168,10 @@ Options:
                                   Generate a view letting you analyze arrivals/
                                     departures per route, stop and hour.
                                     The flag works like --stats-by-route-date.
+    --stats-active-trips-by-hour  Generate a view letting you analyze the number of
+                                    currently running trips over time, by hour.
+                                    Like --stats-by-route-date, this flag accepts
+                                    none, view & materialized-view.
     --schema                      The schema to use for the database. Default: public
     --postgraphile                Tweak generated SQL for PostGraphile usage.
                                     https://www.graphile.org/postgraphile/

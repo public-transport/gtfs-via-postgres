@@ -50,6 +50,9 @@ const {
 		'stats-by-agency-route-stop-hour': {
 			type: 'string',
 		},
+		'stats-active-trips-by-hour': {
+			type: 'string',
+		},
 		'schema': {
 			type: 'string',
 		},
@@ -94,6 +97,10 @@ Options:
                                   Generate a view letting you analyze arrivals/
                                     departures per route, stop and hour.
                                     The flag works like --stats-by-route-date.
+    --stats-active-trips-by-hour  Generate a view letting you analyze the number of
+                                    currently running trips over time, by hour.
+                                    Like --stats-by-route-date, this flag accepts
+                                    none, view & materialized-view.
     --schema                      The schema to use for the database. Default: public
     --postgraphile                Tweak generated SQL for PostGraphile usage.
                                     https://www.graphile.org/postgraphile/
@@ -135,6 +142,7 @@ const opt = {
 	stopsLocationIndex: !!flags['stops-location-index'],
 	statsByRouteIdAndDate: flags['stats-by-route-date'] || 'none',
 	statsByAgencyIdAndRouteIdAndStopAndHour: flags['stats-by-agency-route-stop-hour'] || 'none',
+	statsActiveTripsByHour: flags['stats-active-trips-by-hour'] || 'none',
 	schema: flags['schema'] || 'public',
 	postgraphile: !!flags.postgraphile,
 	importMetadata: !!flags['import-metadata'],
