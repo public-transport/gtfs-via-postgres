@@ -59,6 +59,9 @@ const {
 		'postgraphile': {
 			type: 'boolean',
 		},
+		'postgraphile-password': {
+			type: 'string',
+		},
 		'import-metadata': {
 			type: 'boolean',
 		}
@@ -104,6 +107,8 @@ Options:
     --schema                      The schema to use for the database. Default: public
     --postgraphile                Tweak generated SQL for PostGraphile usage.
                                     https://www.graphile.org/postgraphile/
+    --postgraphile-password       Password for the PostGraphile PostgreSQL user.
+                                    Default: $POSTGRAPHILE_PGPASSWORD, fallback random.
     --import-metadata             Create functions returning import metadata:
                                     - gtfs_data_imported_at (timestamp with time zone)
                                     - gtfs_via_postgres_version (text)
@@ -145,6 +150,7 @@ const opt = {
 	statsActiveTripsByHour: flags['stats-active-trips-by-hour'] || 'none',
 	schema: flags['schema'] || 'public',
 	postgraphile: !!flags.postgraphile,
+	postgraphilePassword: flags['postgraphile-password'],
 	importMetadata: !!flags['import-metadata'],
 }
 opt.stopsWithoutLevelId = !flags['stops-without-level-id']

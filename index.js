@@ -1,6 +1,7 @@
 'use strict'
 
 const debug = require('debug')('gtfs-via-postgres')
+const {randomBytes} = require('crypto')
 const sequencify = require('sequencify')
 const {inspect} = require('util')
 const readCsv = require('gtfs-utils/read-csv')
@@ -24,6 +25,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		statsActiveTripsByHour: 'none',
 		schema: 'public',
 		postgraphile: false,
+		postgraphilePassword: process.env.POSTGRAPHILE_PGPASSWORD || null,
 		importMetadata: false,
 		...opt,
 	}
@@ -38,6 +40,11 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		statsByAgencyIdAndRouteIdAndStopAndHour,
 		statsActiveTripsByHour,
 	} = opt
+	let postgraphilePassword = opt.postgraphilePassword
+	if (postgraphilePassword === null) {
+		postgraphilePassword = randomBytes(10).toString('hex')
+		console.error(`PostGraphile PostgreSQL user's password:`, postgraphilePassword)
+	}
 
 	if (ignoreUnsupportedFiles) {
 		files = files.filter(f => !!formatters[f.name])
@@ -202,7 +209,7 @@ BEGIN
 	) THEN
 		RAISE NOTICE 'Role "postgraphile" already exists, skipping creation.';
 	ELSE
-		CREATE ROLE postgraphile LOGIN PASSWORD 'todo'; -- todo: postgraphile password?
+		CREATE ROLE postgraphile LOGIN PASSWORD '${opt.postgraphilePassword}'; -- todo: escape properly
 	END IF;
 END
 $$;
