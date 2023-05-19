@@ -217,6 +217,7 @@ DO $$
     DECLARE
         db TEXT := current_database();
     BEGIN
+    	-- todo: grant just on $opt.schema instead?
         EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', db, 'postgraphile');
     END
 $$;
