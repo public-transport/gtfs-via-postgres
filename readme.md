@@ -224,7 +224,7 @@ ENTRYPOINT ["/bin/sh", "-c", "gtfs-via-postgres $0 $@ | sponge | psql -b"]
 
 ```shell
 # start PostgreSQL DB in another container "db"
-docker run docker run --name db -p 5432:5432 -e POSTGRES_PASSWORD=password postgis/postgis
+docker run --name db -p 5432:5432 -e POSTGRES_PASSWORD=password postgis/postgis
 
 # variant B: use Docker image to convert GTFS to SQL and import it directly
 docker build -t import-gtfs . # build helper Docker image from Dockerfile
