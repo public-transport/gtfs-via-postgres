@@ -11,3 +11,5 @@ pnpm-debug.log
 /dist
 
 /test
+
+/*.gtfs

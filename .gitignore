@@ -12,3 +12,5 @@ pnpm-debug.log
 /dist
 
 /test/amtrak-gtfs-2021-10-06
+
+/*.gtfs
