@@ -165,9 +165,9 @@ pipeline(
 		if (!err) return;
 		if (err instanceof DataError) {
 			console.error(String(err))
-			return;
+		} else if (err.code !== 'EPIPE') {
+			console.error(err)
 		}
-		if (err.code !== 'EPIPE') console.error(err)
 		process.exit(1)
 	}
 )

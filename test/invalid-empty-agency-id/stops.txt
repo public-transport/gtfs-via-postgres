@@ -1,0 +1,3 @@
+stop_id,stop_name,stop_lat,stop_lon
+airport,International Airport (ABC),52.365,13.511
+museum,Awesome Museum,52.44572,13.43657

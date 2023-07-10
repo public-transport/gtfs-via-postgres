@@ -34,3 +34,14 @@ if [[ "$arrN" != "1563629400" ]]; then
 	echo "invalid 2nd t_arrival: $arrN" 1>&2
 	exit 1
 fi
+
+agency_id_null=$(cat << EOF
+select count(*)
+from arrivals_departures
+where agency_id IS NULL
+EOF)
+agency_id_null_count="$(psql --csv -t -c "$agency_id_null")"
+if [[ "$agency_id_null_count" != "0" ]]; then
+	echo ">0 rows with agency_id = null" 1>&2
+	exit 1
+fi

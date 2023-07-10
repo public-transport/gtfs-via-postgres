@@ -13,5 +13,6 @@ psql -t -c 'SELECT version()'
 ./postgraphile.sh
 ./routes-without-agency-id.sh
 ./stops-without-level-id.sh
+./invalid-empty-agency-id.sh
 
 echo -e "\n\n✔︎ tests passing"
