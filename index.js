@@ -153,6 +153,10 @@ BEGIN;
 \n`
 
 	const csv = new Stringifier({quoted: true})
+	const nrOfRowsByName = new Map()
+	const workingState = {
+		nrOfRowsByName,
+	}
 
 	for (const name of order) {
 		if (!silent) console.error(name)
@@ -174,7 +178,7 @@ BEGIN;
 			const {formatRow} = formatters[name]
 			let nrOfRows = 0
 			for await (const rawRow of await readCsv(task.file)) {
-				const row = formatRow(rawRow, opt)
+				const row = formatRow(rawRow, opt, workingState)
 				let formattedRow = null
 				csv.api.__transform(row, (_formattedRow) => {
 					formattedRow = _formattedRow
@@ -183,6 +187,7 @@ BEGIN;
 				nrOfRows++
 			}
 
+			nrOfRowsByName.set(name, nrOfRows)
 			if (!silent) console.error(`  processed ${nrOfRows} rows`)
 		}
 
