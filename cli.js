@@ -153,7 +153,9 @@ const opt = {
 	postgraphilePassword: flags['postgraphile-password'],
 	importMetadata: !!flags['import-metadata'],
 }
-opt.stopsWithoutLevelId = !flags['stops-without-level-id']
+if ('stops-without-level-id' in flags) {
+	opt.stopsWithoutLevelId = !flags['stops-without-level-id']
+}
 
 pipeline(
 	convertGtfsToSql(files, opt),

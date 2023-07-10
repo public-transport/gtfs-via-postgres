@@ -12,5 +12,6 @@ psql -t -c 'SELECT version()'
 ./amtrak-gtfs-2021-10-06.sh
 ./postgraphile.sh
 ./routes-without-agency-id.sh
+./stops-without-level-id.sh
 
 echo -e "\n\n✔︎ tests passing"
