@@ -131,6 +131,7 @@ if (flags.version) {
 const {basename, extname} = require('path')
 const {pipeline} = require('stream')
 const convertGtfsToSql = require('./index')
+const DataError = require('./lib/data-error')
 
 const files = args.map((file) => {
 	const name = basename(file, extname(file))
@@ -162,6 +163,10 @@ pipeline(
 	process.stdout,
 	(err) => {
 		if (!err) return;
+		if (err instanceof DataError) {
+			console.error(String(err))
+			return;
+		}
 		if (err.code !== 'EPIPE') console.error(err)
 		process.exit(1)
 	}
