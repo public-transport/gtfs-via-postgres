@@ -77,7 +77,7 @@ LANGUAGE plpgsql;
 \i connections_by_non_existent_stop.sql
 \i connections_by_time.sql
 \i connections_by_time_manual.sql
-\i stats_by_route_id_and_date.sql
+\i stats_by_route_date.sql
 
 SELECT * FROM _benchmark;
 
