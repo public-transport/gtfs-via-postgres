@@ -188,6 +188,8 @@ BEGIN;
 			}
 
 			nrOfRowsByName.set(name, nrOfRows)
+			// todo [breaking]: indent with \t
+			// todo [breaking]: print a summary of all files instead
 			if (!silent) console.error(`  processed ${nrOfRows} rows`)
 		}
 

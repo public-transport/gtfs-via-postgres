@@ -329,7 +329,7 @@ AND "date" <= dates_filter_max('2022-03-23T12:35+01') -- evaluates to 2023-03-23
 
 With all use cases I could think of, `gtfs-via-postgres` is reasonably fast. If there's a particular kind of query that you think should be faster, please [open an Issue](https://github.com/public-transport/gtfs-via-postgres/issues/new)!
 
-The following benchmarks were run with the [2022-07-01 VBB GTFS dataset](https://vbb-gtfs.jannisr.de/2022-07-01/) (41k `stops`, 6m `stop_times`, 207m arrivals/departures) on an [M2](https://en.wikipedia.org/wiki/Apple_M2) laptop; All measurements are in milliseconds.
+The following benchmarks were run with the [2022-07-01 VBB GTFS dataset](https://vbb-gtfs.jannisr.de/2022-07-01/) (41k `stops`, 6m `stop_times`, 207m arrivals/departures) using PostgreSQL 14.7 on an [M2](https://en.wikipedia.org/wiki/Apple_M2) laptop running macOS 12.6.7; All measurements are in milliseconds.
 
 | query | avg | min | p25 | p50 | p75 | p95 | p99 | max | iterations |
 | - | - | - | - | - | - | - | - | - | - |
