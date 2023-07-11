@@ -1,0 +1,104 @@
+query,avg,min,p25,p50,p75,p95,p99,max,iterations
+"SELECT *
+FROM stops
+ORDER BY ST_Distance(stop_loc::geometry, ST_SetSRID(ST_MakePoint(9.7, 50.547), 4326)) ASC
+LIMIT 100",16,15.276,15,15,16,17,18,19.19,100
+"SELECT *
+FROM arrivals_departures
+WHERE route_short_name = 'S1'
+AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'
+AND date >= dates_filter_min('2022-08-09T07:10+02')
+AND date <= dates_filter_max('2022-08-09T07:30+02')",83,78.513,81,83,83,87,87,87.367,100
+"SELECT *
+FROM arrivals_departures
+WHERE station_id = 'de:11000:900100001' -- S+U Friedrichstr. (Berlin)
+AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'
+AND date >= dates_filter_min('2022-08-09T07:10+02')
+AND date <= dates_filter_max('2022-08-09T07:30+02')",41,40.425,41,41,41,41,42,41.53,40
+"SELECT *
+FROM arrivals_departures
+WHERE station_id = 'de:11000:900100001' -- S+U Friedrichstr. (Berlin)
+AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'
+AND date >= dates_filter_min('2022-08-09T07:10+02')
+AND date <= dates_filter_max('2022-08-09T07:30+02')
+AND stop_sequence = 0",5,5.249,5,5,5,5,5,5.362,50
+"SELECT *
+FROM arrivals_departures
+WHERE stop_id = 'de:11000:900100001::4' -- S+U Friedrichstr. (Berlin)
+AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'
+AND date >= dates_filter_min('2022-08-09T07:10+02')
+AND date <= dates_filter_max('2022-08-09T07:30+02')",8,7.812,8,8,8,8,8,7.919,100
+"SELECT *
+FROM arrivals_departures
+WHERE trip_id = '168977951'
+AND date > '2022-08-08' AND date <= '2022-08-09'",2,2.444,2,2,2,2,2,2.494,100
+"SELECT count(*)
+FROM arrivals_departures
+WHERE stop_id = 'de:11000:900100001::4' -- S+U Friedrichstr. (Berlin)",71,70.563,71,71,71,71,71,70.963,100
+"SELECT count(*)
+FROM arrivals_departures
+WHERE stop_id = 'definitely-non-existent'",2,2.366,2,2,2,2,2,2.401,100
+"SELECT *
+FROM arrivals_departures
+WHERE t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'
+AND date >= dates_filter_min('2022-08-09T07:10+02'::timestamp with time zone)
+AND date <= dates_filter_max('2022-08-09T07:30+02'::timestamp with time zone)",8124,8047.421,8091,8100,8113,8258,8344,8365.626,10
+"SELECT *
+FROM arrivals_departures
+WHERE t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'
+AND date >= '2022-08-08'
+AND date <= '2022-08-09'",6175,6167.545,6170,6171,6177,6192,6196,6196.497,10
+"SELECT *
+FROM connections
+WHERE route_short_name = 'S1'
+AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'
+AND date >= dates_filter_min('2022-08-09T07:10+02')
+AND date <= dates_filter_max('2022-08-09T07:30+02')",222,172.3,222,224,225,227,240,239.678,100
+"SELECT *
+FROM connections
+WHERE from_station_id = 'de:11000:900100001' -- S+U Friedrichstr. (Berlin)
+AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'
+AND date >= dates_filter_min('2022-08-09T07:10+02')
+AND date <= dates_filter_max('2022-08-09T07:30+02')",61,59.507,60,61,62,63,66,67.016,40
+"SELECT *
+FROM connections
+WHERE from_station_id = 'de:11000:900100001' -- S+U Friedrichstr. (Berlin)
+AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'
+AND date >= dates_filter_min('2022-08-09T07:10+02')
+AND date <= dates_filter_max('2022-08-09T07:30+02')
+AND from_stop_sequence = 0",9,8.703,9,9,9,10,10,9.75,50
+"SELECT *
+FROM connections
+WHERE from_stop_id = 'de:11000:900100001::4' -- S+U Friedrichstr. (Berlin)
+AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'
+AND date >= dates_filter_min('2022-08-09T07:10+02')
+AND date <= dates_filter_max('2022-08-09T07:30+02')",17,16.167,16,17,17,18,18,17.827,100
+"SELECT *
+FROM connections
+WHERE trip_id = '168977951'
+AND date > '2022-08-08' AND date <= '2022-08-09'",4,3.547,4,4,4,4,4,3.985,100
+"SELECT count(*)
+FROM connections
+WHERE from_stop_id = 'de:11000:900100001::4' -- S+U Friedrichstr. (Berlin)",92,90.379,91,92,93,95,98,98.127,100
+"SELECT count(*)
+FROM connections
+WHERE from_stop_id = 'definitely-non-existent'",5,4.435,4,4,5,5,5,4.77,100
+"SELECT *
+FROM connections
+WHERE t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'
+AND date >= dates_filter_min('2022-08-09T07:10+02'::timestamp with time zone)
+AND date <= dates_filter_max('2022-08-09T07:30+02'::timestamp with time zone)
+ORDER BY t_departure
+LIMIT 100",16948,16782.853,16825,16916,17032,17178,17214,17222.399,7
+"SELECT *
+FROM connections
+WHERE t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'
+AND date >= '2022-08-08'
+AND date <= '2022-08-09'
+ORDER BY t_departure
+LIMIT 100",10711,10690.623,10706,10708,10716,10728,10731,10732.243,7
+"SELECT *
+FROM stats_by_route_date
+WHERE route_id = '17452_900' -- M4
+AND date >= '2022-08-08' AND date <= '2022-08-14'
+AND is_effective = true",3634,3615.408,3628,3628,3629,3667,3690,3695.66,10
