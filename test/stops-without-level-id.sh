@@ -13,4 +13,10 @@ shopt -s extglob
 	../node_modules/sample-gtfs-feed/gtfs/!(levels).txt \
 	| grep -c 'stopsWithoutLevelId: true'
 
+# Importing should work *with* --stops-without-level-id (and without levels.txt).
+# see also https://github.com/public-transport/gtfs-via-postgres/issues/43#issuecomment-1632657546
+../cli.js -d -s --stops-without-level-id -- \
+	../node_modules/sample-gtfs-feed/gtfs/!(levels).txt \
+	>/dev/null
+
 echo 'works ✔'

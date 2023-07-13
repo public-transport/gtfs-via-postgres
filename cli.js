@@ -155,7 +155,7 @@ const opt = {
 	importMetadata: !!flags['import-metadata'],
 }
 if ('stops-without-level-id' in flags) {
-	opt.stopsWithoutLevelId = !flags['stops-without-level-id']
+	opt.stopsWithoutLevelId = flags['stops-without-level-id']
 }
 
 pipeline(
