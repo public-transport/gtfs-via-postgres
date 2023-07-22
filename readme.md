@@ -371,7 +371,7 @@ I don't use it though because
 
 ### gtfs-sequelize
 
-[gtfs-squelize](https://github.com/evansiroky/gtfs-sequelize) uses [sequelize.js](https://sequelize.org) to import a GTFS feed and query the DB.
+[gtfs-sequelize](https://github.com/evansiroky/gtfs-sequelize) uses [sequelize.js](https://sequelize.org) to import a GTFS feed and query the DB.
 
 I don't use it because
 
