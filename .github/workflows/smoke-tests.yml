@@ -24,3 +24,12 @@ jobs:
       feed-extract-cmd: 'unzip -d gtfs gtfs.zip'
       feed-import-flags: '--route-types-scheme tpeg-pti'
       feed-import-glob: 'gtfs/*.txt'
+  smoke-test-vgn:
+    name: run VGN smoke test
+    uses: './.github/workflows/smoke-test.yml'
+    with:
+      feed-name: VGN
+      feed-download-cmd: 'wget -nv "https://www.vgn.de/opendata/GTFS.zip" -O gtfs.zip'
+      feed-extract-cmd: 'unzip -d gtfs gtfs.zip'
+      feed-import-flags: '--trips-without-shape-id'
+      feed-import-glob: 'gtfs/*.txt'
