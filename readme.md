@@ -34,12 +34,12 @@ There are also [prebuilt binaries](https://github.com/public-transport/gtfs-via-
 
 If you have a `.zip` GTFS feed, unzip it into individual files.
 
-We're going to use the [2022-02-25 *VBB* feed](https://vbb-gtfs.jannisr.de/2022-02-25/) as an example, which consists of individual files already.
+We're going to use the [2022-07-01 *VBB* feed](https://vbb-gtfs.jannisr.de/2022-07-01/) as an example, which consists of individual files already.
 
 ```sh
 wget --compression auto \
     -r --no-parent --no-directories -R .csv.gz \
-    -P gtfs -N 'https://vbb-gtfs.jannisr.de/2022-02-25/'
+    -P gtfs -N 'https://vbb-gtfs.jannisr.de/2022-07-01/'
 # …
 # Downloaded 14 files in 20s.
 ls -lh gtfs
