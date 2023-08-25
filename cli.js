@@ -41,6 +41,9 @@ const {
 		'stops-without-level-id': {
 			type: 'boolean',
 		},
+		'lower-case-lang-codes': {
+			type: 'boolean',
+		},
 		'stops-location-index': {
 			type: 'boolean',
 		},
@@ -90,6 +93,12 @@ Options:
                                     Default if levels.txt has not been provided.
     --stops-location-index        Create a spatial index on stops.stop_loc for efficient
                                     queries by geolocation.
+    --lower-case-lang-codes       Accept Language Codes (e.g. in feed_info.feed_lang)
+                                    with a different casing than the official BCP-47
+                                    language tags (as specified by the GTFS spec),
+                                    by lower-casing all of them before validating.
+                                    http://www.rfc-editor.org/rfc/bcp/bcp47.txt
+                                    http://www.w3.org/International/articles/language-tags/
     --stats-by-route-date         Wether to generate a stats_by_route_date view
                                     letting you analyze all data per routes and/or date:
                                     - none: Don't generate a view.
@@ -156,6 +165,9 @@ const opt = {
 }
 if ('stops-without-level-id' in flags) {
 	opt.stopsWithoutLevelId = flags['stops-without-level-id']
+}
+if ('lower-case-lang-codes' in flags) {
+	opt.lowerCaseLanguageCodes = flags['lower-case-lang-codes']
 }
 
 pipeline(

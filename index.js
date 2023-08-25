@@ -20,6 +20,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		routesWithoutAgencyId: false,
 		stopsWithoutLevelId: !files.some(f => f.name === 'levels'),
 		stopsLocationIndex: false,
+		lowerCaseLanguageCodes: false,
 		statsByRouteIdAndDate: 'none',
 		statsByAgencyIdAndRouteIdAndStopAndHour: 'none',
 		statsActiveTripsByHour: 'none',
@@ -56,7 +57,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 	debug('deps', deps)
 
 	const tasks = { // file name -> [dep name]
-		'is_bcp_47_code': {
+		'is_valid_lang_code': {
 			dep: [],
 		},
 		'is_timezone': {
