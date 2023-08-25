@@ -33,3 +33,12 @@ jobs:
       feed-extract-cmd: 'unzip -d gtfs gtfs.zip'
       feed-import-flags: '--trips-without-shape-id'
       feed-import-glob: 'gtfs/*.txt'
+  smoke-test-vvs:
+    name: run VVS smoke test
+    uses: './.github/workflows/smoke-test.yml'
+    with:
+      feed-name: VVS
+      feed-download-cmd: 'wget -nv "https://download.vvs.de/gtfs_realtime.zip" -O gtfs.zip'
+      feed-extract-cmd: 'unzip -d gtfs gtfs.zip'
+      feed-import-flags: '--trips-without-shape-id --lower-case-lang-codes'
+      feed-import-glob: 'gtfs/*.txt'
