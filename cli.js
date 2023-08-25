@@ -87,7 +87,7 @@ Options:
     --trips-without-shape-id      Don't require trips.txt items to have a shape_id.
     --routes-without-agency-id    Don't require routes.txt items to have an agency_id.
     --stops-without-level-id      Don't require stops.txt items to have a level_id.
-                                  Default if levels.txt has not been provided.
+                                    Default if levels.txt has not been provided.
     --stops-location-index        Create a spatial index on stops.stop_loc for efficient
                                     queries by geolocation.
     --stats-by-route-date         Wether to generate a stats_by_route_date view

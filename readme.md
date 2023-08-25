@@ -155,7 +155,7 @@ Options:
     --trips-without-shape-id      Don't require trips.txt items to have a shape_id.
     --routes-without-agency-id    Don't require routes.txt items to have an agency_id.
     --stops-without-level-id      Don't require stops.txt items to have a level_id.
-                                  Default if levels.txt has not been provided.
+                                    Default if levels.txt has not been provided.
     --stops-location-index        Create a spatial index on stops.stop_loc for efficient
                                     queries by geolocation.
     --stats-by-route-date         Wether to generate a stats_by_route_date view
@@ -175,6 +175,8 @@ Options:
     --schema                      The schema to use for the database. Default: public
     --postgraphile                Tweak generated SQL for PostGraphile usage.
                                     https://www.graphile.org/postgraphile/
+    --postgraphile-password       Password for the PostGraphile PostgreSQL user.
+                                    Default: $POSTGRAPHILE_PGPASSWORD, fallback random.
     --import-metadata             Create functions returning import metadata:
                                     - gtfs_data_imported_at (timestamp with time zone)
                                     - gtfs_via_postgres_version (text)
