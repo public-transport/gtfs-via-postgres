@@ -11,7 +11,7 @@ jobs:
     uses: './.github/workflows/smoke-test.yml'
     with:
       feed-name: VBB
-      feed-download-cmd: 'wget -nv --compression auto -r --no-parent --no-directories -R .csv.gz -P gtfs -N "https://vbb-gtfs.jannisr.de/latest/"'
+      feed-download-cmd: 'wget -nv -U "gtfs-via-postgres CI" --compression auto -r --no-parent --no-directories -R .csv.gz -P gtfs -N "https://vbb-gtfs.jannisr.de/latest/"'
       feed-extract-cmd: ''
       feed-import-flags: ''
       feed-import-glob: 'gtfs/*.csv'
@@ -20,7 +20,7 @@ jobs:
     uses: './.github/workflows/smoke-test.yml'
     with:
       feed-name: Entur
-      feed-download-cmd: 'wget -nv "https://storage.googleapis.com/marduk-production/outbound/gtfs/rb_norway-aggregated-gtfs.zip" -O gtfs.zip'
+      feed-download-cmd: 'wget -nv -U "gtfs-via-postgres CI" "https://storage.googleapis.com/marduk-production/outbound/gtfs/rb_norway-aggregated-gtfs.zip" -O gtfs.zip'
       feed-extract-cmd: 'unzip -d gtfs gtfs.zip'
       feed-import-flags: '--route-types-scheme tpeg-pti'
       feed-import-glob: 'gtfs/*.txt'
@@ -29,7 +29,7 @@ jobs:
     uses: './.github/workflows/smoke-test.yml'
     with:
       feed-name: VGN
-      feed-download-cmd: 'wget -nv "https://www.vgn.de/opendata/GTFS.zip" -O gtfs.zip'
+      feed-download-cmd: 'wget -nv -U "gtfs-via-postgres CI" "https://www.vgn.de/opendata/GTFS.zip" -O gtfs.zip'
       feed-extract-cmd: 'unzip -d gtfs gtfs.zip'
       feed-import-flags: '--trips-without-shape-id'
       feed-import-glob: 'gtfs/*.txt'
@@ -38,7 +38,7 @@ jobs:
     uses: './.github/workflows/smoke-test.yml'
     with:
       feed-name: VVS
-      feed-download-cmd: 'wget -nv "https://download.vvs.de/gtfs_realtime.zip" -O gtfs.zip'
+      feed-download-cmd: 'wget -nv -U "gtfs-via-postgres CI" "https://download.vvs.de/gtfs_realtime.zip" -O gtfs.zip'
       feed-extract-cmd: 'unzip -d gtfs gtfs.zip'
       feed-import-flags: '--trips-without-shape-id --lower-case-lang-codes'
       feed-import-glob: 'gtfs/*.txt'
