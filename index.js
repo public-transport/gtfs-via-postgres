@@ -241,10 +241,38 @@ GRANT SELECT ON ALL TABLES IN SCHEMA "${opt.schema}" TO postgraphile;
 
 ${opt.postgrest ? `\
 ${opt.schema !== 'public' ? `\
+-- pattern from https://stackoverflow.com/a/8099557
+DO
+$$
+BEGIN
+	IF EXISTS (
+		SELECT FROM pg_catalog.pg_roles
+		WHERE  rolname = 'web_anon'
+	) THEN
+		-- Roles are shared across databases, so we have remove previously configured privileges.
+		-- This might of course interfere with other programs running on the DBMS!
+		-- todo: find a cleaner solution
+		RAISE WARNING 'Role web_anon already exists. Reassigning owned DB objects to current_user().';
+		REASSIGN OWNED BY web_anon TO SESSION_USER;
+		-- REVOKE ALL PRIVILEGES ON DATABASE current_database() FROM web_anon;
+		-- REVOKE ALL PRIVILEGES ON SCHEMA "${opt.schema}" FROM web_anon;
+		-- REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA "${opt.schema}" FROM web_anon;
+		-- REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA "${opt.schema}" FROM web_anon;
+	ELSE
+		BEGIN
+			CREATE ROLE web_anon NOLOGIN NOINHERIT;
+		EXCEPTION
+			WHEN duplicate_object THEN
+				RAISE NOTICE 'Role web_anon was just created by a concurrent transaction.';
+		END;
+	END IF;
+END
+$$;
+
+
 -- https://postgrest.org/en/stable/tutorials/tut0.html#step-4-create-database-for-api
 -- https://postgrest.org/en/stable/explanations/db_authz.html
 -- todo: is this secure?
-CREATE ROLE web_anon NOLOGIN NOINHERIT;
 GRANT USAGE ON SCHEMA "${opt.schema}" TO web_anon;
 GRANT SELECT ON ALL TABLES IN SCHEMA "${opt.schema}" TO web_anon;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA "${opt.schema}" TO web_anon;
