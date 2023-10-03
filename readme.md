@@ -19,6 +19,8 @@
 
 ## Installation
 
+Before installing, ensure you have Node.js version `>=16.17`.
+
 ```shell
 npm install -g gtfs-via-postgres
 ```
