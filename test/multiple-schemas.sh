@@ -53,3 +53,22 @@ if [[ "$unequal_stops_1" -ne 0 ]]; then
 fi
 
 # todo: assert that more tables are equal?
+
+# put an incompatible version
+psql -c "$(cat << EOF
+CREATE OR REPLACE FUNCTION public.gtfs_via_postgres_import_version()
+RETURNS TEXT
+AS \$\$
+	SELECT '0.1.2'
+\$\$
+LANGUAGE SQL
+EOF)"
+
+# expect another import to fail
+if ../cli.js -d --trips-without-shape-id \
+	--schema three \
+	-- amtrak-gtfs-2021-10-06/*.txt \
+	| sponge | psql -b; then
+	1>&2 echo "re-import with incompatible version didn't fail"
+	exit 1
+fi
