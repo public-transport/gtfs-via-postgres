@@ -278,6 +278,9 @@ GRANT SELECT ON ALL TABLES IN SCHEMA "${opt.schema}" TO web_anon;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA "${opt.schema}" TO web_anon;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA "${opt.schema}" TO web_anon;
 
+CREATE ROLE postgrest LOGIN NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER PASSWORD '${opt.postgrestPassword}';
+GRANT web_anon TO postgrest;
+
 COMMENT ON SCHEMA "${opt.schema}" IS
 $$GTFS REST API
 This REST API is created by running [PostgREST](https://postgrest.org/) on top of a [PostgreSQL](https://www.postgresql.org) DB generated using [gtfs-via-postgres](https://github.com/public-transport/gtfs-via-postgres).
