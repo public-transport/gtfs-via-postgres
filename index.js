@@ -250,13 +250,13 @@ ${opt.schema !== 'public' ? `\
 DO
 $$
 BEGIN
+	-- Roles are shared across databases, so we have remove previously configured privileges.
+	-- This might of course interfere with other programs running on the DBMS!
+	-- todo: find a cleaner solution
 	IF EXISTS (
 		SELECT FROM pg_catalog.pg_roles
 		WHERE  rolname = 'web_anon'
 	) THEN
-		-- Roles are shared across databases, so we have remove previously configured privileges.
-		-- This might of course interfere with other programs running on the DBMS!
-		-- todo: find a cleaner solution
 		RAISE WARNING 'Role web_anon already exists. Reassigning owned DB objects to current_user().';
 		REASSIGN OWNED BY web_anon TO SESSION_USER;
 		-- REVOKE ALL PRIVILEGES ON DATABASE current_database() FROM web_anon;
@@ -271,6 +271,24 @@ BEGIN
 				RAISE NOTICE 'Role web_anon was just created by a concurrent transaction.';
 		END;
 	END IF;
+	IF EXISTS (
+		SELECT FROM pg_catalog.pg_roles
+		WHERE  rolname = 'postgrest'
+	) THEN
+		RAISE WARNING 'Role postgrest already exists. Reassigning owned DB objects to current_user().';
+		REASSIGN OWNED BY postgrest TO SESSION_USER;
+		-- REVOKE ALL PRIVILEGES ON DATABASE current_database() FROM postgrest;
+		-- REVOKE ALL PRIVILEGES ON SCHEMA "${opt.schema}" FROM postgrest;
+		-- REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA "${opt.schema}" FROM postgrest;
+		-- REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA "${opt.schema}" FROM postgrest;
+	ELSE
+		BEGIN
+			CREATE ROLE postgrest LOGIN NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER PASSWORD '${postgrestPassword}';
+		EXCEPTION
+			WHEN duplicate_object THEN
+				RAISE NOTICE 'Role postgrest was just created by a concurrent transaction.';
+		END;
+	END IF;
 END
 $$;
 
@@ -283,7 +301,6 @@ GRANT SELECT ON ALL TABLES IN SCHEMA "${opt.schema}" TO web_anon;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA "${opt.schema}" TO web_anon;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA "${opt.schema}" TO web_anon;
 
-CREATE ROLE postgrest LOGIN NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER PASSWORD '${postgrestPassword}';
 GRANT web_anon TO postgrest;
 
 COMMENT ON SCHEMA "${opt.schema}" IS
