@@ -28,7 +28,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		postgraphile: false,
 		postgraphilePassword: process.env.POSTGRAPHILE_PGPASSWORD || null,
 		postgrest: false,
-		postgrestPassword: randomBytes(10).toString('hex'),
+		postgrestPassword: process.env.POSTGREST_PASSWORD || randomBytes(10).toString('hex'),
 		importMetadata: false,
 		...opt,
 	}
