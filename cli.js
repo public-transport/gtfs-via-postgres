@@ -171,7 +171,6 @@ const opt = {
 	statsActiveTripsByHour: flags['stats-active-trips-by-hour'] || 'none',
 	schema: flags['schema'] || 'public',
 	postgraphile: !!flags.postgraphile,
-	postgraphilePassword: flags['postgraphile-password'],
 	postgrest: !!flags.postgrest,
 	importMetadata: !!flags['import-metadata'],
 }
@@ -180,6 +179,9 @@ if ('stops-without-level-id' in flags) {
 }
 if ('lower-case-lang-codes' in flags) {
 	opt.lowerCaseLanguageCodes = flags['lower-case-lang-codes']
+}
+if ('postgraphile-password' in flags) {
+	opt.postgraphilePassword = flags['postgraphile-password']
 }
 if ('postgrest-password' in flags) {
 	opt.postgrestPassword = flags['postgrest-password']
