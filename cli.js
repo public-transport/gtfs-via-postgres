@@ -68,6 +68,9 @@ const {
 		'postgrest': {
 			type: 'boolean',
 		},
+		'postgrest-password': {
+			type: 'string',
+		},
 		'import-metadata': {
 			type: 'boolean',
 		}
@@ -124,6 +127,8 @@ Options:
     --postgrest                   Tweak generated SQL for PostgREST usage.
                                     Please combine it with --schema.
                                     https://postgrest.org/
+    --postgrest-password          Password for the PostgREST PostgreSQL user \`web_anon\`.
+                                    Default: $POSTGREST_PGPASSWORD, fallback random.
     --import-metadata             Create functions returning import metadata:
                                     - gtfs_data_imported_at (timestamp with time zone)
                                     - gtfs_via_postgres_version (text)
@@ -175,6 +180,9 @@ if ('stops-without-level-id' in flags) {
 }
 if ('lower-case-lang-codes' in flags) {
 	opt.lowerCaseLanguageCodes = flags['lower-case-lang-codes']
+}
+if ('postgrest-password' in flags) {
+	opt.postgrestPassword = flags['postgrest-password']
 }
 
 pipeline(

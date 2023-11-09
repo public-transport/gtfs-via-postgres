@@ -28,7 +28,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		postgraphile: false,
 		postgraphilePassword: process.env.POSTGRAPHILE_PGPASSWORD || null,
 		postgrest: false,
-		postgrestPassword: process.env.POSTGREST_PASSWORD || randomBytes(10).toString('hex'),
+		postgrestPassword: process.env.POSTGREST_PASSWORD || null,
 		importMetadata: false,
 		...opt,
 	}
@@ -47,6 +47,11 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 	if (postgraphilePassword === null) {
 		postgraphilePassword = randomBytes(10).toString('hex')
 		console.error(`PostGraphile PostgreSQL user's password:`, postgraphilePassword)
+	}
+	let postgrestPassword = opt.postgrestPassword
+	if (postgrestPassword === null) {
+		postgrestPassword = randomBytes(10).toString('hex')
+		console.error(`PostrREST PostgreSQL user's password:`, postgrestPassword)
 	}
 
 	if (ignoreUnsupportedFiles) {
@@ -278,7 +283,7 @@ GRANT SELECT ON ALL TABLES IN SCHEMA "${opt.schema}" TO web_anon;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA "${opt.schema}" TO web_anon;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA "${opt.schema}" TO web_anon;
 
-CREATE ROLE postgrest LOGIN NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER PASSWORD '${opt.postgrestPassword}';
+CREATE ROLE postgrest LOGIN NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER PASSWORD '${postgrestPassword}';
 GRANT web_anon TO postgrest;
 
 COMMENT ON SCHEMA "${opt.schema}" IS
