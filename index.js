@@ -28,7 +28,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		postgraphile: false,
 		postgraphilePassword: process.env.POSTGRAPHILE_PGPASSWORD || null,
 		postgrest: false,
-		postgrestPassword: randomBytes(10).toString('hex'),
+		postgrestPassword: process.env.POSTGREST_PASSWORD || null,
 		importMetadata: false,
 		...opt,
 	}
@@ -47,6 +47,11 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 	if (postgraphilePassword === null) {
 		postgraphilePassword = randomBytes(10).toString('hex')
 		console.error(`PostGraphile PostgreSQL user's password:`, postgraphilePassword)
+	}
+	let postgrestPassword = opt.postgrestPassword
+	if (postgrestPassword === null) {
+		postgrestPassword = randomBytes(10).toString('hex')
+		console.error(`PostrREST PostgreSQL user's password:`, postgrestPassword)
 	}
 
 	if (ignoreUnsupportedFiles) {
@@ -153,6 +158,48 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 ${opt.schema !== 'public' ? `CREATE SCHEMA IF NOT EXISTS "${opt.schema}";` : ''}
 BEGIN;
 
+-- gtfs-via-postgres supports importing >1 GTFS datasets into 1 DB, each dataset within its own schema. See https://github.com/public-transport/gtfs-via-postgres/issues/51 for more information.
+-- Because almost all helper utilities (enums, functions, etc.) are schema-specific, they get imported more than once. In order to prevent subtle bugs due to incompatibilities among two schemas imported by different gtfs-via-postgres versions, we mock a "mutex" here by checking for public.gtfs_via_postgres_import_version()'s return value.
+
+-- todo: this can be done more elegantly: just a "DO" block, "ASSERT" that the version matches, create gtfs_via_postgres_import_version() in the "EXCEPTION" block
+CREATE FUNCTION pg_temp.get_gtfs_via_postgres_import_version()
+RETURNS TEXT
+AS $$
+	DECLARE
+		res TEXT;
+	BEGIN
+		SELECT public.gtfs_via_postgres_import_version() INTO res;
+		RETURN res;
+	EXCEPTION
+		WHEN undefined_function THEN
+			-- do nothing, silence error
+			RETURN NULL;
+	END;
+$$
+LANGUAGE plpgsql;
+
+DO $$
+BEGIN
+	IF EXISTS (
+		SELECT version
+		FROM (
+			SELECT pg_temp.get_gtfs_via_postgres_import_version() AS version
+		) t
+		WHERE version != '${pkg.version}'
+	) THEN
+		RAISE EXCEPTION 'existing GTFS data imported with an incompatible version of gtfs-via-postgres';
+	END IF;
+END
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION public.gtfs_via_postgres_import_version()
+RETURNS TEXT
+AS $$
+	SELECT '${pkg.version}'
+$$
+LANGUAGE sql;
+
 \n`
 
 	const csv = new Stringifier({quoted: true})
@@ -245,13 +292,13 @@ ${opt.schema !== 'public' ? `\
 DO
 $$
 BEGIN
+	-- Roles are shared across databases, so we have remove previously configured privileges.
+	-- This might of course interfere with other programs running on the DBMS!
+	-- todo: find a cleaner solution
 	IF EXISTS (
 		SELECT FROM pg_catalog.pg_roles
 		WHERE  rolname = 'web_anon'
 	) THEN
-		-- Roles are shared across databases, so we have remove previously configured privileges.
-		-- This might of course interfere with other programs running on the DBMS!
-		-- todo: find a cleaner solution
 		RAISE WARNING 'Role web_anon already exists. Reassigning owned DB objects to current_user().';
 		REASSIGN OWNED BY web_anon TO SESSION_USER;
 		-- REVOKE ALL PRIVILEGES ON DATABASE current_database() FROM web_anon;
@@ -266,6 +313,24 @@ BEGIN
 				RAISE NOTICE 'Role web_anon was just created by a concurrent transaction.';
 		END;
 	END IF;
+	IF EXISTS (
+		SELECT FROM pg_catalog.pg_roles
+		WHERE  rolname = 'postgrest'
+	) THEN
+		RAISE WARNING 'Role postgrest already exists. Reassigning owned DB objects to current_user().';
+		REASSIGN OWNED BY postgrest TO SESSION_USER;
+		-- REVOKE ALL PRIVILEGES ON DATABASE current_database() FROM postgrest;
+		-- REVOKE ALL PRIVILEGES ON SCHEMA "${opt.schema}" FROM postgrest;
+		-- REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA "${opt.schema}" FROM postgrest;
+		-- REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA "${opt.schema}" FROM postgrest;
+	ELSE
+		BEGIN
+			CREATE ROLE postgrest LOGIN NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER PASSWORD '${postgrestPassword}';
+		EXCEPTION
+			WHEN duplicate_object THEN
+				RAISE NOTICE 'Role postgrest was just created by a concurrent transaction.';
+		END;
+	END IF;
 END
 $$;
 
@@ -277,6 +342,8 @@ GRANT USAGE ON SCHEMA "${opt.schema}" TO web_anon;
 GRANT SELECT ON ALL TABLES IN SCHEMA "${opt.schema}" TO web_anon;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA "${opt.schema}" TO web_anon;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA "${opt.schema}" TO web_anon;
+
+GRANT web_anon TO postgrest;
 
 COMMENT ON SCHEMA "${opt.schema}" IS
 $$GTFS REST API
