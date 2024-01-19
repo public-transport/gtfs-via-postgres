@@ -3,3 +3,4 @@ some-days,20190715,1
 some-days,20190716,1
 some-days,20190719,1
 some-days,20190720,1
+only-one-day,20190801,1

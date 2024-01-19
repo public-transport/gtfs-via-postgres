@@ -1,3 +1,5 @@
 trip_id,arrival_time,departure_time,stop_id,stop_sequence,timepoint,pickup_type,drop_off_type
 a-some-days,15:23:00,15:24:00,airport,1,,,
 a-some-days,15:30:00,15:31:00,museum,2,,,
+a-only-one-day,16:59:00,17:00:00,airport-1,3,,,
+a-only-one-day,18:00:00,18:02:00,lake,10,,,
