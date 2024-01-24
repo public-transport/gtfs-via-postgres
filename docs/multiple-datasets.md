@@ -31,3 +31,5 @@ FROM
 ORDER BY paris.stop_loc <-> berlin.stop_loc DESC
 LIMIT 100
 ```
+
+*Note:* During an import, a function `public.gtfs_via_postgres_import_version()` gets created that returns `gtfs-via-postgres`'s version. If that function already exists (because it has been created by a previous import), its return value is compared to `gtfs-via-postgres`'s version, and if these two versions are not equal, the second import will fail. This ensures that multiple imports into the same database can only be made using the exact same `gtfs-via-postgres` version.

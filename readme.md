@@ -179,6 +179,11 @@ Options:
                                     Like --stats-by-route-date, this flag accepts
                                     none, view & materialized-view.
     --schema                      The schema to use for the database. Default: public
+                                    Even when importing into a schema other than `public`,
+                                    a function `public.gtfs_via_postgres_import_version()`
+                                    gets created, to ensure that multiple imports into the
+                                    same database are all made using the same version. See
+                                    also multiple-datasets.md in the docs.
     --postgraphile                Tweak generated SQL for PostGraphile usage.
                                     https://www.graphile.org/postgraphile/
     --postgraphile-password       Password for the PostGraphile PostgreSQL user.
