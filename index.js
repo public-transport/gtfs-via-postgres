@@ -44,12 +44,12 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		statsActiveTripsByHour,
 	} = opt
 	let postgraphilePassword = opt.postgraphilePassword
-	if (postgraphilePassword === null) {
+	if (opt.postgraphile && postgraphilePassword === null) {
 		postgraphilePassword = randomBytes(10).toString('hex')
 		console.error(`PostGraphile PostgreSQL user's password:`, postgraphilePassword)
 	}
 	let postgrestPassword = opt.postgrestPassword
-	if (postgrestPassword === null) {
+	if (opt.postgrest && postgrestPassword === null) {
 		postgrestPassword = randomBytes(10).toString('hex')
 		console.error(`PostrREST PostgreSQL user's password:`, postgrestPassword)
 	}
