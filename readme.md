@@ -153,6 +153,7 @@ Options:
                                     - tpeg-pti: proposed TPEG-PTI-based route types [2]
                                     Default: google-extended
     --trips-without-shape-id      Don't require trips.txt items to have a shape_id.
+                                    Default if shapes.txt has not been provided.
     --routes-without-agency-id    Don't require routes.txt items to have an agency_id.
     --stops-without-level-id      Don't require stops.txt items to have a level_id.
                                     Default if levels.txt has not been provided.

@@ -16,7 +16,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		requireDependencies: false,
 		ignoreUnsupportedFiles: false,
 		routeTypesScheme: 'google-extended',
-		tripsWithoutShapeId: false,
+		tripsWithoutShapeId: !files.some(f => f.name === 'shapes'),
 		routesWithoutAgencyId: false,
 		stopsWithoutLevelId: !files.some(f => f.name === 'levels'),
 		stopsLocationIndex: false,
