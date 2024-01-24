@@ -153,7 +153,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 -- options:
 ${inspect(opt, {compact: false}).split('\n').map(line => '-- ' + line).join('\n')}
 
-\\set ON_ERROR_STOP True
+\\set ON_ERROR_STOP on
 CREATE EXTENSION IF NOT EXISTS postgis;
 ${opt.schema !== 'public' ? `CREATE SCHEMA IF NOT EXISTS "${opt.schema}";` : ''}
 BEGIN;
