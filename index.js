@@ -304,10 +304,6 @@ BEGIN
 	) THEN
 		RAISE WARNING 'Role web_anon already exists. Reassigning owned DB objects to current_user().';
 		REASSIGN OWNED BY web_anon TO SESSION_USER;
-		-- REVOKE ALL PRIVILEGES ON DATABASE current_database() FROM web_anon;
-		-- REVOKE ALL PRIVILEGES ON SCHEMA "${opt.schema}" FROM web_anon;
-		-- REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA "${opt.schema}" FROM web_anon;
-		-- REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA "${opt.schema}" FROM web_anon;
 	ELSE
 		BEGIN
 			CREATE ROLE web_anon NOLOGIN NOINHERIT;
@@ -322,10 +318,6 @@ BEGIN
 	) THEN
 		RAISE WARNING 'Role postgrest already exists. Reassigning owned DB objects to current_user().';
 		REASSIGN OWNED BY postgrest TO SESSION_USER;
-		-- REVOKE ALL PRIVILEGES ON DATABASE current_database() FROM postgrest;
-		-- REVOKE ALL PRIVILEGES ON SCHEMA "${opt.schema}" FROM postgrest;
-		-- REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA "${opt.schema}" FROM postgrest;
-		-- REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA "${opt.schema}" FROM postgrest;
 	ELSE
 		BEGIN
 			CREATE ROLE postgrest LOGIN NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER PASSWORD '${postgrestPassword}';
