@@ -32,8 +32,11 @@
 	"contributors": [
 		"Daniel Langbein <daniel@systemli.org>"
 	],
-	"homepage": "https://github.com/public-transport/gtfs-via-postgres",
-	"repository": "public-transport/gtfs-via-postgres",
+	"homepage": "https://github.com/public-transport/gtfs-via-postgres/tree/4.9.0",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/public-transport/gtfs-via-postgres.git"
+	},
 	"bugs": "https://github.com/public-transport/gtfs-via-postgres/issues",
 	"license": "(Apache-2.0 AND Prosperity-3.0.0)",
 	"funding": [
@@ -73,7 +76,7 @@
 		"test": "./test/index.sh",
 		"lint": "eslint .",
 		"benchmark": "./benchmark/run.sh",
-		"build-binaries": "pkg --public -t node18-macos-x64,node18-macos-arm64,node18-linux-x64,node18-linux-arm64 -o dist/gtfs-via-postgres cli.js",
+		"build-binaries": "pkg --public -t node18-macos-x64,node18-macos-arm64,node18-linux-x64,node18-linux-arm64 -o dist/gtfs-via-postgres cli.js && gzip -k --best dist/gtfs-via-postgres-*",
 		"prepublishOnly": "npm run lint && npm test"
 	}
 }

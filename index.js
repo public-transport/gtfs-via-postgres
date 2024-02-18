@@ -347,7 +347,7 @@ ALTER USER web_anon SET plan_filter.statement_cost_limit = ${opt.postgrestQueryC
 
 COMMENT ON SCHEMA "${opt.schema}" IS
 $$GTFS REST API
-This REST API is created by running [PostgREST](https://postgrest.org/) on top of a [PostgreSQL](https://www.postgresql.org) DB generated using [gtfs-via-postgres](https://github.com/public-transport/gtfs-via-postgres).
+This REST API is created by running [PostgREST](https://postgrest.org/) on top of a [PostgreSQL](https://www.postgresql.org) DB generated using [${pkg.name} v${pkg.version}](${pkg.homepage || pkg.repository}).
 $$;
 ` : ''}
 ` : ''}
