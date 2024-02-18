@@ -29,6 +29,9 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		postgraphilePassword: process.env.POSTGRAPHILE_PGPASSWORD || null,
 		postgrest: false,
 		postgrestPassword: process.env.POSTGREST_PASSWORD || null,
+		// see https://github.com/pgexperts/pg_plan_filter
+		// see also https://www.postgresql.org/docs/14/using-explain.html
+		postgrestQueryCostLimit: null, // or float
 		importMetadata: false,
 		...opt,
 	}
@@ -344,6 +347,11 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA "${opt.schema}" TO web_anon;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA "${opt.schema}" TO web_anon;
 
 GRANT web_anon TO postgrest;
+
+${opt.postgrestQueryCostLimit !== null ? `
+-- If pg_plan_filter is installed, limit the cost of queries made by PostgREST users.
+ALTER USER web_anon SET plan_filter.statement_cost_limit = ${opt.postgrestQueryCostLimit};
+` : ''}
 
 COMMENT ON SCHEMA "${opt.schema}" IS
 $$GTFS REST API

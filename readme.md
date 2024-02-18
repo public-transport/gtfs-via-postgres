@@ -194,6 +194,12 @@ Options:
                                     https://postgrest.org/
     --postgrest-password          Password for the PostgREST PostgreSQL user `web_anon`.
                                     Default: $POSTGREST_PGPASSWORD, fallback random.
+    --postgrest-query-cost-limit  Define a cost limit [1] for queries executed by PostgREST
+                                    on behalf of a user. It is only enforced if
+                                    pg_plan_filter [2] is installed in the database!
+                                    Must be a positive float. Default: none
+                                    [1] https://www.postgresql.org/docs/14/using-explain.html
+                                    [2] https://github.com/pgexperts/pg_plan_filter
     --import-metadata             Create functions returning import metadata:
                                     - gtfs_data_imported_at (timestamp with time zone)
                                     - gtfs_via_postgres_version (text)
