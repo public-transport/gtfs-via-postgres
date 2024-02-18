@@ -39,6 +39,6 @@ jobs:
     with:
       feed-name: VVS
       feed-download-cmd: 'wget -nv -U "gtfs-via-postgres CI" "https://download.vvs.de/gtfs_realtime.zip" -O gtfs.zip'
-      feed-extract-cmd: 'unzip -d gtfs gtfs.zip'
+      feed-extract-cmd: 'unzip -d gtfs gtfs.zip && rm gtfs/ticketing_deep_links.txt gtfs/ticketing_identifiers.txt'
       feed-import-flags: '--trips-without-shape-id --lower-case-lang-codes'
       feed-import-glob: 'gtfs/*.txt'
