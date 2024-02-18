@@ -170,8 +170,8 @@ jobs:
       with:
         push: true
         tags: |
-          ghcr.io/publictransport/gtfs-via-postgres:latest
-          ghcr.io/publictransport/gtfs-via-postgres:4
+          ghcr.io/public-transport/gtfs-via-postgres:latest
+          ghcr.io/public-transport/gtfs-via-postgres:4
         # https://github.com/docker/build-push-action/blob/9472e9021074a3cb3279ba431598b8836d40433f/docs/advanced/cache.md#github-cache
         # https://github.com/moby/buildkit#registry-push-image-and-cache-separately
         cache-from: type=gha
