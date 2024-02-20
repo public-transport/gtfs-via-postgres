@@ -169,4 +169,25 @@ if [[ "$translated_airport_entrance" != "airport-entrance,Eingang,de-DE" ]]; the
 	exit 1
 fi
 
+wheelchair_accessible_arrs_deps_query=$(cat << EOF
+SELECT DISTINCT ON (trip_id)
+	trip_id, wheelchair_accessible
+FROM arrivals_departures
+WHERE route_id = ANY(ARRAY['A', 'B'])
+ORDER BY trip_id
+EOF)
+wheelchair_accessible_arrs_deps_rows="$(psql --csv -t -c "$wheelchair_accessible_arrs_deps_query")"
+wheelchair_accessible_arrs_deps_expected=$(cat << EOF
+a-downtown-all-day,
+a-outbound-all-day,
+b-downtown-on-weekends,accessible
+b-downtown-on-working-days,accessible
+b-outbound-on-weekends,unknown
+b-outbound-on-working-days,unknown
+EOF)
+if [[ "$wheelchair_accessible_arrs_deps_rows" != "$wheelchair_accessible_arrs_deps_expected" ]]; then
+	echo "arrivals_departures: invalid wheelchair_accessible values" 1>&2
+	exit 1
+fi
+
 echo 'works ✔'
