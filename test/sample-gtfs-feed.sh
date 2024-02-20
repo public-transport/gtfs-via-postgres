@@ -190,4 +190,25 @@ if [[ "$wheelchair_accessible_arrs_deps_rows" != "$wheelchair_accessible_arrs_de
 	exit 1
 fi
 
+bikes_allowed_arrs_deps_query=$(cat << EOF
+SELECT DISTINCT ON (trip_id)
+	trip_id, bikes_allowed
+FROM arrivals_departures
+WHERE route_id = ANY(ARRAY['A', 'B'])
+ORDER BY trip_id
+EOF)
+bikes_allowed_arrs_deps_rows="$(psql --csv -t -c "$bikes_allowed_arrs_deps_query")"
+bikes_allowed_arrs_deps_expected=$(cat << EOF
+a-downtown-all-day,
+a-outbound-all-day,
+b-downtown-on-weekends,unknown
+b-downtown-on-working-days,unknown
+b-outbound-on-weekends,allowed
+b-outbound-on-working-days,allowed
+EOF)
+if [[ "$bikes_allowed_arrs_deps_rows" != "$bikes_allowed_arrs_deps_expected" ]]; then
+	echo "arrivals_departures: invalid bikes_allowed values" 1>&2
+	exit 1
+fi
+
 echo 'works ✔'
