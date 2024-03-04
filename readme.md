@@ -14,7 +14,7 @@
 - ✨ joins `stop_times.txt`/`frequencies.txt`, `calendar.txt`/`calendar_dates.txt`, `trips.txt`, `route.txt` & `stops.txt` into [views](https://www.postgresql.org/docs/14/sql-createview.html) for straightforward data analysis (see below)
 - 🚀 is carefully optimised to let PostgreSQL's query planner do its magic, yielding quick lookups even with large datasets (see [performance section](#performance))
 - ✅ validates and imports `translations.txt`
-- ✨ exposes (almost) all data via GraphQL using [PostGraphile](https://www.graphile.org/postgraphile/introduction/)
+- ✨ exposes (almost) all data via GraphQL using [PostGraphile](https://www.graphile.org/postgraphile/introduction/), and as a RESTful API using [PostgREST](https://postgrest.org/)
 
 
 ## Installation
@@ -408,7 +408,7 @@ I don't use it because
 
 - it doesn't handle GTFS Time values correctly ([1](https://github.com/evansiroky/gtfs-sequelize/blob/ba101fa82e730694c536c43e615ff38fd264a65b/lib/gtfsLoader.js#L616-L617)/[2](https://github.com/evansiroky/gtfs-sequelize/blob/ba101fa82e730694c536c43e615ff38fd264a65b/lib/gtfsLoader.js#L24-L33), cheked on 2022-03-01)
 - it doesn't provide much tooling for analyzing all arrivals/departures (checked on 2022-03-01)
-- some of its operations are quite slow, because they fetch relatved records of a record via JS instead of using `JOIN`s
+- some of its operations are quite slow, because they fetch related records of a record via JS instead of using `JOIN`s
 
 ### gtfs-sql-importer
 
