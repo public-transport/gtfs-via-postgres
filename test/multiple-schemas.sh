@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -u
 set -o pipefail
 cd "$(dirname $0)"
 set -x
@@ -72,3 +73,5 @@ if ../cli.js -d --trips-without-shape-id \
 	1>&2 echo "re-import with incompatible version didn't fail"
 	exit 1
 fi
+
+echo 'works ✔'

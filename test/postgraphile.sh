@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -u
 set -o pipefail
 cd "$(dirname $0)"
 set -x
@@ -28,4 +29,4 @@ curl -X POST 'http://localhost:3000/graphql' -H 'Content-Type: application/json'
 
 git diff --exit-code sample-gtfs-feed-postgraphile-test.res.json "$actual_path"
 
-# echo 'works ✔'
+echo 'works ✔'

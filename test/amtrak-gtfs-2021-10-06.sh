@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -u
 set -o pipefail
 cd "$(dirname $0)"
 set -x
@@ -132,3 +133,5 @@ if [ "$stop_id" != 'PDC' ]; then
 	1>&2 echo "$stops_url: expected PDC, got $stop_id"
 	exit 1
 fi
+
+echo 'works ✔'

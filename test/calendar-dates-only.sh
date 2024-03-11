@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -u
 set -o pipefail
 cd "$(dirname $0)"
 set -x
@@ -48,9 +49,10 @@ fi
 
 wheelchair_boarding_query=$(cat << EOF
 SELECT DISTINCT ON (stop_id)
-	stop_id,wheelchair_boarding
+	stop_id,
+	wheelchair_boarding
 FROM arrivals_departures
-ORDER BY stop_id
+ORDER BY stop_id, trip_id
 EOF)
 wheelchair_boarding_rows="$(psql --csv -t -c "$wheelchair_boarding_query")"
 wheelchair_boarding_expected="$(echo -e "airport,accessible\nairport-1,not_accessible\nlake,no_info_or_inherit\nmuseum,no_info_or_inherit")"
@@ -58,3 +60,5 @@ if [[ "$wheelchair_boarding_rows" != "$wheelchair_boarding_expected" ]]; then
 	echo "invalid wheelchair_boarding values" 1>&2
 	exit 1
 fi
+
+echo 'works ✔'
