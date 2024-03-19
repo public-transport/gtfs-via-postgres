@@ -1,7 +1,7 @@
 {
 	"name": "gtfs-via-postgres",
 	"description": "Process GTFS using PostgreSQL.",
-	"version": "4.9.1",
+	"version": "4.10.0",
 	"main": "lib/index.js",
 	"bin": {
 		"gtfs-to-sql": "cli.js",
@@ -30,7 +30,8 @@
 	],
 	"author": "Jannis R <mail@jannisr.de>",
 	"contributors": [
-		"Daniel Langbein <daniel@systemli.org>"
+		"Daniel Langbein <daniel@systemli.org>",
+		"Magnus Burton <magnus.burton@me.com>"
 	],
 	"homepage": "https://github.com/public-transport/gtfs-via-postgres/tree/4.9.0",
 	"repository": {
