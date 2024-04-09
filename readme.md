@@ -329,7 +329,7 @@ Let's consider two examples:
 
 `gtfs-via-postgres` always prioritizes correctness over speed. Because it follows the GTFS semantics, when filtering `arrivals_departures` by *absolute* departure date+time, it cannot automatically filter `service_days` (which is `calendar` and `calendar_dates` combined), because **even a date *before* the date of the desired departure time frame might still end up *within*, when combined with a `departure_time` of e.g. `27:30:00`**; Instead, it has to consider all `service_days` and apply the `departure_time` to all of them to check if they're within the range.
 
-However, if you determine your feed's largest `arrival_time`/`departure_time`, you can filter on `date` when querying `arrivals_departures`; This allows PostgreSQL to reduce the number of joins and calendar calculations by orders of magnitude, speeding up your queries significantly. `gtfs-via-postgres` provides two helper functions `largest_arrival_time()` & `largest_departure_time()` for this.
+However, if you determine your feed's largest `arrival_time`/`departure_time`, you can filter on `date` when querying `arrivals_departures`; This allows PostgreSQL to reduce the number of joins and calendar calculations by orders of magnitude, speeding up your queries significantly. `gtfs-via-postgres` provides two low-level helper functions `largest_arrival_time()` & `largest_departure_time()` for this, as well as two high-level helper functions `dates_filter_min(t_min)` & `dates_filter_max(t_max)` (see below).
 
 For example, when querying all *absolute* departures at `de:11000:900120003` (*S Ostkreuz Bhf (Berlin)*) between `2022-03-23T12:30+01` and  `2022-03-23T12:35+01` within the [2022-02-25 *VBB* feed](https://vbb-gtfs.jannisr.de/2022-02-25/), filtering by `date` speeds it up nicely (Apple M1, PostgreSQL 14.2):
 
@@ -343,7 +343,7 @@ For example, when querying all *absolute* departures at `de:11000:900120003` (*S
 *none* | `2022-03-13` >= `date` < `2022-04-08` | 34s | ~35m
 *none* | `2022-03-22` > `date` < `2022-03-24` | 2.4s | ~1523k
 
-`gtfs-via-postgres` provides 2 helper functions `dates_filter_min(t_min)` & `dates_filter_max(t_max)` for this. When filtering by `t_departure` (absolute departure date+time), `t_min` is the lower `t_departure` bound, whereas `t_max` is the upper bound. The VBB example above can be queried like this:
+Using `dates_filter_min(t_min)` & `dates_filter_max(t_max)`, we can easily filter by `date`. When filtering by `t_departure` (absolute departure date+time), `t_min` is the lower `t_departure` bound, whereas `t_max` is the upper bound. The VBB example above can be queried like this:
 
 ```sql
 SELECT *
