@@ -11,7 +11,8 @@ env | grep '^PG' || true
 psql -c 'create database sample_gtfs_feed'
 export PGDATABASE='sample_gtfs_feed'
 
-../cli.js -d --trips-without-shape-id -- \
+# --lower-case-lang-codes: Even though sample-gtfs-feed@0.11.2 *does not* contain invalid-case language codes (e.g. de_aT or de-at), we check that with --lower-case-lang-codes valid ones are still accepted.
+../cli.js -d --trips-without-shape-id --lower-case-lang-codes -- \
 	../node_modules/sample-gtfs-feed/gtfs/agency.txt \
 	../node_modules/sample-gtfs-feed/gtfs/calendar.txt \
 	../node_modules/sample-gtfs-feed/gtfs/calendar_dates.txt \
