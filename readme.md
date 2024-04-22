@@ -68,6 +68,8 @@ env PGDATABASE=postgres psql -c 'create database vbb_2022_02_25'
 export PGDATABASE=vbb_2022_02_25
 ```
 
+*Note*: `gtfs-via-postgres` generates SQL that contains the `CREATE EXTENSION postgis` instruction. For this to work, the PostgreSQL user you're connecting as needs the `CREATE` [permission](https://www.postgresql.org/docs/14/ddl-priv.html) on the database. Also, the `postgis` extension must either be marked as trusted (by putting `trusted = true` into `$(pg_config --sharedir)/extension/postgis.control`), or your user must be a superuser.
+
 Install `gtfs-via-postgres` and use it to import the GTFS data:
 
 ```sh
