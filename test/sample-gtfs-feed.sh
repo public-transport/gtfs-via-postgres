@@ -62,7 +62,7 @@ if [[ "$freq_arr_dep1" != "1,1552028340,1552028400,1,1" ]]; then
 	exit 1
 fi
 freq_arr_dep2=$(psql --csv -t -c "$arrs_deps_b_downtown_on_working_days" | head -n 2 | tail -n 1)
-if [[ "$freq_arr_dep2" != "1,1552028640,1552028700,1,1" ]]; then
+if [[ "$freq_arr_dep2" != "1,1552028640,1552028700,1,2" ]]; then
 	echo "invalid/missing frequencies-based arrival/departure: $freq_arr_dep1" 1>&2
 	exit 1
 fi
@@ -209,6 +209,22 @@ b-outbound-on-working-days,allowed
 EOF)
 if [[ "$bikes_allowed_arrs_deps_rows" != "$bikes_allowed_arrs_deps_expected" ]]; then
 	echo "arrivals_departures: invalid bikes_allowed values" 1>&2
+	exit 1
+fi
+
+frequencies_it_query=$(cat << EOF
+SELECT t_departure, stop_sequence, stop_id frequencies_it
+FROM arrivals_departures
+WHERE trip_id = 'b-downtown-on-working-days' AND "date" = '2019-05-29' AND frequencies_it = 3
+EOF)
+frequencies_it_rows="$(psql --csv -t -c "$frequencies_it_query")"
+frequencies_it_expected=$(cat << EOF
+2019-05-29 08:10:00+02,1,airport
+2019-05-29 08:18:00+02,3,lake
+2019-05-29 08:27:00+02,5,center
+EOF)
+if [[ "$frequencies_it_rows" != "$frequencies_it_expected" ]]; then
+	echo "arrivals_departures with frequencies_it=3" 1>&2
 	exit 1
 fi
 
