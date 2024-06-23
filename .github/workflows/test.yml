@@ -16,9 +16,13 @@ jobs:
       matrix:
         node-version:
           - '16.x'
+          - '18.x'
+          - '20.x'
+          - '22.x'
         postgis-docker-tag:
-          - '14-3.3-alpine'
-          - '15-3.3-alpine'
+          - '14-3.4-alpine'
+          - '15-3.4-alpine'
+          - '16-3.4-alpine'
 
     steps:
     - name: checkout
