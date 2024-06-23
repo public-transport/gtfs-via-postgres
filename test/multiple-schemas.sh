@@ -45,7 +45,8 @@ WHERE (
 	OR a.level_id IS DISTINCT FROM b.level_id
 	OR a.platform_code IS DISTINCT FROM b.platform_code
 )
-EOF)
+EOF
+)
 
 unequal_stops_1=$(psql --csv -t -c "$nr_of_unequal_stops" | head -n 1)
 if [[ "$unequal_stops_1" -ne 0 ]]; then
@@ -63,7 +64,8 @@ AS \$\$
 	SELECT '0.1.2'
 \$\$
 LANGUAGE SQL
-EOF)"
+EOF
+)"
 
 # expect another import to fail
 if ../cli.js -d --trips-without-shape-id \

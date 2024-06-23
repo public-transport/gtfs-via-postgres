@@ -31,7 +31,8 @@ select extract(epoch from t_arrival)::integer as t_arrival
 from arrivals_departures
 where route_id = 'D'
 order by t_arrival
-EOF)
+EOF
+)
 
 arr1=$(psql --csv -t -c "$query" | head -n 1)
 if [[ "$arr1" != "1553993700" ]]; then
@@ -55,7 +56,8 @@ arrs_deps_b_downtown_on_working_days=$(cat << EOF
 	WHERE trip_id = 'b-downtown-on-working-days'
 	ORDER BY t_departure
 	LIMIT 2
-EOF)
+EOF
+)
 freq_arr_dep1=$(psql --csv -t -c "$arrs_deps_b_downtown_on_working_days" | head -n 1)
 if [[ "$freq_arr_dep1" != "1,1552028340,1552028400,1,1" ]]; then
 	echo "invalid/missing frequencies-based arrival/departure: $freq_arr_dep1" 1>&2
@@ -77,7 +79,8 @@ cons_b_downtown_on_working_days=$(cat << EOF
 	WHERE trip_id = 'b-downtown-on-working-days'
 	ORDER BY t_departure
 	LIMIT 1
-EOF)
+EOF
+)
 freq_con1=$(psql --csv -t -c "$cons_b_downtown_on_working_days")
 if [[ "$freq_con1" != "1,1552028400,3,1552028760" ]]; then
 	echo "invalid/missing frequencies-based connection: $freq_con1" 1>&2
@@ -91,7 +94,8 @@ connection_during_dst=$(cat << EOF
 	FROM connections
 	WHERE trip_id = 'during-dst-1'
 	AND t_departure = '2019-03-31T01:58+01'
-EOF)
+EOF
+)
 dst1=$(psql --csv -t -c "$connection_during_dst" | head -n 1)
 if [[ "$dst1" != "0,1553993880" ]]; then
 	echo "invalid/missing DST t_departure: $dst1" 1>&2
@@ -107,7 +111,8 @@ airport_levels=$(cat << EOF
 	WHERE level_id LIKE 'airport-%'
 	ORDER BY level_index
 	LIMIT 1
-EOF)
+EOF
+)
 lvl1=$(psql --csv -t -c "$airport_levels" | head -n 1)
 if [[ "$lvl1" != "airport-level-0,0,ground level" ]]; then
 	echo "invalid/missing lowest airport-% level: $lvl1" 1>&2
@@ -122,7 +127,8 @@ airportPathway=$(cat << EOF
 	WHERE from_stop_id = 'airport-entrance'
 	AND to_stop_id = 'airport-1-access'
 	LIMIT 1
-EOF)
+EOF
+)
 pw1=$(psql --csv -t -c "$airportPathway" | head -n 1)
 if [[ "$pw1" != "escalator,f" ]]; then
 	echo "invalid/missing DST t_departure: $pw1" 1>&2
@@ -135,7 +141,8 @@ timepoint_exact=$(cat << EOF
 	WHERE timepoint = 'exact'
 	AND stop_sequence_consec = 0
 	LIMIT 1
-EOF)
+EOF
+)
 exact1=$(psql --csv -t -c "$timepoint_exact" | head -n 1)
 if [[ "$exact1" != "exact" ]]; then
 	echo "invalid/missing DST t_departure: $exact1" 1>&2
@@ -148,7 +155,8 @@ stops_translations=$(cat << EOF
 	WHERE table_name = 'stops' AND field_name = 'stop_name'
 	AND language = 'de-DE'
 	AND record_id = 'airport-entrance'
-EOF)
+EOF
+)
 airport_entrance_translation=$(psql --csv -t -c "$stops_translations")
 if [[ "$airport_entrance_translation" != "Eingang,de-DE" ]]; then
 	echo "invalid/missing stop translation: $airport_entrance_translation" 1>&2
@@ -163,7 +171,8 @@ stops_translated=$(cat << EOF
 	FROM stops_translated
 	WHERE (stop_name_lang IS NULL or stop_name_lang = 'de-DE')
 	AND stop_id = 'airport-entrance'
-EOF)
+EOF
+)
 translated_airport_entrance=$(psql --csv -t -c "$stops_translated")
 if [[ "$translated_airport_entrance" != "airport-entrance,Eingang,de-DE" ]]; then
 	echo "invalid/missing translated stop: $translated_airport_entrance" 1>&2
@@ -176,7 +185,8 @@ SELECT DISTINCT ON (trip_id)
 FROM arrivals_departures
 WHERE route_id = ANY(ARRAY['A', 'B'])
 ORDER BY trip_id
-EOF)
+EOF
+)
 wheelchair_accessible_arrs_deps_rows="$(psql --csv -t -c "$wheelchair_accessible_arrs_deps_query")"
 wheelchair_accessible_arrs_deps_expected=$(cat << EOF
 a-downtown-all-day,
@@ -185,7 +195,8 @@ b-downtown-on-weekends,accessible
 b-downtown-on-working-days,accessible
 b-outbound-on-weekends,unknown
 b-outbound-on-working-days,unknown
-EOF)
+EOF
+)
 if [[ "$wheelchair_accessible_arrs_deps_rows" != "$wheelchair_accessible_arrs_deps_expected" ]]; then
 	echo "arrivals_departures: invalid wheelchair_accessible values" 1>&2
 	exit 1
@@ -197,7 +208,8 @@ SELECT DISTINCT ON (trip_id)
 FROM arrivals_departures
 WHERE route_id = ANY(ARRAY['A', 'B'])
 ORDER BY trip_id
-EOF)
+EOF
+)
 bikes_allowed_arrs_deps_rows="$(psql --csv -t -c "$bikes_allowed_arrs_deps_query")"
 bikes_allowed_arrs_deps_expected=$(cat << EOF
 a-downtown-all-day,
@@ -206,7 +218,8 @@ b-downtown-on-weekends,unknown
 b-downtown-on-working-days,unknown
 b-outbound-on-weekends,allowed
 b-outbound-on-working-days,allowed
-EOF)
+EOF
+)
 if [[ "$bikes_allowed_arrs_deps_rows" != "$bikes_allowed_arrs_deps_expected" ]]; then
 	echo "arrivals_departures: invalid bikes_allowed values" 1>&2
 	exit 1
@@ -216,13 +229,15 @@ frequencies_it_query=$(cat << EOF
 SELECT t_departure, stop_sequence, stop_id frequencies_it
 FROM arrivals_departures
 WHERE trip_id = 'b-downtown-on-working-days' AND "date" = '2019-05-29' AND frequencies_it = 3
-EOF)
+EOF
+)
 frequencies_it_rows="$(psql --csv -t -c "$frequencies_it_query")"
 frequencies_it_expected=$(cat << EOF
 2019-05-29 08:10:00+02,1,airport
 2019-05-29 08:18:00+02,3,lake
 2019-05-29 08:27:00+02,5,center
-EOF)
+EOF
+)
 if [[ "$frequencies_it_rows" != "$frequencies_it_expected" ]]; then
 	echo "arrivals_departures with frequencies_it=3" 1>&2
 	exit 1
@@ -236,7 +251,8 @@ SELECT
 	stop_url, stop_url_lang
 FROM stops_translated
 WHERE stop_id LIKE 'airport%'
-EOF)
+EOF
+)
 stops_translated_rows="$(psql --csv -t -c "$stops_translated_query")"
 stops_translated_expected=$(cat << EOF
 airport,International Airport (ABC),,train station at the Internationl Airport (ABC),,https://example.org#AT,de-AT
@@ -246,7 +262,8 @@ airport-2,Platform 2,,Platform 2,,,
 airport-2-access,,,,,,
 airport-2-boarding,pl. 2 boarding,,platform 2 boarding area,,,
 airport-entrance,Eingang,de-DE,,,,
-EOF)
+EOF
+)
 if [[ "$stops_translated_rows" != "$stops_translated_expected" ]]; then
 	echo "stops_translated with stop_id=airport*" 1>&2
 	exit 1

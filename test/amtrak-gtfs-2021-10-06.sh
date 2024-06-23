@@ -29,7 +29,8 @@ from amtrak.arrivals_departures
 where stop_id = 'BHM' -- Birmingham
 and date = '2021-11-26'
 order by t_arrival
-EOF)
+EOF
+)
 
 # 2021-11-26T15:15:00-05:00
 arr1=$(psql --csv -t -c "$query" | head -n 1)
@@ -63,7 +64,8 @@ FROM amtrak.stats_by_route_date
 WHERE route_id = '40751' -- Acela
 AND date = '2021-11-26'
 AND is_effective = True
-EOF)
+EOF
+)
 acelaStat=$(psql --csv -t -c "$acelaStatQuery" | tail -n 1)
 if [[ "$acelaStat" != "16,190" ]]; then
 	echo "invalid stats for route 40751 (Acela) on 2021-11-26: $acelaStat" 1>&2
@@ -76,7 +78,8 @@ FROM amtrak.stats_by_agency_route_stop_hour
 WHERE route_id = '40751' -- Acela
 AND stop_id = 'PHL' -- Philadelphia
 AND effective_hour = '2022-07-24T09:00-05'
-EOF)
+EOF
+)
 acelaPhillyStat=$(psql --csv -t -c "$acelaPhillyStatQuery" | tail -n 1)
 if [[ "$acelaPhillyStat" != "2" ]]; then
 	echo "invalid stats for route 40751 (Acela) at PHL (Philadelphia) on 2021-11-26: $acelaPhillyStat" 1>&2
@@ -87,7 +90,8 @@ nrOfActiveTripsQuery=$(cat << EOF
 SELECT nr_of_active_trips
 FROM amtrak.stats_active_trips_by_hour
 WHERE "hour" = '2021-11-26T04:00-05'
-EOF)
+EOF
+)
 # Note: I'm not sure if 127 is correct, but it is in the right ballpark. 🙈
 # The following query yields 150 connections, and it doesn't contain those who depart earlier and arrive later.
 # SELECT DISTINCT ON (trip_id) *
