@@ -3,6 +3,8 @@ on:
   push:
     tags:
       - '*'
+    branches:
+      - debug-ci # todo: remove
 jobs:
   test:
     name: run tests
