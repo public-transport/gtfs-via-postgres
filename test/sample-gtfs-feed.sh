@@ -228,4 +228,28 @@ if [[ "$frequencies_it_rows" != "$frequencies_it_expected" ]]; then
 	exit 1
 fi
 
+stops_translated_query=$(cat << EOF
+SELECT
+	stop_id,
+	stop_name, stop_name_lang,
+	stop_desc, stop_desc_lang,
+	stop_url, stop_url_lang
+FROM stops_translated
+WHERE stop_id LIKE 'airport%'
+EOF)
+stops_translated_rows="$(psql --csv -t -c "$stops_translated_query")"
+stops_translated_expected=$(cat << EOF
+airport,International Airport (ABC),,train station at the Internationl Airport (ABC),,https://example.org#AT,de-AT
+airport-1,Gleis 1,de-DE,Platform 1,,,
+airport-1-access,,,,,,
+airport-2,Platform 2,,Platform 2,,,
+airport-2-access,,,,,,
+airport-2-boarding,pl. 2 boarding,,platform 2 boarding area,,,
+airport-entrance,Eingang,de-DE,,,,
+EOF)
+if [[ "$stops_translated_rows" != "$stops_translated_expected" ]]; then
+	echo "stops_translated with stop_id=airport*" 1>&2
+	exit 1
+fi
+
 echo 'works ✔'
