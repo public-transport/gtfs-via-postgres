@@ -255,7 +255,7 @@ EOF
 )
 stops_translated_rows="$(psql --csv -t -c "$stops_translated_query")"
 stops_translated_expected=$(cat << EOF
-airport,International Airport (ABC),,train station at the Internationl Airport (ABC),,https://example.org#AT,de-AT
+airport,International Airport (ABC),,train station at the Internationl Airport (ABC),,https://fta.example.org/stations/airport.html,
 airport-1,Gleis 1,de-DE,Platform 1,,,
 airport-1-access,,,,,,
 airport-2,Platform 2,,Platform 2,,,
