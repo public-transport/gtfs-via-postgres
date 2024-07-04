@@ -262,6 +262,7 @@ airport-2,Platform 2,,Platform 2,,,
 airport-2-access,,,,,,
 airport-2-boarding,pl. 2 boarding,,platform 2 boarding area,,,
 airport-entrance,Eingang,de-DE,,,,
+airport-entrance,Entrada,es-ES,,,,
 EOF
 )
 if [[ "$stops_translated_rows" != "$stops_translated_expected" ]]; then
