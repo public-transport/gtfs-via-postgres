@@ -22,7 +22,6 @@ trap 'exit_code=$?; kill -- $(jobs -p); exit $exit_code' SIGINT SIGTERM EXIT
 ../scripts/run-postgraphile.js &
 sleep 2
 
-expected="$(cat sample-gtfs-feed-postgraphile-test.res.json)"
 body=$(node -e 'process.stdout.write(JSON.stringify({query: fs.readFileSync("sample-gtfs-feed-postgraphile-test.graphql", {encoding: "utf8"})}))')
 actual_path="$(mktemp -t sample-gtfs-feed-postgraphile-test-XXX)"
 curl -X POST 'http://localhost:3000/graphql' -H 'Content-Type: application/json' -H 'Accept: application/json' --data "$body" -fsS | jq -r --tab . >"$actual_path"
