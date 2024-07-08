@@ -1,5 +1,3 @@
-SELECT * from bench(
-'SELECT count(*)
+SELECT count(*)
 FROM arrivals_departures
-WHERE stop_id = ''definitely-non-existent'''
-);
+WHERE stop_id = 'definitely-non-existent'

@@ -15,7 +15,7 @@ pipeline(
 			if (firstRow) {
 				firstRow = false
 
-				const keys = Object.keys(row)
+				const keys = Object.keys(row).filter(key => key !== 'filename')
 				process.stdout.write(`| ${keys.join(' | ')} |\n`)
 				process.stdout.write(`| ${keys.map(_ => '-').join(' | ')} |\n`)
 			}

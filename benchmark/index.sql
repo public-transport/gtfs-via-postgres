@@ -1,5 +1,6 @@
 BEGIN;
 CREATE TEMP TABLE _benchmark (
+	filename TEXT,
 	query TEXT,
 	avg FLOAT,
 	min FLOAT,
@@ -14,7 +15,7 @@ CREATE TEMP TABLE _benchmark (
 
 -- slightly modified from "How to benchmark PostgreSQL queries well"
 -- https://www.tangramvision.com/blog/how-to-benchmark-postgresql-queries-well#sql-function-with-clock_timestamp
-CREATE OR REPLACE FUNCTION bench(_query TEXT, _iterations INTEGER = 100)
+CREATE OR REPLACE FUNCTION bench(_filename TEXT, _query TEXT, _iterations INTEGER = 100)
 RETURNS void
 AS $$
 DECLARE
@@ -41,6 +42,7 @@ BEGIN
 
 	INSERT INTO _benchmark
 	SELECT
+		_filename,
 		_query,
 		round(avg(elapsed)::numeric, 0),
 		min(elapsed),
@@ -58,26 +60,46 @@ END
 $$
 LANGUAGE plpgsql;
 
-\i stops_by_distance.sql
-\i arrs_deps_by_route_name_and_time.sql
-\i arrs_deps_by_station_and_time.sql
-\i arrs_deps_by_station_and_time_seq_0.sql
-\i arrs_deps_by_stop_and_time.sql
-\i arrs_deps_by_trip_and_date.sql
-\i arrs_deps_by_stop.sql
-\i arrs_deps_by_non_existent_stop.sql
-\i arrs_deps_by_time.sql
-\i arrs_deps_by_time_manual.sql
-\i connections_by_route_name_and_time.sql
-\i connections_by_station_and_time.sql
-\i connections_by_station_and_time_seq_0.sql
-\i connections_by_stop_and_time.sql
-\i connections_by_trip_and_date.sql
-\i connections_by_stop.sql
-\i connections_by_non_existent_stop.sql
-\i connections_by_time.sql
-\i connections_by_time_manual.sql
-\i stats_by_route_date.sql
+\set query `cat arrs_deps_by_non_existent_stop.sql`
+SELECT bench('arrs_deps_by_non_existent_stop.sql', :'query');
+\set query `cat arrs_deps_by_route_name_and_time.sql`
+SELECT bench('arrs_deps_by_route_name_and_time.sql', :'query');
+\set query `cat arrs_deps_by_station_and_time.sql`
+SELECT bench('arrs_deps_by_station_and_time.sql', :'query', 40);
+\set query `cat arrs_deps_by_station_and_time_seq_0.sql`
+SELECT bench('arrs_deps_by_station_and_time_seq_0.sql', :'query', 50);
+\set query `cat arrs_deps_by_stop.sql`
+SELECT bench('arrs_deps_by_stop.sql', :'query');
+\set query `cat arrs_deps_by_stop_and_time.sql`
+SELECT bench('arrs_deps_by_stop_and_time.sql', :'query');
+\set query `cat arrs_deps_by_time.sql`
+SELECT bench('arrs_deps_by_time.sql', :'query', 10);
+\set query `cat arrs_deps_by_time_manual.sql`
+SELECT bench('arrs_deps_by_time_manual.sql', :'query', 10);
+\set query `cat arrs_deps_by_trip_and_date.sql`
+SELECT bench('arrs_deps_by_trip_and_date.sql', :'query');
+\set query `cat connections_by_non_existent_stop.sql`
+SELECT bench('connections_by_non_existent_stop.sql', :'query');
+\set query `cat connections_by_route_name_and_time.sql`
+SELECT bench('connections_by_route_name_and_time.sql', :'query');
+\set query `cat connections_by_station_and_time.sql`
+SELECT bench('connections_by_station_and_time.sql', :'query', 40);
+\set query `cat connections_by_station_and_time_seq_0.sql`
+SELECT bench('connections_by_station_and_time_seq_0.sql', :'query', 50);
+\set query `cat connections_by_stop.sql`
+SELECT bench('connections_by_stop.sql', :'query');
+\set query `cat connections_by_stop_and_time.sql`
+SELECT bench('connections_by_stop_and_time.sql', :'query');
+\set query `cat connections_by_time.sql`
+SELECT bench('connections_by_time.sql', :'query', 7);
+\set query `cat connections_by_time_manual.sql`
+SELECT bench('connections_by_time_manual.sql', :'query', 7);
+\set query `cat connections_by_trip_and_date.sql`
+SELECT bench('connections_by_trip_and_date.sql', :'query');
+\set query `cat stats_by_route_date.sql`
+SELECT bench('stats_by_route_date.sql', :'query', 10);
+\set query `cat stops_by_distance.sql`
+SELECT bench('stops_by_distance.sql', :'query');
 
 SELECT * FROM _benchmark;
 

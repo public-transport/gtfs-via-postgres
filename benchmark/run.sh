@@ -7,4 +7,4 @@ set -x
 
 psql -c 'VACUUM ANALYZE'
 
-psql -q -b --csv -f index.sql
+psql -q -b -v 'ON_ERROR_STOP=1' --csv -f index.sql
