@@ -1,4 +1,5 @@
 {
+	"private": true,
 	"name": "gtfs-via-postgres",
 	"description": "Process GTFS using PostgreSQL.",
 	"version": "4.10.2",
@@ -55,24 +56,16 @@
 		"node": ">=16.17"
 	},
 	"dependencies": {
-		"csv-stringify": "^6.2.0",
 		"debug": "^4.3.3",
+		"duckdb": "^1.0.0",
 		"gtfs-utils": "^5.1.0",
 		"sequencify": "0.0.7"
 	},
 	"devDependencies": {
-		"@graphile-contrib/pg-simplify-inflector": "^6.1.0",
-		"@graphile/postgis": "^0.2.0-0",
 		"csv-parser": "^3.0.0",
 		"eslint": "^8.33.0",
 		"pkg": "^5.3.2",
-		"postgraphile": "^4.12.11",
 		"sample-gtfs-feed": "^0.13.0"
-	},
-	"peerDependencies": {
-		"@graphile-contrib/pg-simplify-inflector": "^6.1.0",
-		"@graphile/postgis": "^0.2.0-0",
-		"postgraphile": "^4.12.11"
 	},
 	"scripts": {
 		"test": "./test/index.sh",

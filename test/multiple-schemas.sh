@@ -11,18 +11,17 @@ env | grep '^PG' || true
 unzip -q -j -n amtrak-gtfs-2021-10-06.zip -d amtrak-gtfs-2021-10-06
 ls -lh amtrak-gtfs-2021-10-06
 
-psql -c 'create database multiple_schemas'
-export PGDATABASE='multiple_schemas'
+path_to_db="$(mktemp -d -t gtfs)/multiple-schemas.duckdb"
 
 ../cli.js -d --trips-without-shape-id \
 	--schema one \
-	-- amtrak-gtfs-2021-10-06/*.txt \
-	| sponge | psql -b
+	"$path_to_db" \
+	-- amtrak-gtfs-2021-10-06/*.txt
 
 ../cli.js -d --trips-without-shape-id \
 	--schema two \
-	-- amtrak-gtfs-2021-10-06/*.txt \
-	| sponge | psql -b
+	"$path_to_db" \
+	-- amtrak-gtfs-2021-10-06/*.txt
 
 # https://dba.stackexchange.com/a/72656
 nr_of_unequal_stops=$(cat << EOF
@@ -48,7 +47,7 @@ WHERE (
 EOF
 )
 
-unequal_stops_1=$(psql --csv -t -c "$nr_of_unequal_stops" | head -n 1)
+unequal_stops_1=$(duckdb -csv -noheader -c "$nr_of_unequal_stops" | head -n 1)
 if [[ "$unequal_stops_1" -ne 0 ]]; then
 	1>&2 echo "$unequal_stops_1 unequal stops between one.stops & two.stops"
 	exit 1
@@ -57,7 +56,7 @@ fi
 # todo: assert that more tables are equal?
 
 # put an incompatible version
-psql -c "$(cat << EOF
+duckdb -c "$(cat << EOF
 CREATE OR REPLACE FUNCTION public.gtfs_via_postgres_import_version()
 RETURNS TEXT
 AS \$\$
@@ -70,8 +69,8 @@ EOF
 # expect another import to fail
 if ../cli.js -d --trips-without-shape-id \
 	--schema three \
-	-- amtrak-gtfs-2021-10-06/*.txt \
-	| sponge | psql -b; then
+	"$path_to_db" \
+	-- amtrak-gtfs-2021-10-06/*.txt; then
 	1>&2 echo "re-import with incompatible version didn't fail"
 	exit 1
 fi
