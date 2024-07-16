@@ -76,6 +76,9 @@ const {
 		},
 		'import-metadata': {
 			type: 'boolean',
+		},
+		'folder-mode': {
+			type: 'boolean',
 		}
 	},
 	allowPositionals: true,
@@ -148,6 +151,10 @@ Options:
                                     - gtfs_data_imported_at (timestamp with time zone)
                                     - gtfs_via_postgres_version (text)
                                     - gtfs_via_postgres_options (jsonb)
+    --folder-mode                 Use folder name instead of file wildcard. Script automatically
+                                    parses file names in specified folder.
+                                    This mode works for Windows machines.
+                                    Example: gtfs-to-sql --folder-mode -- gtfs
 Examples:
     gtfs-to-sql some-gtfs/*.txt | sponge | psql -b # import into PostgreSQL
     gtfs-to-sql -u -- some-gtfs/*.txt | gzip >gtfs.sql.gz # generate a gzipped SQL dump
@@ -167,11 +174,7 @@ const {basename, extname} = require('path')
 const {pipeline} = require('stream')
 const convertGtfsToSql = require('./index')
 const DataError = require('./lib/data-error')
-
-const files = args.map((file) => {
-	const name = basename(file, extname(file))
-	return {name, file}
-})
+const {readdirSync} = require('fs');
 
 const opt = {
 	silent: !!flags.silent,
@@ -188,6 +191,7 @@ const opt = {
 	postgraphile: !!flags.postgraphile,
 	postgrest: !!flags.postgrest,
 	importMetadata: !!flags['import-metadata'],
+	folderMode: !!flags['folder-mode'],
 }
 if ('stops-without-level-id' in flags) {
 	opt.stopsWithoutLevelId = flags['stops-without-level-id']
@@ -209,6 +213,14 @@ if ('postgrest-query-cost-limit' in flags) {
 	}
 	opt.lowerCaseLanguageCodes = limit
 }
+
+const files = (opt.folderMode ? readdirSync(args[0]) : args).map((file) => {
+	const name = basename(file, extname(file))
+	return {
+		name,
+		file: opt.folderMode ? `${args[0]}/${file}` : file
+	}
+});
 
 pipeline(
 	convertGtfsToSql(files, opt),
