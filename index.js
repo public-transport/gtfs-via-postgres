@@ -208,6 +208,22 @@ LANGUAGE sql;
 	const nrOfRowsByName = new Map()
 	const workingState = {
 		nrOfRowsByName,
+		onlyAgencyId: null,
+	}
+
+	// The GTFS spec allows agency.txt to be empty/null if there is exactly one agency in the feed.
+	// It seems that GTFS has allowed this at least since 2016:
+	// https://github.com/google/transit/blame/217e9bf/gtfs/spec/en/reference.md#L544-L554
+	// However, because we have to use left join instead of an inner join in tables referencing `agency`, this prevents the PostgreSQL query planner from doing some filter pushdowns, e.g.
+	// - when querying `arrivals_departures` by route, stop, date and t_departure/t_arrival
+	{
+		for await (const agency of await readCsv('agency')) {
+			workingState.onlyAgencyId = agency.agency_id
+			if (++agencies >= 2) {
+				workingState.onlyAgencyId = null
+				break
+			}
+		}
 	}
 
 	for (const name of order) {
