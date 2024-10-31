@@ -220,6 +220,7 @@ LANGUAGE sql;
 	// https://github.com/google/transit/blame/217e9bf/gtfs/spec/en/reference.md#L544-L554
 	// However, because we have to use left join instead of an inner join in tables referencing `agency`, this prevents the PostgreSQL query planner from doing some filter pushdowns, e.g.
 	// - when querying `arrivals_departures` by route, stop, date and t_departure/t_arrival
+	// todo: add tests: 0 agencies (implicit single agency), 1 agency
 	{
 		let agencies = 0
 		for await (const agency of await readCsv('agency')) {
