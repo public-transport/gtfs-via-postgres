@@ -9,6 +9,7 @@ const {Stringifier} = require('csv-stringify')
 const formatters = require('./lib')
 const getDependencies = require('./lib/deps')
 const pkg = require('./package.json')
+const {DEFAULT_AGENCY_ID} = require('./lib/agency')
 
 const convertGtfsToSql = async function* (files, opt = {}) {
 	opt = {
@@ -24,6 +25,8 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		statsByAgencyIdAndRouteIdAndStopAndHour: 'none',
 		statsActiveTripsByHour: 'none',
 		schema: 'public',
+		// todo: find something more helpful than falling back to Etc/GMT!
+		defaultTimezone: new Intl.DateTimeFormat().resolvedOptions().timeZone || 'Etc/GMT',
 		postgraphile: false,
 		postgraphilePassword: process.env.POSTGRAPHILE_PGPASSWORD || null,
 		postgrest: false,
@@ -208,6 +211,7 @@ LANGUAGE sql;
 	const nrOfRowsByName = new Map()
 	const workingState = {
 		nrOfRowsByName,
+		insertDefaultAgency: false,
 		onlyAgencyId: null,
 	}
 
@@ -217,12 +221,18 @@ LANGUAGE sql;
 	// However, because we have to use left join instead of an inner join in tables referencing `agency`, this prevents the PostgreSQL query planner from doing some filter pushdowns, e.g.
 	// - when querying `arrivals_departures` by route, stop, date and t_departure/t_arrival
 	{
+		let agencies = 0
 		for await (const agency of await readCsv('agency')) {
 			workingState.onlyAgencyId = agency.agency_id
 			if (++agencies >= 2) {
 				workingState.onlyAgencyId = null
 				break
 			}
+		}
+		// We insert a mock agency in order to use an inner join in tables referencing `agency`.
+		if (agencies === 0) {
+			workingState.insertDefaultAgency = true
+			workingState.onlyAgencyId = DEFAULT_AGENCY_ID
 		}
 	}
 
