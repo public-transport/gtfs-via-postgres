@@ -224,7 +224,7 @@ LANGUAGE sql;
 		if ('string' === typeof beforeAll && beforeAll) {
 			yield beforeAll
 		} else if ('function' === typeof beforeAll) {
-			yield beforeAll(opt)
+			yield beforeAll(opt, workingState)
 		}
 
 		if (task.file) {
@@ -249,7 +249,7 @@ LANGUAGE sql;
 		if ('string' === typeof afterAll && afterAll) {
 			yield afterAll + ';\n'
 		} else if ('function' === typeof afterAll) {
-			yield afterAll(opt) + ';\n'
+			yield afterAll(opt, workingState) + ';\n'
 		}
 	}
 
