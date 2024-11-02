@@ -289,7 +289,7 @@ In line with the intended PostGraphile usage, `gtfs-via-postgres` will create a 
 
 ```shell
 npm install \
-    postgraphile@4.12 \
+    postgraphile@^4.12 \
     @graphile-contrib/pg-simplify-inflector@^6.1 \
     @graphile/postgis@^0.2.0-0
 ```
