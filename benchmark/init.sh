@@ -10,6 +10,11 @@ ls -lh ../vbb-2022-07-01.gtfs
 
 env | grep '^PG' || true
 
+psql -c 'CREATE DATABASE benchmark_raw'
+export PGDATABASE=benchmark_raw
+
 ../cli.js -d \
 	--stops-location-index --stats-by-route-date=view \
 	../vbb-2022-07-01.gtfs/*.csv | sponge | psql -b
+
+./run.sh
