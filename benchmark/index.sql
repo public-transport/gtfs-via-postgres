@@ -1,5 +1,6 @@
 BEGIN;
 CREATE TEMP TABLE _benchmark (
+	dbname TEXT,
 	filename TEXT,
 	query TEXT,
 	avg FLOAT,
@@ -44,6 +45,7 @@ BEGIN
 
 	INSERT INTO _benchmark
 	SELECT
+		current_database() AS dbname,
 		_filename,
 		_query,
 		round(avg(elapsed)::numeric, 0),
