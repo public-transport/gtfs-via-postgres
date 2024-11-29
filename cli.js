@@ -35,9 +35,6 @@ const {
 		'trips-without-shape-id': {
 			type: 'boolean',
 		},
-		'routes-without-agency-id': {
-			type: 'boolean',
-		},
 		'stops-without-level-id': {
 			type: 'boolean',
 		},
@@ -98,7 +95,6 @@ Options:
                                     Default: google-extended
     --trips-without-shape-id      Don't require trips.txt items to have a shape_id.
                                     Default if shapes.txt has not been provided.
-    --routes-without-agency-id    Don't require routes.txt items to have an agency_id.
     --stops-without-level-id      Don't require stops.txt items to have a level_id.
                                     Default if levels.txt has not been provided.
     --stops-location-index        Create a spatial index on stops.stop_loc for efficient
@@ -179,7 +175,6 @@ const opt = {
 	ignoreUnsupportedFiles: !!flags['ignore-unsupported'],
 	routeTypesScheme: flags['route-types-scheme'] || 'google-extended',
 	tripsWithoutShapeId: !!flags['trips-without-shape-id'],
-	routesWithoutAgencyId: !!flags['routes-without-agency-id'],
 	stopsLocationIndex: !!flags['stops-location-index'],
 	statsByRouteIdAndDate: flags['stats-by-route-date'] || 'none',
 	statsByAgencyIdAndRouteIdAndStopAndHour: flags['stats-by-agency-route-stop-hour'] || 'none',
