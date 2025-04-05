@@ -243,6 +243,28 @@ if [[ "$frequencies_it_rows" != "$frequencies_it_expected" ]]; then
 	exit 1
 fi
 
+frequencies_it_connections_query=$(cat << EOF
+SELECT from_stop_sequence, t_departure, t_arrival, frequencies_it
+FROM connections
+WHERE trip_id = 'b-downtown-on-working-days'
+AND "date" = '2019-03-08'
+AND frequencies_row = 1
+ORDER BY t_departure ASC
+LIMIT 3
+EOF
+)
+frequencies_it_connections_rows="$(psql --csv -t -c "$frequencies_it_connections_query")"
+frequencies_it_connections_expected=$(cat << EOF
+1,2019-03-08 08:00:00+01,2019-03-08 08:06:00+01,1
+1,2019-03-08 08:05:00+01,2019-03-08 08:11:00+01,2
+3,2019-03-08 08:08:00+01,2019-03-08 08:16:00+01,1
+EOF
+)
+if [[ "$frequencies_it_connections_rows" != "$frequencies_it_connections_expected" ]]; then
+	echo "first 3 connections by t_departure" 1>&2
+	exit 1
+fi
+
 stops_translated_query=$(cat << EOF
 SELECT
 	stop_id,
