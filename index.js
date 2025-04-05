@@ -13,6 +13,7 @@ const pkg = require('./package.json')
 const convertGtfsToSql = async function* (files, opt = {}) {
 	opt = {
 		silent: false,
+		// todo [breaking]: make the default!
 		requireDependencies: false,
 		ignoreUnsupportedFiles: false,
 		routeTypesScheme: 'google-extended',
