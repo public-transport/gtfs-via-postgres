@@ -16,6 +16,11 @@
 - ✅ validates and imports `translations.txt`
 - ✨ exposes (almost) all data via GraphQL using [PostGraphile](https://www.graphile.org/postgraphile/introduction/), and as a RESTful API using [PostgREST](https://postgrest.org/)
 
+To work with the time-related data (`stop_times` etc.), `gtfs-via-postgres` supports two "mental models":
+
+- the time-*unexpanded* data that is almost directly taken from the GTFS Schedule data – This is useful if you want to do network analysis.
+- the time-*expanded* view that "applies" every trip's `stop_times` rows to all of its service days – This is useful for routing & queries from the traveller's perspective.
+
 
 ## Installation
 
