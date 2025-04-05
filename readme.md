@@ -429,6 +429,7 @@ The project has a slightly different goal than `gtfs-via-postgres`: While `gtfs-
 ### other related projects
 
 - [gtfsdb](https://github.com/OpenTransitTools/gtfsdb) – Python library for converting GTFS files into a relational database.
+- [pygtfs](https://github.com/jarondl/pygtfs) – A python (2/3) library for GTFS (fork of [gtfs-sql](https://github.com/andrewblim/gtfs-sql))
 - [gtfspy](https://github.com/CxAalto/gtfspy) – Public transport network analysis using Python and SQLite.
 - [GTFS Kit](https://github.com/mrcagney/gtfs_kit) – A Python 3.6+ tool kit for analyzing General Transit Feed Specification (GTFS) data.
 - [GtfsToSql](https://github.com/OpenMobilityData/GtfsToSql) – Parses a GTFS feed into an SQL database (Java)
