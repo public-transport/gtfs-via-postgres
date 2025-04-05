@@ -226,16 +226,16 @@ if [[ "$bikes_allowed_arrs_deps_rows" != "$bikes_allowed_arrs_deps_expected" ]];
 fi
 
 frequencies_it_query=$(cat << EOF
-SELECT t_departure, stop_sequence, stop_id frequencies_it
+SELECT t_departure, stop_sequence, stop_id, frequencies_it
 FROM arrivals_departures
 WHERE trip_id = 'b-downtown-on-working-days' AND "date" = '2019-05-29' AND frequencies_it = 3
 EOF
 )
 frequencies_it_rows="$(psql --csv -t -c "$frequencies_it_query")"
 frequencies_it_expected=$(cat << EOF
-2019-05-29 08:10:00+02,1,airport
-2019-05-29 08:18:00+02,3,lake
-2019-05-29 08:27:00+02,5,center
+2019-05-29 08:10:00+02,1,airport,3
+2019-05-29 08:18:00+02,3,lake,3
+2019-05-29 08:27:00+02,5,center,3
 EOF
 )
 if [[ "$frequencies_it_rows" != "$frequencies_it_expected" ]]; then
