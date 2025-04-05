@@ -59,7 +59,7 @@ jobs:
         dl_url="$(
           curl -fsSL \
             'https://api.github.com/repos/PostgREST/postgrest/releases/latest' \
-            | jq -rc '.assets[] | select(.name | test("linux-static-x64")) | .browser_download_url'
+            | jq -rc '.assets[] | select(.name | test("linux-static-x86-64")) | .browser_download_url'
         )"
         wget -nv -U 'public-transport/gtfs-via-postgres CI' \
           -O /tmp/postgrest.tar.xz \
