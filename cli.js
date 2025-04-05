@@ -95,6 +95,7 @@ Options:
                                     - basic: core route types in the GTFS spec
                                     - google-extended: Extended GTFS Route Types [1]
                                     - tpeg-pti: proposed TPEG-PTI-based route types [2]
+	                                May also be a set of these schemes, separated by \`,\`.
                                     Default: google-extended
     --trips-without-shape-id      Don't require trips.txt items to have a shape_id.
                                     Default if shapes.txt has not been provided.
