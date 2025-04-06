@@ -1,6 +1,6 @@
 # gtfs-via-postgres
 
-**Import [GTFS Static/Schedule](https://gtfs.org/schedule/) datasets into a [PostgreSQL database](https://www.postgresql.org)**, to allow for efficient querying and analysis.
+**Import [GTFS Static/Schedule](https://gtfs.org/documentation/schedule/reference/) datasets into a [PostgreSQL database](https://www.postgresql.org)**, to allow for efficient querying and analysis.
 
 [![npm version](https://img.shields.io/npm/v/gtfs-via-postgres.svg)](https://www.npmjs.com/package/gtfs-via-postgres)
 [![binary build status](https://img.shields.io/github/actions/workflow/status/public-transport/gtfs-via-postgres/publish.yml?label=binary%20build)](https://github.com/public-transport/gtfs-via-postgres/actions)
@@ -96,10 +96,10 @@ Importing will take 10s to 10m, depending on the size of the feed. On an [M1 Mac
 
 In addition to a table for each GTFS file, `gtfs-via-postgres` adds these views to help with real-world analysis:
 
-- `service_days` ([materialized](https://www.postgresql.org/docs/13/sql-creatematerializedview.html)) "applies" [`calendar_dates`](https://gtfs.org/reference/static/#calendar_datestxt) to [`calendar`](https://gtfs.org/reference/static/#calendartxt) to give you all days of operation for each "service" defined in [`calendar`](https://gtfs.org/reference/static/#calendartxt).
-- `arrivals_departures` "applies" [`stop_times`](https://gtfs.org/reference/static/#stop_timestxt)/[`frequencies`](https://gtfs.org/reference/static/#frequenciestxt) to [`trips`](https://gtfs.org/reference/static/#tripstxt) and `service_days` to give you all arrivals/departures at each stop with their *absolute* dates & times. It also resolves each stop's parent station ID & name.
-- `connections` "applies" [`stop_times`](https://gtfs.org/reference/static/#stop_timestxt)/[`frequencies`](https://gtfs.org/reference/static/#frequenciestxt) to [`trips`](https://gtfs.org/reference/static/#tripstxt) and `service_days`, just like `arrivals_departures`, but gives you departure (at stop A) & arrival (at stop B) *pairs*.
-- `shapes_aggregates` aggregates individual shape points in [`shapes`](https://gtfs.org/reference/static/#shapestxt) into a [PostGIS `LineString`](http://postgis.net/workshops/postgis-intro/geometries.html#linestrings).
+- `service_days` ([materialized](https://www.postgresql.org/docs/13/sql-creatematerializedview.html)) "applies" [`calendar_dates`](https://gtfs.org/documentation/schedule/reference/#calendar_datestxt) to [`calendar`](https://gtfs.org/documentation/schedule/reference/#calendartxt) to give you all days of operation for each "service" defined in [`calendar`](https://gtfs.org/documentation/schedule/reference/#calendartxt).
+- `arrivals_departures` "applies" [`stop_times`](https://gtfs.org/documentation/schedule/reference/#stop_timestxt)/[`frequencies`](https://gtfs.org/documentation/schedule/reference/#frequenciestxt) to [`trips`](https://gtfs.org/documentation/schedule/reference/#tripstxt) and `service_days` to give you all arrivals/departures at each stop with their *absolute* dates & times. It also resolves each stop's parent station ID & name.
+- `connections` "applies" [`stop_times`](https://gtfs.org/documentation/schedule/reference/#stop_timestxt)/[`frequencies`](https://gtfs.org/documentation/schedule/reference/#frequenciestxt) to [`trips`](https://gtfs.org/documentation/schedule/reference/#tripstxt) and `service_days`, just like `arrivals_departures`, but gives you departure (at stop A) & arrival (at stop B) *pairs*.
+- `shapes_aggregates` aggregates individual shape points in [`shapes`](https://gtfs.org/documentation/schedule/reference/#shapestxt) into a [PostGIS `LineString`](http://postgis.net/workshops/postgis-intro/geometries.html#linestrings).
 - `stats_by_route_date` provides the number of arrivals/departures by route ID and date. – [read more](docs/analysis/feed-by-route-date.md)
 - `stats_by_agency_route_stop_hour` provides the number of arrivals/departures by agency ID, route ID, stop ID & hour. – [read more](docs/analysis/feed-by-agency-route-stop-and-hour.md)
 - In contrast to `stats_by_route_date` & `stats_by_agency_route_stop_hour`, `stats_active_trips_by_hour` provides the number of *currently running* trips for each hour in the feeds period of time.
