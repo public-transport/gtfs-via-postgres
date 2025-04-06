@@ -63,9 +63,9 @@
 	"devDependencies": {
 		"@graphile-contrib/pg-simplify-inflector": "^6.1.0",
 		"@graphile/postgis": "^0.2.0-0",
+		"@yao-pkg/pkg": "^5.16.1",
 		"csv-parser": "^3.0.0",
 		"eslint": "^8.33.0",
-		"pkg": "^5.3.2",
 		"postgraphile": "^4.12.11",
 		"sample-gtfs-feed": "^0.13.0"
 	},
