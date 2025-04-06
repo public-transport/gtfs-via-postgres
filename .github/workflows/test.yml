@@ -56,18 +56,23 @@ jobs:
 
     - name: install PostgREST
       run: |
-        set -e
+        set -euo pipefail
         set -x
         dl_url="$(
           curl -fsSL \
+            -H "User-Agent: $user_agent" \
+            -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
             'https://api.github.com/repos/PostgREST/postgrest/releases/latest' \
             | jq -rc '.assets[] | select(.name | test("linux-static-x86-64")) | .browser_download_url'
         )"
-        wget -nv -U 'public-transport/gtfs-via-postgres CI' \
+        wget -nv -U "$user_agent" \
+          --header='Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
           -O /tmp/postgrest.tar.xz \
           "$dl_url"
         tar -C /usr/local/bin -J -x postgrest </tmp/postgrest.tar.xz
         /usr/local/bin/postgrest --version
+      env:
+        user_agent: 'public-transport/gtfs-via-postgres CI'
 
     - run: npm install
 
