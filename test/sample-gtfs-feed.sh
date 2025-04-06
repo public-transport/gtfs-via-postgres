@@ -65,7 +65,7 @@ if [[ "$freq_arr_dep1" != "1,1552028340,1552028400,1,1" ]]; then
 fi
 freq_arr_dep2=$(psql --csv -t -c "$arrs_deps_b_downtown_on_working_days" | head -n 2 | tail -n 1)
 if [[ "$freq_arr_dep2" != "1,1552028640,1552028700,1,2" ]]; then
-	echo "invalid/missing frequencies-based arrival/departure: $freq_arr_dep1" 1>&2
+	echo "invalid/missing frequencies-based arrival/departure: $freq_arr_dep2" 1>&2
 	exit 1
 fi
 
