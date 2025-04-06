@@ -7,6 +7,8 @@ on:
   pull_request:
     branches:
       - '*'
+  # make workflow callable by others
+  workflow_call:
 
 jobs:
   test:

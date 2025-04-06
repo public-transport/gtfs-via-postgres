@@ -1,4 +1,5 @@
 name: build & upload binaries
+
 on:
   push:
     tags:
@@ -6,58 +7,7 @@ on:
 jobs:
   test:
     name: run tests
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version:
-          - '16.x'
-          - '18.x'
-          - '20.x'
-          - '22.x'
-        postgis-docker-tag:
-          - '14-3.4-alpine'
-          - '15-3.4-alpine'
-          - '16-3.4-alpine'
-
-    steps:
-    - name: checkout
-      uses: actions/checkout@v4
-    - name: setup Node
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: install sponge (moreutils)
-      run: sudo apt install -y moreutils
-
-    - name: install & start PostgreSQL with PostGIS
-      # todo: currently, it uses mdillon, which doesn't have PostgreSQL 14
-      # uses: huaxk/postgis-action@v1
-      # with:
-      #   postgresql version: '${{ matrix.postgis-docker-tag }}'
-      #   postgresql password: password
-      #   postgresql user: postgres
-      #   postgresql db: postgres
-      run: |
-        docker run -d \
-          -e POSTGRES_USER=$PGUSER -e POSTGRES_PASSWORD=$PGPASSWORD -e POSTGRES_DB=$PGDATABASE \
-          -p 5432:5432 postgis/postgis:${{ matrix.postgis-docker-tag }} \
-          -c timezone=Europe/Berlin
-      env:
-        PGUSER: postgres
-        PGPASSWORD: password
-        PGDATABASE: postgres
-
-    - run: npm install
-
-    - run: npm run lint
-    - name: npm test
-      run : npm test
-      env:
-        PGHOST: localhost
-        PGPORT: '5432'
-        PGUSER: postgres
-        PGPASSWORD: password
-        PGDATABASE: postgres
+    uses: './.github/workflows/test.yml'
 
   binaries:
     name: build binaries & publish as GitHub release
