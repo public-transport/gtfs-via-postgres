@@ -23,11 +23,8 @@ jobs:
     - run: npm install
 
     - name: build binaries
-      run: npm run build-binaries
-    - name: compress binaries
       run: |
-        set -e
-        gzip --best -k dist/*
+        npm run build-binaries
         ls -lh dist
     - name: create release
       id: create_release
