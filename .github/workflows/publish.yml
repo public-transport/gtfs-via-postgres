@@ -12,6 +12,8 @@ jobs:
   binaries:
     name: build binaries & publish as GitHub release
     needs: [test]
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
     - name: checkout
@@ -110,6 +112,8 @@ jobs:
   docker-image:
     name: build & publish Docker image
     needs: [test]
+    permissions:
+      packages: write
     runs-on: ubuntu-latest
     steps:
     - name: checkout
