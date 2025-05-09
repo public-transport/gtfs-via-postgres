@@ -64,6 +64,10 @@ ls -lh gtfs
 #  16M trips.csv
 ```
 
+```shell
+duckdb_cli -c 'INSTALL ICU'
+```
+
 Depending on your specific setup, configure access to the PostgreSQL database via [`PG*` environment variables](https://www.postgresql.org/docs/14/libpq-envars.html):
 
 ```sh
@@ -265,6 +269,10 @@ docker run --rm --volume /path/to/gtfs:/gtfs \
 	--link db -e PGHOST=db -e PGPASSWORD=password \
 	import-gtfs --require-dependencies -- '/gtfs/*.csv'
 ```
+
+### Importing a GTFS Schedule feed continuously
+
+postgis-gtfs-importer
 
 ### Exporting data efficiently
 
