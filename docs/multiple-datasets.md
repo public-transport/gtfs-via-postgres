@@ -8,14 +8,14 @@ As an example, let's import two datasets ([Paris](https://en.wikipedia.org/wiki/
 wget -U 'gtfs-via-postgres demo' -O paris.gtfs.zip 'https://eu.ftp.opendatasoft.com/stif/GTFS/IDFM-gtfs.zip'
 unzip -d paris.gtfs paris.gtfs.zip
 gtfs-to-sql --require-dependencies \
-	--schema paris -- paris.gtfs/*.txt \
-	| sponge | psql -b
+	--schema paris multiple-datasets.duckdb -- \
+	paris.gtfs/*.txt
 
 wget -U 'gtfs-via-postgres demo' -O berlin.gtfs.zip 'https://www.vbb.de/vbbgtfs'
 unzip -d berlin.gtfs berlin.gtfs.zip
 gtfs-to-sql --require-dependencies \
-	--schema berlin -- berlin.gtfs/*.txt \
-	| sponge | psql -b
+	--schema berlin multiple-datasets.duckdb -- \
+	berlin.gtfs/*.txt
 ```
 
 We can now do queries across both datasets, for example finding the geographically furthest 2 stops:
@@ -28,6 +28,7 @@ SELECT
 FROM
 	paris.stops paris,
 	berlin.stops berlin
+-- todo: does this operator work in DuckDB?
 ORDER BY paris.stop_loc <-> berlin.stop_loc DESC
 LIMIT 100
 ```
