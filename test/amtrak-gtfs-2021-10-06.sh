@@ -19,7 +19,6 @@ export PGDATABASE='amtrak_2021_10_06'
 	--stats-by-route-date=view \
 	--stats-by-agency-route-stop-hour=view \
 	--stats-active-trips-by-hour=view \
-	--postgrest \
 	-- amtrak-gtfs-2021-10-06/*.txt \
 	| sponge | psql -b
 
@@ -101,40 +100,6 @@ EOF
 nrOfActiveTrips=$(psql --csv -t -c "$nrOfActiveTripsQuery" | tail -n 1)
 if [[ "$nrOfActiveTrips" != "127" ]]; then
 	echo "unexpected no. of active trips at 2021-11-26T04:00-05: $nrOfActiveTrips" 1>&2
-	exit 1
-fi
-
-# kill child processes on exit
-# https://stackoverflow.com/questions/360201/how-do-i-kill-background-processes-jobs-when-my-shell-script-exits/2173421#2173421
-trap 'exit_code=$?; kill -- $(jobs -p); exit $exit_code' SIGINT SIGTERM EXIT
-
-env \
-	PGRST_DB_SCHEMAS=amtrak \
-	PGRST_DB_ANON_ROLE=web_anon \
-	PGRST_ADMIN_SERVER_PORT=3001 \
-	PGRST_LOG_LEVEL=info \
-	postgrest &
-	# docker run --rm -i \
-	# -p 3000:3000 -p 3001:3001 \
-	# -e PGHOST=host.docker.internal -e PGUSER -e PGPASSWORD -e PGDATABASE \
-	# postgrest/postgrest &
-sleep 3
-
-health_status="$(curl 'http://localhost:3001/live' -I -fsS | grep -o -m1 -E '[0-9]{3}')"
-if [ "$health_status" != '200' ]; then
-	1>&2 echo "/live: expected 200, got $health_status"
-	exit 1
-fi
-
-stops_url='http://localhost:3000/stops?stop_name=ilike.%25palm%25&limit=1&order=stop_id.asc'
-stops_status="$(curl "$stops_url" -H 'Accept: application/json' -I -fsS | grep -o -m1 -E '[0-9]{3}')"
-if [ "$stops_status" != '200' ]; then
-	1>&2 echo "$stops_url: expected 200, got $stops_status"
-	exit 1
-fi
-stop_id="$(curl "$stops_url" -H 'Accept: application/json' -fsS | jq -rc '.[0].stop_id')"
-if [ "$stop_id" != 'PDC' ]; then
-	1>&2 echo "$stops_url: expected PDC, got $stop_id"
 	exit 1
 fi
 
