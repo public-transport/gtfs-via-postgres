@@ -41,10 +41,10 @@ const {
 		'stops-without-level-id': {
 			type: 'boolean',
 		},
-		'lower-case-lang-codes': {
+		'stops-location-index': {
 			type: 'boolean',
 		},
-		'stops-location-index': {
+		'lower-case-lang-codes': {
 			type: 'boolean',
 		},
 		'stats-by-route-date': {
