@@ -59,21 +59,6 @@ const {
 		'schema': {
 			type: 'string',
 		},
-		'postgraphile': {
-			type: 'boolean',
-		},
-		'postgraphile-password': {
-			type: 'string',
-		},
-		'postgrest': {
-			type: 'boolean',
-		},
-		'postgrest-password': {
-			type: 'string',
-		},
-		'postgrest-query-cost-limit': {
-			type: 'string',
-		},
 		'import-metadata': {
 			type: 'boolean',
 		}
@@ -130,21 +115,6 @@ Options:
                                     gets created, to ensure that multiple imports into the
                                     same database are all made using the same version. See
                                     also multiple-datasets.md in the docs.
-    --postgraphile                Tweak generated SQL for PostGraphile usage.
-                                    https://www.graphile.org/postgraphile/
-    --postgraphile-password       Password for the PostGraphile PostgreSQL user.
-                                    Default: $POSTGRAPHILE_PGPASSWORD, fallback random.
-    --postgrest                   Tweak generated SQL for PostgREST usage.
-                                    Please combine it with --schema.
-                                    https://postgrest.org/
-    --postgrest-password          Password for the PostgREST PostgreSQL user \`web_anon\`.
-                                    Default: $POSTGREST_PGPASSWORD, fallback random.
-    --postgrest-query-cost-limit  Define a cost limit [1] for queries executed by PostgREST
-                                    on behalf of a user. It is only enforced if
-                                    pg_plan_filter [2] is installed in the database!
-                                    Must be a positive float. Default: none
-                                    [1] https://www.postgresql.org/docs/14/using-explain.html
-                                    [2] https://github.com/pgexperts/pg_plan_filter
     --import-metadata             Create functions returning import metadata:
                                     - gtfs_data_imported_at (timestamp with time zone)
                                     - gtfs_via_postgres_version (text)
@@ -186,8 +156,6 @@ const opt = {
 	statsByAgencyIdAndRouteIdAndStopAndHour: flags['stats-by-agency-route-stop-hour'] || 'none',
 	statsActiveTripsByHour: flags['stats-active-trips-by-hour'] || 'none',
 	schema: flags['schema'] || 'public',
-	postgraphile: !!flags.postgraphile,
-	postgrest: !!flags.postgrest,
 	importMetadata: !!flags['import-metadata'],
 }
 if ('stops-without-level-id' in flags) {
@@ -195,20 +163,6 @@ if ('stops-without-level-id' in flags) {
 }
 if ('lower-case-lang-codes' in flags) {
 	opt.lowerCaseLanguageCodes = flags['lower-case-lang-codes']
-}
-if ('postgraphile-password' in flags) {
-	opt.postgraphilePassword = flags['postgraphile-password']
-}
-if ('postgrest-password' in flags) {
-	opt.postgrestPassword = flags['postgrest-password']
-}
-if ('postgrest-query-cost-limit' in flags) {
-	const limit = parseFloat(flags['postgrest-query-cost-limit'])
-	if (!Number.isFinite(limit) || limit < 0) {
-		console.error('Invalid --postgrest-query-cost-limit value.')
-		process.exit(1)
-	}
-	opt.lowerCaseLanguageCodes = limit
 }
 
 pipeline(

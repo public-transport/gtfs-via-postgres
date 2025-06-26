@@ -26,13 +26,6 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		statsByAgencyIdAndRouteIdAndStopAndHour: 'none',
 		statsActiveTripsByHour: 'none',
 		schema: 'public',
-		postgraphile: false,
-		postgraphilePassword: process.env.POSTGRAPHILE_PGPASSWORD || null,
-		postgrest: false,
-		postgrestPassword: process.env.POSTGREST_PASSWORD || null,
-		// see https://github.com/pgexperts/pg_plan_filter
-		// see also https://www.postgresql.org/docs/14/using-explain.html
-		postgrestQueryCostLimit: null, // or float
 		importMetadata: false,
 		...opt,
 	}
@@ -47,16 +40,6 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		statsByAgencyIdAndRouteIdAndStopAndHour,
 		statsActiveTripsByHour,
 	} = opt
-	let postgraphilePassword = opt.postgraphilePassword
-	if (opt.postgraphile && postgraphilePassword === null) {
-		postgraphilePassword = randomBytes(10).toString('hex')
-		console.error(`PostGraphile PostgreSQL user's password:`, postgraphilePassword)
-	}
-	let postgrestPassword = opt.postgrestPassword
-	if (opt.postgrest && postgrestPassword === null) {
-		postgrestPassword = randomBytes(10).toString('hex')
-		console.error(`PostrREST PostgreSQL user's password:`, postgrestPassword)
-	}
 
 	if (ignoreUnsupportedFiles) {
 		files = files.filter(f => !!formatters[f.name])
@@ -258,104 +241,6 @@ LANGUAGE sql;
 	}
 
 	yield `\
-
-${opt.postgraphile ? `\
--- seal imported data
--- todo:
--- > Be careful with public schema.It already has a lot of default privileges that you maybe don't want... See documentation[1].
--- > [1]: postgresql.org/docs/11/ddl-schemas.html#DDL-SCHEMAS-PRIV
-DO $$
-BEGIN
-	-- https://stackoverflow.com/questions/8092086/create-postgresql-role-user-if-it-doesnt-exist#8099557
-	IF EXISTS (
-		SELECT FROM pg_catalog.pg_roles
-		WHERE rolname = 'postgraphile'
-	) THEN
-		RAISE NOTICE 'Role "postgraphile" already exists, skipping creation.';
-	ELSE
-		CREATE ROLE postgraphile LOGIN PASSWORD '${opt.postgraphilePassword}'; -- todo: escape properly
-	END IF;
-END
-$$;
-DO $$
-    DECLARE
-        db TEXT := current_database();
-    BEGIN
-    	-- todo: grant just on $opt.schema instead?
-        EXECUTE format('GRANT ALL PRIVILEGES ON DATABASE %I TO %I', db, 'postgraphile');
-    END
-$$;
-GRANT USAGE ON SCHEMA "${opt.schema}" TO postgraphile;
--- https://stackoverflow.com/questions/760210/how-do-you-create-a-read-only-user-in-postgresql#comment50679407_762649
-REVOKE CREATE ON SCHEMA "${opt.schema}" FROM PUBLIC;
-GRANT SELECT ON ALL TABLES IN SCHEMA "${opt.schema}" TO postgraphile;
--- ALTER DEFAULT PRIVILEGES IN SCHEMA "${opt.schema}" GRANT SELECT ON TABLES TO postgraphile;
--- todo: set search_path? https://stackoverflow.com/questions/760210/how-do-you-create-a-read-only-user-in-postgresql#comment33535263_762649
-` : ''}
-
-${opt.postgrest ? `\
-${opt.schema !== 'public' ? `\
--- pattern from https://stackoverflow.com/a/8099557
-DO
-$$
-BEGIN
-	-- Roles are shared across databases, so we have remove previously configured privileges.
-	-- This might of course interfere with other programs running on the DBMS!
-	-- todo: find a cleaner solution
-	IF EXISTS (
-		SELECT FROM pg_catalog.pg_roles
-		WHERE  rolname = 'web_anon'
-	) THEN
-		RAISE WARNING 'Role web_anon already exists. Reassigning owned DB objects to current_user().';
-		REASSIGN OWNED BY web_anon TO SESSION_USER;
-	ELSE
-		BEGIN
-			CREATE ROLE web_anon NOLOGIN NOINHERIT;
-		EXCEPTION
-			WHEN duplicate_object THEN
-				RAISE NOTICE 'Role web_anon was just created by a concurrent transaction.';
-		END;
-	END IF;
-	IF EXISTS (
-		SELECT FROM pg_catalog.pg_roles
-		WHERE  rolname = 'postgrest'
-	) THEN
-		RAISE WARNING 'Role postgrest already exists. Reassigning owned DB objects to current_user().';
-		REASSIGN OWNED BY postgrest TO SESSION_USER;
-	ELSE
-		BEGIN
-			CREATE ROLE postgrest LOGIN NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER PASSWORD '${postgrestPassword}';
-		EXCEPTION
-			WHEN duplicate_object THEN
-				RAISE NOTICE 'Role postgrest was just created by a concurrent transaction.';
-		END;
-	END IF;
-END
-$$;
-
-
--- https://postgrest.org/en/stable/tutorials/tut0.html#step-4-create-database-for-api
--- https://postgrest.org/en/stable/explanations/db_authz.html
--- todo: is this secure?
-GRANT USAGE ON SCHEMA "${opt.schema}" TO web_anon;
-GRANT SELECT ON ALL TABLES IN SCHEMA "${opt.schema}" TO web_anon;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA "${opt.schema}" TO web_anon;
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA "${opt.schema}" TO web_anon;
-
-GRANT web_anon TO postgrest;
-
-${opt.postgrestQueryCostLimit !== null ? `
--- If pg_plan_filter is installed, limit the cost of queries made by PostgREST users.
-ALTER USER web_anon SET plan_filter.statement_cost_limit = ${opt.postgrestQueryCostLimit};
-` : ''}
-
-COMMENT ON SCHEMA "${opt.schema}" IS
-$$GTFS REST API
-This REST API is created by running [PostgREST](https://postgrest.org/) on top of a [PostgreSQL](https://www.postgresql.org) DB generated using [${pkg.name} v${pkg.version}](${pkg.homepage || pkg.repository}).
-$$;
-` : ''}
-` : ''}
-
 COMMIT;`
 }
 
