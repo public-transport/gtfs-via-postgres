@@ -12,7 +12,7 @@ SELECT gtfs_via_postgres_version()
 -- 4.5.3
 
 SELECT gtfs_via_postgres_options()
--- {"schema": "public", "silent": false, "importStart": 1681417454781, "postgraphile": false, "importMetadata": true, … }
+-- {"schema": "public", "silent": false, "importStart": 1681417454781, "importMetadata": true, … }
 SELECT (gtfs_via_postgres_options())['tripsWithoutShapeId']
 -- true
 ```
