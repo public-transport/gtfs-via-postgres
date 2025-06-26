@@ -1,6 +1,7 @@
 #!/bin/sh
 
 set -e
+set -u
 set -o pipefail
 
 2>&1 echo "importing into PostgreSQL:"
@@ -13,7 +14,7 @@ psql -c "$(cat <<- EOM
 	SELECT
 		trip_id, route_id,
 		from_stop_id, t_departure,
-		stop_sequence,
+		from_stop_sequence,
 		to_stop_id, t_arrival
 	FROM connections
 	WHERE trip_id = 'during-dst-1'

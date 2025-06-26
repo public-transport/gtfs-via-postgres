@@ -1,8 +1,8 @@
-# importing multiple datasets into one DB
+# working with multiple datasets
 
 Using `gtfs-via-postgres`, you can import more than one dataset into a single PostgreSQL database by importing them into separate [schemas](https://www.postgresql.org/docs/14/ddl-schemas.html). You can then run queries combine or compare data from them.
 
-As an example, let's import two datasets ([Paris](https://en.wikipedia.org/wiki/Île-de-France_Mobilités)' and [Berlin](https://en.wikipedia.org/wiki/Verkehrsverbund_Berlin-Brandenburg)'s) into separate schemas:
+As an example, let's compare two datasets from [Paris](https://en.wikipedia.org/wiki/Île-de-France_Mobilités) and [Berlin](https://en.wikipedia.org/wiki/Verkehrsverbund_Berlin-Brandenburg).
 
 ```shell
 wget -U 'gtfs-via-postgres demo' -O paris.gtfs.zip 'https://eu.ftp.opendatasoft.com/stif/GTFS/IDFM-gtfs.zip'
