@@ -229,6 +229,7 @@ frequencies_it_query=$(cat << EOF
 SELECT t_departure, stop_sequence, stop_id, frequencies_it
 FROM arrivals_departures
 WHERE trip_id = 'b-downtown-on-working-days' AND "date" = '2019-05-29' AND frequencies_it = 3
+ORDER BY t_departure
 EOF
 )
 frequencies_it_rows="$(psql --csv -t -c "$frequencies_it_query")"
@@ -273,6 +274,7 @@ SELECT
 	stop_url, stop_url_lang
 FROM stops_translated
 WHERE stop_id LIKE 'airport%'
+ORDER BY stop_id, stop_name_lang, stop_desc_lang
 EOF
 )
 stops_translated_rows="$(psql --csv -t -c "$stops_translated_query")"
