@@ -49,29 +49,29 @@ duckdb_cli -c 'INSTALL spatial'
 
 If you have a `.zip` GTFS feed, unzip it into individual files.
 
-We're going to use the [2022-07-01 *VBB* feed](https://vbb-gtfs.jannisr.de/2022-07-01/) as an example, which consists of individual files already.
+We're going to use the [2025-05-21 *VBB* feed](https://vbb-gtfs.jannisr.de/2025-05-21/) as an example, which consists of individual files already.
 
 ```sh
 wget --compression auto \
-    -r --no-parent --no-directories -R .csv.gz \
-    -P gtfs -N 'https://vbb-gtfs.jannisr.de/2022-07-01/'
+    -r --no-parent --no-directories -R .csv.gz -R .csv.br \
+    -P gtfs -N 'https://vbb-gtfs.jannisr.de/2025-05-21/'
 # …
 # Downloaded 14 files in 20s.
 ls -lh gtfs
-# 3.3K agency.csv
-#  97K calendar.csv
-# 1.1M calendar_dates.csv
+# 3.2K agency.csv
+# 107K calendar.csv
+# 1.2M calendar_dates.csv
 # 2.5K datapackage.json
 #  64B frequencies.csv
-# 5.9K levels.csv
+# 6.1K levels.csv
 # 246B license
-# 8.3M pathways.csv
-#  49K routes.csv
-# 146M shapes.csv
-# 368M stop_times.csv
-# 5.0M stops.csv
-# 4.7M transfers.csv
-#  16M trips.csv
+# 8.9M pathways.csv
+#  50K routes.csv
+# 152M shapes.csv
+# 383M stop_times.csv
+# 7.0M stops.csv
+# 3.0M transfers.csv
+#  17M trips.csv
 ```
 
 Install `gtfs-via-duckdb` and use it to import the GTFS data:
@@ -114,14 +114,14 @@ AND t_departure >= '2022-03-23T12:30:00+01' AND t_departure <= '2022-03-23T12:35
 
 `route_id` | `route_short_name` | `route_type` | `trip_id` | `date` | `stop_sequence` | `t_arrival` | `t_departure` | `stop_id` | `stop_name` | `station_id` | `station_name`
 -|-|-|-|-|-|-|-|-|-|-|-
-`10148_109` | `S3` | `109` | `169035756` | `2022-03-23 00:00:00` | `19` | `2022-03-23 12:31:24+01` | `2022-03-23 12:32:12+01` | `de:11000:900120003:2:53` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
-`10148_109` | `S3` | `109` | `169035899` | `2022-03-23 00:00:00` | `10` | `2022-03-23 12:33:06+01` | `2022-03-23 12:33:54+01` | `de:11000:900120003:3:55` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
-`10162_109` | `S7` | `109` | `169128381` | `2022-03-23 00:00:00` | `19` | `2022-03-23 12:33:54+01` | `2022-03-23 12:34:42+01` | `de:11000:900120003:2:53` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
-`10162_109` | `S7` | `109` | `169128495` | `2022-03-23 00:00:00` | `9` | `2022-03-23 12:30:36+01` | `2022-03-23 12:31:24+01` | `de:11000:900120003:3:55` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
-`10223_109` | `S41` | `109` | `169054370` | `2022-03-23 00:00:00` | `21` | `2022-03-23 12:30:24+01` | `2022-03-23 12:31:12+01` | `de:11000:900120003:5:58` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
-`10227_109` | `S42` | `109` | `169071882` | `2022-03-23 00:00:00` | `6` | `2022-03-23 12:30:30+01` | `2022-03-23 12:31:12+01` | `de:11000:900120003:5:59` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
-`19040_100` | `RB14` | `100` | `178748721` | `2022-03-23 00:00:00` | `13` | `2022-03-23 12:30:00+01` | `2022-03-23 12:30:00+01` | `de:11000:900120003:1:50` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
-`22664_2` | `FEX` | `2` | `178748125` | `2022-03-23 00:00:00` | `1` | `2022-03-23 12:32:00+01` | `2022-03-23 12:34:00+01` | `de:11000:900120003:4:57` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
+`10148_109` | `S3` | `109` | `169035756` | `2022-03-23 00:00:00` | `19` | `2022-03-23 12:31:24+01` | `2022-03-23 12:32:12+01` | `de:11000:900120003:2` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
+`10148_109` | `S3` | `109` | `169035899` | `2022-03-23 00:00:00` | `10` | `2022-03-23 12:33:06+01` | `2022-03-23 12:33:54+01` | `de:11000:900120003:3` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
+`10162_109` | `S7` | `109` | `169128381` | `2022-03-23 00:00:00` | `19` | `2022-03-23 12:33:54+01` | `2022-03-23 12:34:42+01` | `de:11000:900120003:2` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
+`10162_109` | `S7` | `109` | `169128495` | `2022-03-23 00:00:00` | `9` | `2022-03-23 12:30:36+01` | `2022-03-23 12:31:24+01` | `de:11000:900120003:3` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
+`10223_109` | `S41` | `109` | `169054370` | `2022-03-23 00:00:00` | `21` | `2022-03-23 12:30:24+01` | `2022-03-23 12:31:12+01` | `de:11000:900120003:5` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
+`10227_109` | `S42` | `109` | `169071882` | `2022-03-23 00:00:00` | `6` | `2022-03-23 12:30:30+01` | `2022-03-23 12:31:12+01` | `de:11000:900120003:5` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
+`19040_100` | `RB14` | `100` | `178748721` | `2022-03-23 00:00:00` | `13` | `2022-03-23 12:30:00+01` | `2022-03-23 12:30:00+01` | `de:11000:900120003:1` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
+`22664_2` | `FEX` | `2` | `178748125` | `2022-03-23 00:00:00` | `1` | `2022-03-23 12:32:00+01` | `2022-03-23 12:34:00+01` | `de:11000:900120003:4` | `S Ostkreuz Bhf (Berlin)` | `de:11000:900120003` | `S Ostkreuz Bhf (Berlin)`
 
 ### translations
 
@@ -257,7 +257,7 @@ Let's consider two examples:
 
 However, if you determine your feed's largest `arrival_time`/`departure_time`, you can filter on `date` when querying `arrivals_departures`; This allows DuckDB to reduce the number of joins and calendar calculations by orders of magnitude, speeding up your queries significantly. `gtfs-via-duckdb` provides a low-level helper table `largest_arr_dep_time` for this, as well as two high-level helper functions `dates_filter_min(t_min)` & `dates_filter_max(t_max)` (see below).
 
-For example, when querying all *absolute* departures at `de:11000:900120003` (*S Ostkreuz Bhf (Berlin)*) between `2022-03-23T12:30:00+01` and  `2022-03-23T12:35:00+01` within the [2022-07-01 *VBB* feed](https://vbb-gtfs.jannisr.de/2022-07-01/), filtering by `date` speeds it up nicely (Apple M2, DuckDB v1.3.0):
+For example, when querying all *absolute* departures at `de:11000:900120003` (*S Ostkreuz Bhf (Berlin)*) between `2022-03-23T12:30:00+01` and  `2022-03-23T12:35:00+01` within the [2025-05-21 *VBB* feed](https://vbb-gtfs.jannisr.de/2025-05-21/), filtering by `date` speeds it up nicely (Apple M2, DuckDB v1.3.0):
 
 `station_id` filter | `date` filter | query time | nr of results
 -|-|-|-
@@ -286,7 +286,7 @@ AND "date" <= dates_filter_max('2022-03-23T12:35:00+01') -- evaluates to 2023-03
 
 `gtfs-via-duckdb` is fast enough for most use cases I can think of. If there's a particular kind of query that you think should be faster, please [open an Issue](https://github.com/public-transport/gtfs-via-duckdb/issues/new)!
 
-The following benchmarks were run with the [2022-07-01 VBB GTFS dataset](https://vbb-gtfs.jannisr.de/2022-07-01/) (41k `stops`, 6m `stop_times`, 207m arrivals/departures) using `gtfs-via-duckdb@5.0.0` and DuckDB v1.3 on an [M2](https://en.wikipedia.org/wiki/Apple_M2) laptop running macOS 14.7.6; All measurements are in milliseconds.
+The following benchmarks were run with the [2025-05-21 VBB GTFS dataset](https://vbb-gtfs.jannisr.de/2025-05-21/) (41k `stops`, 6m `stop_times`, 207m arrivals/departures) using `gtfs-via-duckdb@5.0.0-alpha.3` and DuckDB v1.3 on an [M2](https://en.wikipedia.org/wiki/Apple_M2) laptop running macOS 14.7.6; All measurements are in milliseconds.
 
 todo: re-run benchmarks!
 
