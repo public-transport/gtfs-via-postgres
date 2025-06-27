@@ -17,10 +17,8 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - '16.x'
-          - '18.x'
-          - '20.x'
           - '22.x'
+          - '24.x'
         postgis-docker-tag:
           - '14-3.4-alpine'
           - '15-3.4-alpine'
