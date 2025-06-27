@@ -76,7 +76,7 @@ SELECT nr_of_arrs
 FROM amtrak.stats_by_agency_route_stop_hour
 WHERE route_id = '40751' -- Acela
 AND stop_id = 'PHL' -- Philadelphia
-AND effective_hour = '2022-07-24T09:00-05'
+AND effective_hour = '2022-07-24 09:00:00-05:00'
 EOF
 )
 acelaPhillyStat=$(psql --csv -t -c "$acelaPhillyStatQuery" | tail -n 1)
@@ -87,16 +87,16 @@ fi
 
 nrOfActiveTripsQuery=$(cat << EOF
 SELECT nr_of_active_trips
-FROM amtrak.stats_active_trips_by_hour
-WHERE "hour" = '2021-11-26T04:00-05'
+FROM stats_active_trips_by_hour
+WHERE "hour" = '2021-11-26 04:00:00-05:00'
 EOF
 )
 # Note: I'm not sure if 127 is correct, but it is in the right ballpark. 🙈
 # The following query yields 150 connections, and it doesn't contain those who depart earlier and arrive later.
 # SELECT DISTINCT ON (trip_id) *
 # FROM amtrak.connections
-# WHERE t_departure >= '2021-11-26T02:00-05'
-# AND t_arrival <= '2021-11-26T06:00-05'
+# WHERE t_departure >= '2021-11-26 02:00:00-05:00'
+# AND t_arrival <= '2021-11-26 06:00:00-05:00'
 nrOfActiveTrips=$(psql --csv -t -c "$nrOfActiveTripsQuery" | tail -n 1)
 if [[ "$nrOfActiveTrips" != "127" ]]; then
 	echo "unexpected no. of active trips at 2021-11-26T04:00-05: $nrOfActiveTrips" 1>&2
