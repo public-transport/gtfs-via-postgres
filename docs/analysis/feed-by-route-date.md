@@ -6,7 +6,7 @@ Are you trying to answer a question like those below?
 - Has the number of stop time events decreased, compared to the last dataset version?
 - Do specific routes stop running during certain time periods?
 
-`gtfs-via-postgres` optionally provides a **(materialized) view `stats_by_route_date` to help with such SQL queries. Use the `--stats-by-route-date` flag to enable it** in the generated SQL:
+`gtfs-via-duckdb` optionally provides a **(materialized) view `stats_by_route_date` to help with such SQL queries. Use the `--stats-by-route-date` flag to enable it** in the generated SQL:
 
 - If you run `gtfs-to-sql` with `--stats-by-route-date=view`, `stats_by_route_date` will be a "regular" non-materialized view. Use this option if you want to import the GTFS data quickly, and if you only query `stats_by_route_date` rarely or in time-uncritical scenarios.
 - If you pass `--stats-by-route-date=materialized-view`, the `stats_by_route_date` view will [be materialized](https://www.postgresql.org/docs/14/rules-materializedviews.html). Use this option if you need fast queries, and if you can tolerate significantly longer import times (3m for the 64mb 2023-03-05 SNCB/NMBS GTFS feed, 1h15m for the 540mb 2023-02-27 VBB GTFS feed).
