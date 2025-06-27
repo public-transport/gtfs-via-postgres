@@ -25,7 +25,6 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		statsByRouteIdAndDate: 'none',
 		statsByAgencyIdAndRouteIdAndStopAndHour: 'none',
 		statsActiveTripsByHour: 'none',
-		schema: 'public',
 		importMetadata: false,
 		...opt,
 	}
@@ -145,52 +144,9 @@ ${inspect(opt, {compact: false}).split('\n').map(line => '-- ' + line).join('\n'
 
 \\set ON_ERROR_STOP on
 CREATE EXTENSION IF NOT EXISTS postgis;
-${opt.schema !== 'public' ? `CREATE SCHEMA IF NOT EXISTS "${opt.schema}";` : ''}
 BEGIN;
 
--- gtfs-via-postgres supports importing >1 GTFS datasets into 1 DB, each dataset within its own schema. See https://github.com/public-transport/gtfs-via-postgres/issues/51 for more information.
--- Because almost all helper utilities (enums, functions, etc.) are schema-specific, they get imported more than once. In order to prevent subtle bugs due to incompatibilities among two schemas imported by different gtfs-via-postgres versions, we mock a "mutex" here by checking for public.gtfs_via_postgres_import_version()'s return value.
-
--- todo: this can be done more elegantly: just a "DO" block, "ASSERT" that the version matches, create gtfs_via_postgres_import_version() in the "EXCEPTION" block
-CREATE FUNCTION pg_temp.get_gtfs_via_postgres_import_version()
-RETURNS TEXT
-AS $$
-	DECLARE
-		res TEXT;
-	BEGIN
-		SELECT public.gtfs_via_postgres_import_version() INTO res;
-		RETURN res;
-	EXCEPTION
-		WHEN undefined_function THEN
-			-- do nothing, silence error
-			RETURN NULL;
-	END;
-$$
-LANGUAGE plpgsql;
-
-DO $$
-BEGIN
-	IF EXISTS (
-		SELECT version
-		FROM (
-			SELECT pg_temp.get_gtfs_via_postgres_import_version() AS version
-		) t
-		WHERE version != '${pkg.version}'
-	) THEN
-		RAISE EXCEPTION 'existing GTFS data imported with an incompatible version of gtfs-via-postgres';
-	END IF;
-END
-$$
-LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION public.gtfs_via_postgres_import_version()
-RETURNS TEXT
-AS $$
-	SELECT '${pkg.version}'
-$$
-LANGUAGE sql;
-
-\n`
+`
 
 	const csv = new Stringifier({quoted: true})
 	const nrOfRowsByName = new Map()

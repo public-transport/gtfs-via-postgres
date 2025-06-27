@@ -187,12 +187,6 @@ Options:
                                     currently running trips over time, by hour.
                                     Like --stats-by-route-date, this flag accepts
                                     none, view & materialized-view.
-    --schema                      The schema to use for the database. Default: public
-                                    Even when importing into a schema other than `public`,
-                                    a function `public.gtfs_via_postgres_import_version()`
-                                    gets created, to ensure that multiple imports into the
-                                    same database are all made using the same version. See
-                                    also multiple-datasets.md in the docs.
     --import-metadata             Create functions returning import metadata:
                                     - gtfs_data_imported_at (timestamp with time zone)
                                     - gtfs_via_postgres_version (text)
