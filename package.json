@@ -4,7 +4,7 @@
 	"version": "5.0.0",
 	"main": "lib/index.js",
 	"bin": {
-		"gtfs-to-sql": "cli.js"
+		"gtfs-to-duckdb": "cli.js"
 	},
 	"files": [
 		"cli.js",
@@ -58,7 +58,7 @@
 		"node": ">=22"
 	},
 	"dependencies": {
-		"csv-stringify": "^6.2.0",
+		"@duckdb/node-api": "^1.2.2-alpha.18",
 		"debug": "^4.3.3",
 		"gtfs-utils": "^5.1.0",
 		"sequencify": "0.0.7"
@@ -67,13 +67,14 @@
 		"@yao-pkg/pkg": "^6.6.0",
 		"csv-parser": "^3.0.0",
 		"eslint": "^8.33.0",
-		"sample-gtfs-feed": "^0.13.0"
+		"sample-gtfs-feed": "^0.13.0",
+		"tinybench": "^6.0.0"
 	},
 	"scripts": {
 		"test": "./test/index.sh",
 		"lint": "eslint .",
-		"benchmark": "./benchmark/run.sh",
-		"build-binaries": "pkg --public -t node22-macos-x64,node22-macos-arm64,node22-linux-x64,node22-linux-arm64 -o dist/gtfs-via-postgres cli.js && gzip -k --best dist/gtfs-via-postgres-*",
+		"benchmark": "./benchmark/index.cjs",
+		"build-binaries": "pkg --public -t node22-macos-x64,node22-macos-arm64,node22-linux-x64,node22-linux-arm64 -o dist/gtfs-via-duckdb cli.js && gzip -k --best dist/gtfs-via-duckdb-*",
 		"prepublishOnly": "npm run lint && npm test"
 	}
 }
