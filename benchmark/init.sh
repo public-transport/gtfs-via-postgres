@@ -12,4 +12,5 @@ env | grep '^PG' || true
 
 ../cli.js -d \
 	--stops-location-index --stats-by-route-date=view \
-	../vbb-2022-07-01.gtfs/*.csv | sponge | psql -b
+	vbb-2022-07-01.gtfs.duckdb \
+	../vbb-2022-07-01.gtfs/*.csv
