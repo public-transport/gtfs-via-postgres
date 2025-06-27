@@ -11,16 +11,15 @@ env | grep '^PG' || true
 unzip -q -j -n amtrak-gtfs-2021-10-06.zip -d amtrak-gtfs-2021-10-06
 ls -lh amtrak-gtfs-2021-10-06
 
-psql -c 'create database amtrak_2021_10_06'
-export PGDATABASE='amtrak_2021_10_06'
+path_to_db="$(mktemp -d -t gtfs.XXX)/amtrak-gtfs-2021-10-06.duckdb"
 
 ../cli.js -d --trips-without-shape-id \
 	--import-metadata \
 	--stats-by-route-date=view \
 	--stats-by-agency-route-stop-hour=view \
 	--stats-active-trips-by-hour=view \
-	-- amtrak-gtfs-2021-10-06/*.txt \
-	| sponge | psql -b
+	"$path_to_db" \
+	-- amtrak-gtfs-2021-10-06/*.txt
 
 query=$(cat << EOF
 select extract(epoch from t_arrival)::integer as t_arrival
@@ -32,26 +31,20 @@ EOF
 )
 
 # 2021-11-26T15:15:00-05:00
-arr1=$(psql --csv -t -c "$query" | head -n 1)
+arr1=$(duckdb -csv -noheader -c "$query" "$path_to_db" | head -n 1)
 if [[ "$arr1" != "1637957700" ]]; then
 	echo "invalid 1st t_arrival: $arr1" 1>&2
 	exit 1
 fi
 
 # 2021-11-27T13:45:00-05:00
-arrN=$(psql --csv -t -c "$query" | tail -n 1)
+arrN=$(duckdb -csv -noheader -c "$query" "$path_to_db" | tail -n 1)
 if [[ "$arrN" != "1638038700" ]]; then
 	echo "invalid 2nd t_arrival: $arrN" 1>&2
 	exit 1
 fi
 
-version=$(psql --csv -t -c "SELECT split_part(amtrak.gtfs_via_postgres_version(), '.', 1)" | tail -n 1)
-if [[ "$version" != "4" ]]; then
-	echo "invalid gtfs_via_postgres_version(): $version" 1>&2
-	exit 1
-fi
-
-fMin=$(psql --csv -t -c "SELECT amtrak.dates_filter_min('2021-11-27T13:45:00-06')" | tail -n 1)
+fMin=$(duckdb -csv -noheader -c "SELECT dates_filter_min('2021-11-27T13:45:00-06')" "$path_to_db" | tail -n 1)
 if [[ "$fMin" != "2021-11-24" ]]; then
 	echo "invalid dates_filter_min(…): $fMin" 1>&2
 	exit 1
@@ -65,7 +58,7 @@ AND date = '2021-11-26'
 AND is_effective = True
 EOF
 )
-acelaStat=$(psql --csv -t -c "$acelaStatQuery" | tail -n 1)
+acelaStat=$(duckdb -csv -noheader -c "$acelaStatQuery" "$path_to_db" | tail -n 1)
 if [[ "$acelaStat" != "16,190" ]]; then
 	echo "invalid stats for route 40751 (Acela) on 2021-11-26: $acelaStat" 1>&2
 	exit 1
@@ -79,7 +72,7 @@ AND stop_id = 'PHL' -- Philadelphia
 AND effective_hour = '2022-07-24 09:00:00-05:00'
 EOF
 )
-acelaPhillyStat=$(psql --csv -t -c "$acelaPhillyStatQuery" | tail -n 1)
+acelaPhillyStat=$(duckdb -csv -noheader -c "$acelaPhillyStatQuery" "$path_to_db" | tail -n 1)
 if [[ "$acelaPhillyStat" != "2" ]]; then
 	echo "invalid stats for route 40751 (Acela) at PHL (Philadelphia) on 2021-11-26: $acelaPhillyStat" 1>&2
 	exit 1
@@ -97,7 +90,7 @@ EOF
 # FROM amtrak.connections
 # WHERE t_departure >= '2021-11-26 02:00:00-05:00'
 # AND t_arrival <= '2021-11-26 06:00:00-05:00'
-nrOfActiveTrips=$(psql --csv -t -c "$nrOfActiveTripsQuery" | tail -n 1)
+nrOfActiveTrips=$(duckdb -csv -noheader -c "$nrOfActiveTripsQuery" "$path_to_db" | tail -n 1)
 if [[ "$nrOfActiveTrips" != "127" ]]; then
 	echo "unexpected no. of active trips at 2021-11-26T04:00-05: $nrOfActiveTrips" 1>&2
 	exit 1

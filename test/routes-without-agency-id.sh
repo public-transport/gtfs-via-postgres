@@ -7,7 +7,7 @@ cd "$(dirname $0)"
 set -x
 
 ../cli.js -d --routes-without-agency-id -- \
-	../node_modules/sample-gtfs-feed/gtfs/*.txt \
-	>/dev/null
+	':memory:' \
+	../node_modules/sample-gtfs-feed/gtfs/*.txt
 
 echo 'works ✔'
