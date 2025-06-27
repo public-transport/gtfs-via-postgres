@@ -5,13 +5,13 @@ Using `gtfs-via-postgres`, you can import more than one dataset into a single Po
 As an example, let's compare two datasets from [Paris](https://en.wikipedia.org/wiki/Île-de-France_Mobilités) and [Berlin](https://en.wikipedia.org/wiki/Verkehrsverbund_Berlin-Brandenburg).
 
 ```shell
-wget -U 'gtfs-via-postgres demo' -O paris.gtfs.zip 'https://eu.ftp.opendatasoft.com/stif/GTFS/IDFM-gtfs.zip'
+wget -U 'gtfs-via-duckdb demo' -O paris.gtfs.zip 'https://eu.ftp.opendatasoft.com/stif/GTFS/IDFM-gtfs.zip'
 unzip -d paris.gtfs paris.gtfs.zip
 gtfs-to-sql --require-dependencies \
 	--schema paris -- paris.gtfs/*.txt \
 	| sponge | psql -b
 
-wget -U 'gtfs-via-postgres demo' -O berlin.gtfs.zip 'https://www.vbb.de/vbbgtfs'
+wget -U 'gtfs-via-duckdb demo' -O berlin.gtfs.zip 'https://www.vbb.de/vbbgtfs'
 unzip -d berlin.gtfs berlin.gtfs.zip
 gtfs-to-sql --require-dependencies \
 	--schema berlin -- berlin.gtfs/*.txt \

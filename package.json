@@ -1,7 +1,7 @@
 {
-	"name": "gtfs-via-postgres",
-	"description": "Process GTFS using PostgreSQL.",
-	"version": "4.11.1",
+	"name": "gtfs-via-duckdb",
+	"description": "Analyze GTFS datasets using DuckDB.",
+	"version": "5.0.0",
 	"main": "lib/index.js",
 	"bin": {
 		"gtfs-to-sql": "cli.js"
@@ -22,8 +22,8 @@
 		"public transport",
 		"transit",
 		"convert",
-		"postgres",
-		"postgresql",
+		"duckdb",
+		"data analysis",
 		"sql"
 	],
 	"author": "Jannis R <mail@jannisr.de>",
@@ -33,12 +33,12 @@
 		"smohiudd <saadiq@developmentseed.org>",
 		"@mattkinnia"
 	],
-	"homepage": "https://github.com/public-transport/gtfs-via-postgres/tree/4.11.1",
+	"homepage": "https://github.com/public-transport/gtfs-via-duckdb/tree/5.0.0",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/public-transport/gtfs-via-postgres.git"
+		"url": "git+https://github.com/public-transport/gtfs-via-duckdb.git"
 	},
-	"bugs": "https://github.com/public-transport/gtfs-via-postgres/issues",
+	"bugs": "https://github.com/public-transport/gtfs-via-duckdb/issues",
 	"license": "(Apache-2.0 AND Prosperity-3.0.0)",
 	"funding": [
 		{

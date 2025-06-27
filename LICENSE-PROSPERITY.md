@@ -2,7 +2,7 @@
 
 Contributor: Jannis R
 
-Source Code: https://github.com/public-transport/gtfs-via-postgres
+Source Code: https://github.com/public-transport/gtfs-via-duckdb
 
 ## Purpose
 

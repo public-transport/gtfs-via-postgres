@@ -1,11 +1,11 @@
-# gtfs-via-postgres
+# gtfs-via-duckdb
 
-**Import [GTFS Static/Schedule](https://gtfs.org/documentation/schedule/reference/) datasets into a [PostgreSQL database](https://www.postgresql.org)**, to allow for efficient querying and analysis.
+**Import [GTFS Static/Schedule](https://gtfs.org/documentation/schedule/reference/) datasets into a [DuckDB database](https://duckdb.org)**, to allow for efficient querying and analysis.
 
-[![npm version](https://img.shields.io/npm/v/gtfs-via-postgres.svg)](https://www.npmjs.com/package/gtfs-via-postgres)
-[![binary build status](https://img.shields.io/github/actions/workflow/status/public-transport/gtfs-via-postgres/publish.yml?label=binary%20build)](https://github.com/public-transport/gtfs-via-postgres/actions)
+[![npm version](https://img.shields.io/npm/v/gtfs-via-duckdb.svg)](https://www.npmjs.com/package/gtfs-via-duckdb)
+[![binary build status](https://img.shields.io/github/actions/workflow/status/public-transport/gtfs-via-duckdb/publish.yml?label=binary%20build)](https://github.com/public-transport/gtfs-via-duckdb/actions)
 [![Prosperity/Apache license](https://img.shields.io/static/v1?label=license&message=Prosperity%2FApache&color=0997E8)](#license)
-![minimum Node.js version](https://img.shields.io/node/v/gtfs-via-postgres.svg)
+![minimum Node.js version](https://img.shields.io/node/v/gtfs-via-duckdb.svg)
 [![support me via GitHub Sponsors](https://img.shields.io/badge/support%20me-donate-fa7664.svg)](https://github.com/sponsors/derhuerst)
 [![chat with me on Twitter](https://img.shields.io/badge/chat%20with%20me-on%20Twitter-1da1f2.svg)](https://twitter.com/derhuerst)
 
@@ -15,23 +15,26 @@
 - 🚀 is carefully optimised to let PostgreSQL's query planner do its magic, yielding quick lookups even with large datasets (see [performance section](#performance))
 - ✅ validates and imports `translations.txt`
 
-To work with the time-related data (`stop_times` etc.), `gtfs-via-postgres` supports two "mental models":
+To work with the time-related data (`stop_times` etc.), `gtfs-via-duckdb` supports two "mental models":
 
 - the time-*unexpanded* data that is almost directly taken from the GTFS Schedule data – This is useful if you want to do network analysis.
 - the time-*expanded* view that "applies" every trip's `stop_times` rows to all of its service days – This is useful for routing & queries from the traveller's perspective.
+
+> [!NOTE]
+> `gtfs-via-duckdb` is a fork of [`gtfs-via-postgres`](https://github.com/public-transport/gtfs-via-postgres). Refer to the [comparison below](#gtfs-via-postgres) for details.
 
 
 ## Installation
 
 ```shell
-npm install -g gtfs-via-postgres
+npm install -g gtfs-via-duckdb
 ```
 
 Or use [`npx`](https://npmjs.com/package/npx). ✨
 
-There are also [prebuilt binaries](https://github.com/public-transport/gtfs-via-postgres/releases/latest) and [Docker images](https://github.com/public-transport/gtfs-via-postgres/pkgs/container/gtfs-via-postgres) available.
+There are also [prebuilt binaries](https://github.com/public-transport/gtfs-via-duckdb/releases/latest) and [Docker images](https://github.com/public-transport/gtfs-via-duckdb/pkgs/container/gtfs-via-duckdb) available.
 
-*Note:* `gtfs-via-postgres` **needs PostgreSQL >=14** to work, as it uses the [`WITH … AS NOT MATERIALIZED`](https://www.postgresql.org/docs/14/queries-with.html#id-1.5.6.12.7) syntax. You can check your PostgreSQL server's version with `psql -t -c 'SELECT version()'`.
+*Note:* `gtfs-via-duckdb` **needs PostgreSQL >=14** to work, as it uses the [`WITH … AS NOT MATERIALIZED`](https://www.postgresql.org/docs/14/queries-with.html#id-1.5.6.12.7) syntax. You can check your PostgreSQL server's version with `psql -t -c 'SELECT version()'`.
 
 
 ## Getting Started
@@ -72,12 +75,10 @@ env PGDATABASE=postgres psql -c 'create database vbb_2022_02_25'
 export PGDATABASE=vbb_2022_02_25
 ```
 
-*Note*: `gtfs-via-postgres` generates SQL that contains the `CREATE EXTENSION postgis` instruction. For this to work, the PostgreSQL user you're connecting as needs the `CREATE` [permission](https://www.postgresql.org/docs/14/ddl-priv.html) on the database. Also, the `postgis` extension must either be marked as trusted (by putting `trusted = true` into `$(pg_config --sharedir)/extension/postgis.control`), or your user must be a superuser.
-
-Install `gtfs-via-postgres` and use it to import the GTFS data:
+Install `gtfs-via-duckdb` and use it to import the GTFS data:
 
 ```sh
-npm install -D gtfs-via-postgres
+npm install -D gtfs-via-duckdb
 npm exec -- gtfs-to-sql --require-dependencies -- gtfs/*.csv | sponge | psql -b
 # agency
 # calendar
@@ -93,9 +94,7 @@ npm exec -- gtfs-to-sql --require-dependencies -- gtfs/*.csv | sponge | psql -b
 
 Importing will take 10s to 15m, depending on the size of the feed. On an [M2 MacBook Air](https://support.apple.com/en-us/111867), importing the above feed takes about 9m; Importing the [260kb 2021-10-06 Amtrak feed](https://transitfeeds.com/p/amtrak/1136/20211006) takes 6s.
 
-The [DELFI](https://www.delfi.de/) feed with ca. 330 MB may take 1 hour or more and require at least 35 GB of disk space for the database.
-
-In addition to a table for each GTFS file, `gtfs-via-postgres` adds these views to help with real-world analysis:
+In addition to a table for each GTFS file, `gtfs-via-duckdb` adds these views to help with real-world analysis:
 
 - `service_days` ([materialized](https://www.postgresql.org/docs/14/sql-creatematerializedview.html)) "applies" [`calendar_dates`](https://gtfs.org/documentation/schedule/reference/#calendar_datestxt) to [`calendar`](https://gtfs.org/documentation/schedule/reference/#calendartxt) to give you all days of operation for each "service" defined in [`calendar`](https://gtfs.org/documentation/schedule/reference/#calendartxt).
 - `arrivals_departures` "applies" [`stop_times`](https://gtfs.org/documentation/schedule/reference/#stop_timestxt)/[`frequencies`](https://gtfs.org/documentation/schedule/reference/#frequenciestxt) to [`trips`](https://gtfs.org/documentation/schedule/reference/#tripstxt) and `service_days` to give you all arrivals/departures at each stop with their *absolute* dates & times. It also resolves each stop's parent station ID & name.
@@ -218,12 +217,12 @@ You can run queries with date+time values in any timezone (offset) and they will
 
 *Note:* Just like the `npm`-installed variant, the Docker integration too assumes that your GTFS dataset consists of individual files (i.e. unzipped).
 
-Instead of installing via `npm`, you can use [the `ghcr.io/public-transport/gtfs-via-postgres` Docker image](https://github.com/public-transport/gtfs-via-postgres/pkgs/container/gtfs-via-postgres):
+Instead of installing via `npm`, you can use [the `ghcr.io/public-transport/gtfs-via-duckdb` Docker image](https://github.com/public-transport/gtfs-via-duckdb/pkgs/container/gtfs-via-duckdb):
 
 ```shell
 # variant A: use Docker image just to convert GTFS to SQL
 docker run --rm --volume /path/to/gtfs:/gtfs \
-	ghcr.io/public-transport/gtfs-via-postgres --require-dependencies -- '/gtfs/*.csv' \
+    ghcr.io/public-transport/gtfs-via-duckdb --require-dependencies -- '/gtfs/*.csv' \
     | sponge | psql -b
 ```
 
@@ -231,14 +230,14 @@ docker run --rm --volume /path/to/gtfs:/gtfs \
 
 With the code above, the `psql -b` process will run *outside* of the Docker container, so your host machine needs access to PostgreSQL.
 
-If you want to directly import the GTFS data *from within the Docker container*, you need add `psql` to the image and run it from inside. To do that, write a new Dockerfile that extends the `ghcr.io/public-transport/gtfs-via-postgres` image:
+If you want to directly import the GTFS data *from within the Docker container*, you need add `psql` to the image and run it from inside. To do that, write a new Dockerfile that extends the `ghcr.io/public-transport/gtfs-via-duckdb` image:
 
 ```Dockerfile
-FROM ghcr.io/public-transport/gtfs-via-postgres
+FROM ghcr.io/public-transport/gtfs-via-duckdb
 ENV PGPORT=5432 PGUSER=postgres
 WORKDIR /gtfs
-# pass all arguments into gtfs-via-postgres, pipe output into psql:
-ENTRYPOINT ["/bin/sh", "-c", "gtfs-via-postgres $0 $@ | sponge | psql -b"]
+# pass all arguments into gtfs-via-duckdb, pipe output into psql:
+ENTRYPOINT ["/bin/sh", "-c", "gtfs-via-duckdb $0 $@ | sponge | psql -b"]
 ```
 
 ```shell
@@ -270,11 +269,11 @@ In the nested `SELECT` query, you can use features like `WHERE`, `ORDER BY` and 
 
 ### Querying stops by location efficiently
 
-If you want to find stops by (geo)location, run `gtfs-via-postgres` with `--stops-location-index`. This will create a [spatial index](https://postgis.net/workshops/postgis-intro/indexing.html) on `stops.stop_loc`, so that most [PostGIS functions & operators](https://postgis.net/docs/manual-3.2/reference.html#Measurement_Functions) make use of it.
+If you want to find stops by (geo)location, run `gtfs-via-duckdb` with `--stops-location-index`. This will create a [spatial index](https://postgis.net/workshops/postgis-intro/indexing.html) on `stops.stop_loc`, so that most [PostGIS functions & operators](https://postgis.net/docs/manual-3.2/reference.html#Measurement_Functions) make use of it.
 
 ### more guides
 
-The [`docs` directory](docs) contains more instructions on how to use `gtfs-via-postgres`.
+The [`docs` directory](docs) contains more instructions on how to use `gtfs-via-duckdb`.
 
 
 ## Correctness vs. Speed regarding GTFS Time Values
@@ -288,7 +287,7 @@ Let's consider two examples:
 - A `departure_time` of `26:59:00` with a trip running on `2021-03-01`: The time, applied to this specific date, "extends" into the following day, so it actually departs at `2021-03-02T02:59+01`.
 - A departure time of `03:01:00` with a trip running on `2021-03-28`: This is when the standard -> DST switch happens in the `Europe/Berlin` timezone. Because the dep. time refers to noon - 12h (*not* to midnight), it actually happens at `2021-03-28T03:01+02` which is *not* `3h1m` after `2021-03-28T00:00+01`.
 
-`gtfs-via-postgres` always prioritizes correctness over speed. Because it follows the GTFS semantics, when filtering `arrivals_departures` by *absolute* departure date+time, it cannot automatically filter `service_days` (which is `calendar` and `calendar_dates` combined), because **even a date *before* the date of the desired departure time frame might still end up *within*, when combined with a `departure_time` of e.g. `27:30:00`**; Instead, it has to consider all `service_days` and apply the `departure_time` to all of them to check if they're within the range.
+`gtfs-via-duckdb` always prioritizes correctness over speed. Because it follows the GTFS semantics, when filtering `arrivals_departures` by *absolute* departure date+time, it cannot automatically filter `service_days` (which is `calendar` and `calendar_dates` combined), because **even a date *before* the date of the desired departure time frame might still end up *within*, when combined with a `departure_time` of e.g. `27:30:00`**; Instead, it has to consider all `service_days` and apply the `departure_time` to all of them to check if they're within the range.
 
 However, if you determine your feed's largest `arrival_time`/`departure_time`, you can filter on `date` when querying `arrivals_departures`; This allows PostgreSQL to reduce the number of joins and calendar calculations by orders of magnitude, speeding up your queries significantly. `gtfs-via-postgres` provides two low-level helper functions `largest_arrival_time()` & `largest_departure_time()` for this, as well as two high-level helper functions `dates_filter_min(t_min)` & `dates_filter_max(t_max)` (see below).
 
@@ -319,9 +318,11 @@ AND "date" <= dates_filter_max('2022-03-23T12:35+01') -- evaluates to 2023-03-23
 
 ## Performance
 
-With all use cases I could think of, `gtfs-via-postgres` is reasonably fast. If there's a particular kind of query that you think should be faster, please [open an Issue](https://github.com/public-transport/gtfs-via-postgres/issues/new)!
+`gtfs-via-duckdb` is fast enough for most use cases I can think of. If there's a particular kind of query that you think should be faster, please [open an Issue](https://github.com/public-transport/gtfs-via-duckdb/issues/new)!
 
-The following benchmarks were run with the [2022-07-01 VBB GTFS dataset](https://vbb-gtfs.jannisr.de/2022-07-01/) (41k `stops`, 6m `stop_times`, 207m arrivals/departures) using `gtfs-via-postgres@4.11.9` and PostgreSQL 18.1 on an [M2 MacBook Air](https://support.apple.com/en-us/111867) running macOS 14.8; All measurements are in milliseconds.
+The following benchmarks were run with the [2022-07-01 VBB GTFS dataset](https://vbb-gtfs.jannisr.de/2022-07-01/) (41k `stops`, 6m `stop_times`, 207m arrivals/departures) using `gtfs-via-duckdb@5.0.0` on an [M2](https://en.wikipedia.org/wiki/Apple_M2) laptop running macOS 12.6.8; All measurements are in milliseconds.
+
+todo: re-run benchmarks!
 
 | query | avg | min | p25 | p50 | p75 | p95 | p99 | max | iterations |
 | - | - | - | - | - | - | - | - | - | - |
@@ -349,7 +350,15 @@ The following benchmarks were run with the [2022-07-01 VBB GTFS dataset](https:/
 
 ## Related Projects
 
-There are some projects that are very similar to `gtfs-via-postgres`:
+There are some projects that are very similar to `gtfs-via-duckdb`:
+
+### gtfs-via-postgres
+
+`gtfs-via-duckdb`'s spiritual predecessor, importing GTFS into a *PostgreSQL* database. Because `gtfs-via-duckdb` is forked from `gtfs-via-postgres`, the two have the same features, shortcomings and conceptual design (runtime access to the GTFS happens using SQL only).
+
+However, because PostgreSQL is a daemon and because its databases are administered using SQL, `gtfs-via-postgres`' usage in production systems implies [a lot of complexity as explained in `postgis-gtfs-importer`'s readme](https://github.com/mobidata-bw/postgis-gtfs-importer/blob/v5/README.md). With DuckDB, a database is just a single file and there is no daemon, so [`duckdb-gtfs-importer`](https://github.com/OpenDataVBB/duckdb-gtfs-importer) can enable the *robustness* and *atomicity* goals with a much simpler design (>1 DB files, symlink to the latest).
+
+Because DuckDB tends to be more efficient than PostgreSQL with the mostly [OLAP](https://en.wikipedia.org/wiki/Online_analytical_processing)-like queries run for GTFS analysis, so `gtfs-via-duckdb` imports datasets faster and queries for common use cases usually run faster.
 
 ### Node-GTFS
 
@@ -375,12 +384,13 @@ I don't use it because
 
 There are several forks of the [original outdated project](https://github.com/cbick/gtfs_SQL_importer); [fitnr's fork](https://github.com/fitnr/gtfs-sql-importer) seems to be the most recent one.
 
-The project has a slightly different goal than `gtfs-via-postgres`: While `gtfs-sql-importer` is designed to import multiple versions of a GTFS dataset in an idempotent fashion, `gtfs-via-postgres` assumes that *one* (version of a) GTFS dataset is imported into *one* DB exactly once.
+The project has a slightly different goal than `gtfs-via-duckdb`: While `gtfs-sql-importer` is designed to import multiple versions of a GTFS dataset in an idempotent fashion, `gtfs-via-duckdb` assumes that *one* (version of a) GTFS dataset is imported into *one* DB exactly once.
 
-`gtfs-via-postgres` aims to provide more tools – e.g. the `arrivals_departures` & `connections` views – to help with the analysis of a GTFS dataset, whereas `gtfs-sql-importer` just imports the data.
+`gtfs-via-duckdb` aims to provide more tools – e.g. the `arrivals_departures` & `connections` views – to help with the analysis of a GTFS dataset, whereas `gtfs-sql-importer` just imports the data.
 
 ### other related projects
 
+- [gtfs-via-postgres](https://github.com/public-transport/gtfs-via-postgres) – `gtfs-via-duckdb`'s spiritual predecessor, importing GTFS into a PostgreSQL database.
 - [gtfsdb](https://github.com/OpenTransitTools/gtfsdb) – Python library for converting GTFS files into a relational database.
 - [pygtfs](https://github.com/jarondl/pygtfs) – A python (2/3) library for GTFS (fork of [gtfs-sql](https://github.com/andrewblim/gtfs-sql))
 - [gtfspy](https://github.com/CxAalto/gtfspy) – Public transport network analysis using Python and SQLite.
@@ -390,11 +400,12 @@ The project has a slightly different goal than `gtfs-via-postgres`: While `gtfs-
 - [gtfs-lib](https://github.com/conveyal/gtfs-lib) – Java library & CLI for importing GTFS files into a PostgreSQL database.
 - [gtfs-schema](https://github.com/tyleragreen/gtfs-schema) – PostgreSQL schemas for GTFS feeds. (plain SQL)
 - [markusvalo/HSLtraffic](https://github.com/markusvalo/HSLtraffic) – Scripts to create a PostgreSQL database for HSL GTFS-data. (plain SQL)
+- [smohiudd/gtfs-parquet-duckdb-wasm](https://github.com/smohiudd/gtfs-parquet-duckdb-wasm) – Test visualization of GTFS data using DuckDB-Wasm ([blog post](http://saadiqm.com/gtfs-parquet-duckdb-wasm/))
 
 
 ## License
 
-This project is dual-licensed: **My ([@derhuerst](https://github.com/derhuerst)) contributions are licensed under the [*Prosperity Public License*](https://prosperitylicense.com), [contributions of other people](https://github.com/public-transport/gtfs-via-postgres/graphs/contributors) are licensed as [Apache 2.0](https://apache.org/licenses/LICENSE-2.0)**.
+This project is dual-licensed: **My ([@derhuerst](https://github.com/derhuerst)) contributions are licensed under the [*Prosperity Public License*](https://prosperitylicense.com), [contributions of other people](https://github.com/public-transport/gtfs-via-duckdb/graphs/contributors) are licensed as [Apache 2.0](https://apache.org/licenses/LICENSE-2.0)**.
 
 > This license allows you to use and share this software for noncommercial purposes for free and to try this software for commercial purposes for thirty days.
 
@@ -405,6 +416,6 @@ This project is dual-licensed: **My ([@derhuerst](https://github.com/derhuerst))
 
 ## Contributing
 
-If you have a question or need support using `gtfs-via-postgres`, please double-check your code and setup first. If you think you have found a bug or want to propose a feature, use [the issues page](https://github.com/public-transport/gtfs-via-postgres/issues).
+If you have a question or need support using `gtfs-via-duckdb`, please double-check your code and setup first. If you think you have found a bug or want to propose a feature, use [the issues page](https://github.com/public-transport/gtfs-via-duckdb/issues).
 
 By contributing, you agree to release your modifications under the [Apache 2.0 license](LICENSE-APACHE).
