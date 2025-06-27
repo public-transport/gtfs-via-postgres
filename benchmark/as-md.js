@@ -1,39 +1,31 @@
 #!/usr/bin/env node
 
-const {pipeline, Transform} = require('stream')
-const csvParser = require('csv-parser')
-const {ok} = require('assert')
+const {createInterface} = require('node:readline')
 
-let firstRow = true
+const linewise = createInterface({
+	input: process.stdin,
+	// Note: We use the crlfDelay option to recognize all instances of CR LF as a single line break.
+	crlfDelay: Infinity,
+})
 
-pipeline(
-	process.stdin,
-	csvParser(),
-	new Transform({
-		objectMode: true,
-		transform: function (row, _, cb) {
-			if (firstRow) {
-				firstRow = false
+;(async () => {
+	let firstRow = true
+	for await (const line of linewise) {
+		const row = JSON.parse(line)
 
-				const keys = Object.keys(row).filter(key => key !== 'filename')
-				process.stdout.write(`| ${keys.join(' | ')} |\n`)
-				process.stdout.write(`| ${keys.map(_ => '-').join(' | ')} |\n`)
-			}
+		if (firstRow) {
+			firstRow = false
 
-			const formattedVals = Object.entries(row)
-			.map(([key, val]) => {
-				if (key === 'query') return '<pre>' + val.replace(/\n/g, '<br>') + '</pre>'
-				return val
-			})
-			process.stdout.write(`| ${formattedVals.join(' | ')} |\n`)
+			const keys = Object.keys(row).filter(key => key !== 'filename')
+			process.stdout.write(`| ${keys.join(' | ')} |\n`)
+			process.stdout.write(`| ${keys.map(_ => '-').join(' | ')} |\n`)
+		}
 
-			cb()
-		},
-	}),
-	process.stdout,
-	(err) => {
-		if (!err) return;
-		console.error(err)
-		process.exit(1)
-	},
-)
+		const formattedVals = Object.entries(row)
+		.map(([key, val]) => {
+			if (key === 'query') return '<pre>' + val.trim().replace(/\n/g, '<br>') + '</pre>'
+			return typeof val === 'number' && !Number.isInteger(val) ? Math.round(val * 100) / 100 : val
+		})
+		process.stdout.write(`| ${formattedVals.join(' | ')} |\n`)
+	}
+})()

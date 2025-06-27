@@ -6,7 +6,7 @@ set -o pipefail
 cd "$(dirname $0)"
 set -x
 
-psql -t -c 'SELECT version()'
+duckdb --version
 
 ./calendar-dates-only.sh
 ./sample-gtfs-feed.sh
@@ -14,5 +14,6 @@ psql -t -c 'SELECT version()'
 ./routes-without-agency-id.sh
 ./stops-without-level-id.sh
 ./invalid-empty-agency-id.sh
+./multiple-datasets.sh
 
 echo -e "\n\n✔︎ tests passing"
