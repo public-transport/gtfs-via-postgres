@@ -11,8 +11,8 @@
 
 - ✅ handles [daylight saving time correctly](#correctness-vs-speed-regarding-gtfs-time-values) but retains reasonable lookup performance
 - ✅ supports `frequencies.txt`
-- ✨ joins `stop_times.txt`/`frequencies.txt`, `calendar.txt`/`calendar_dates.txt`, `trips.txt`, `route.txt` & `stops.txt` into [views](https://www.postgresql.org/docs/14/sql-createview.html) for straightforward data analysis (see below)
-- 🚀 is carefully optimised to let PostgreSQL's query planner do its magic, yielding quick lookups even with large datasets (see [performance section](#performance))
+- ✨ joins `stop_times.txt`/`frequencies.txt`, `calendar.txt`/`calendar_dates.txt`, `trips.txt`, `route.txt` & `stops.txt` into [views](https://duckdb.org/docs/stable/sql/statements/create_view) for straightforward data analysis (see below)
+- 🚀 is carefully optimised to let DuckDB's query planner do its magic, yielding quick lookups even with large datasets (see [performance section](#performance))
 - ✅ validates and imports `translations.txt`
 
 To work with the time-related data (`stop_times` etc.), `gtfs-via-duckdb` supports two "mental models":
@@ -34,10 +34,18 @@ Or use [`npx`](https://npmjs.com/package/npx). ✨
 
 There are also [prebuilt binaries](https://github.com/public-transport/gtfs-via-duckdb/releases/latest) and [Docker images](https://github.com/public-transport/gtfs-via-duckdb/pkgs/container/gtfs-via-duckdb) available.
 
-*Note:* `gtfs-via-duckdb` **needs PostgreSQL >=14** to work, as it uses the [`WITH … AS NOT MATERIALIZED`](https://www.postgresql.org/docs/14/queries-with.html#id-1.5.6.12.7) syntax. You can check your PostgreSQL server's version with `psql -t -c 'SELECT version()'`.
+> [!NOTE]
+> `gtfs-via-duckdb` **needs DuckDB >=1.2** and its [`icu`](https://duckdb.org/docs/stable/extensions/icu) and [`spatial`](https://duckdb.org/docs/stable/extensions/spatial/overview) extensions to work.
 
 
 ## Getting Started
+
+Install the DuckDB [`icu`](https://duckdb.org/docs/stable/extensions/icu) and [`spatial`](https://duckdb.org/docs/stable/extensions/spatial/overview) extensions.
+
+```shell
+duckdb_cli -c 'INSTALL icu'
+duckdb_cli -c 'INSTALL spatial'
+```
 
 If you have a `.zip` GTFS feed, unzip it into individual files.
 
@@ -66,20 +74,11 @@ ls -lh gtfs
 #  16M trips.csv
 ```
 
-Depending on your specific setup, configure access to the PostgreSQL database via [`PG*` environment variables](https://www.postgresql.org/docs/14/libpq-envars.html):
-
-```sh
-export PGUSER=postgres
-export PGPASSWORD=password
-env PGDATABASE=postgres psql -c 'create database vbb_2022_02_25'
-export PGDATABASE=vbb_2022_02_25
-```
-
 Install `gtfs-via-duckdb` and use it to import the GTFS data:
 
 ```sh
 npm install -D gtfs-via-duckdb
-npm exec -- gtfs-to-sql --require-dependencies -- gtfs/*.csv | sponge | psql -b
+npm exec -- gtfs-to-duckdb --require-dependencies -- gtfs.duckdb gtfs/*.csv
 # agency
 # calendar
 # CREATE EXTENSION
@@ -92,14 +91,14 @@ npm exec -- gtfs-to-sql --require-dependencies -- gtfs/*.csv | sponge | psql -b
 # COMMIT
 ```
 
-Importing will take 10s to 15m, depending on the size of the feed. On an [M2 MacBook Air](https://support.apple.com/en-us/111867), importing the above feed takes about 9m; Importing the [260kb 2021-10-06 Amtrak feed](https://transitfeeds.com/p/amtrak/1136/20211006) takes 6s.
+Importing will take a few seconds to a few minutes, depending on the size of the feed. On an [M2](https://en.wikipedia.org/wiki/Apple_M2) laptop, importing the above feed takes about 30s.
 
 In addition to a table for each GTFS file, `gtfs-via-duckdb` adds these views to help with real-world analysis:
 
-- `service_days` ([materialized](https://www.postgresql.org/docs/14/sql-creatematerializedview.html)) "applies" [`calendar_dates`](https://gtfs.org/documentation/schedule/reference/#calendar_datestxt) to [`calendar`](https://gtfs.org/documentation/schedule/reference/#calendartxt) to give you all days of operation for each "service" defined in [`calendar`](https://gtfs.org/documentation/schedule/reference/#calendartxt).
+- `service_days` (table) "applies" [`calendar_dates`](https://gtfs.org/documentation/schedule/reference/#calendar_datestxt) to [`calendar`](https://gtfs.org/documentation/schedule/reference/#calendartxt) to give you all days of operation for each "service" defined in [`calendar`](https://gtfs.org/documentation/schedule/reference/#calendartxt).
 - `arrivals_departures` "applies" [`stop_times`](https://gtfs.org/documentation/schedule/reference/#stop_timestxt)/[`frequencies`](https://gtfs.org/documentation/schedule/reference/#frequenciestxt) to [`trips`](https://gtfs.org/documentation/schedule/reference/#tripstxt) and `service_days` to give you all arrivals/departures at each stop with their *absolute* dates & times. It also resolves each stop's parent station ID & name.
 - `connections` "applies" [`stop_times`](https://gtfs.org/documentation/schedule/reference/#stop_timestxt)/[`frequencies`](https://gtfs.org/documentation/schedule/reference/#frequenciestxt) to [`trips`](https://gtfs.org/documentation/schedule/reference/#tripstxt) and `service_days`, just like `arrivals_departures`, but gives you departure (at stop A) & arrival (at stop B) *pairs*.
-- `shapes_aggregated` aggregates individual shape points in [`shapes`](https://gtfs.org/documentation/schedule/reference/#shapestxt) into a [PostGIS `LineString`](http://postgis.net/workshops/postgis-intro/geometries.html#linestrings).
+- `shapes_aggregated` aggregates individual shape points in [`shapes`](https://gtfs.org/documentation/schedule/reference/#shapestxt) into a [`LineString`](https://duckdb.org/docs/stable/extensions/spatial/overview#the-geometry-type).
 - `stats_by_route_date` provides the number of arrivals/departures by route ID and date. – [read more](docs/analysis/feed-by-route-date.md)
 - `stats_by_agency_route_stop_hour` provides the number of arrivals/departures by agency ID, route ID, stop ID & hour. – [read more](docs/analysis/feed-by-agency-route-stop-and-hour.md)
 - In contrast to `stats_by_route_date` & `stats_by_agency_route_stop_hour`, `stats_active_trips_by_hour` provides the number of *currently running* trips for each hour in the feeds period of time.
@@ -147,7 +146,7 @@ AND (stop_url_lang = 'de-CH' OR stop_url_lang IS NULL)
 
 ```
 Usage:
-    gtfs-to-sql [options] [--] <gtfs-file> ...
+    import-gtfs-into-duckdb [options] [--] <path-to-duckdb> <gtfs-file> ...
 Options:
     --silent                  -s  Don't show files being converted.
     --require-dependencies    -d  Require files that the specified GTFS files depend
@@ -189,23 +188,23 @@ Options:
                                     none, view & materialized-view.
     --import-metadata             Create functions returning import metadata:
                                     - gtfs_data_imported_at (timestamp with time zone)
-                                    - gtfs_via_postgres_version (text)
-                                    - gtfs_via_postgres_options (jsonb)
+                                    - gtfs_via_duckdb_version (text)
+                                    - gtfs_via_duckdb_options (jsonb)
+Notes:
+    If you just want to check if the GTFS data can be imported but don't care about the
+    resulting DuckDB database file, you can import into an in-memory database by specifying
+    `:memory:` as the <path-to-duckdb>.
 Examples:
-    gtfs-to-sql some-gtfs/*.txt | sponge | psql -b # import into PostgreSQL
-    gtfs-to-sql -u -- some-gtfs/*.txt | gzip >gtfs.sql.gz # generate a gzipped SQL dump
+    import-gtfs-into-duckdb some-gtfs.duckdb some-gtfs/*.txt
 
 [1] https://developers.google.com/transit/gtfs/reference/extended-route-types
 [2] https://groups.google.com/g/gtfs-changes/c/keT5rTPS7Y0/m/71uMz2l6ke0J
 ```
 
-Some notable limitations mentioned in the [PostgreSQL 14 documentation on date/time types](https://www.postgresql.org/docs/14/datatype-datetime.html):
-
-> For `timestamp with time zone`, the internally stored value is always in UTC (Universal Coordinated Time, traditionally known as Greenwich Mean Time, GMT). An input value that has an explicit time zone specified is converted to UTC using the appropriate offset for that time zone.
-
-> When a `timestamp with time zone` value is output, it is always converted from UTC to the current `timezone` zone, and displayed as local time in that zone. To see the time in another time zone, either change `timezone` or use the `AT TIME ZONE` construct […].
-
-You can run queries with date+time values in any timezone (offset) and they will be processed correctly, but the output will always be in the database timezone (offset), unless you have explicitly used `AT TIME ZONE`.
+> [!TIP]
+> DuckDB will always store `timestamp with time zone` values as microsends since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time) (similar to UTC). An input value with an explicit offset specified (e.g. `2022-03-04T05:06:07+08:00`) is converted to the internal representation using the offset.
+> When the stored value is queried, it is always converted back into the current offset of the timezone specified by the `TimeZone` config. To see the time in another time zone, [change the `TimeZone` config](https://duckdb.org/docs/1.2/sql/data_types/timestamp#settings).
+> TLDR: You can run queries with date+time values in any timezone (offset) and they will be processed correctly.
 
 ### With Docker
 
@@ -213,36 +212,11 @@ You can run queries with date+time values in any timezone (offset) and they will
 
 Instead of installing via `npm`, you can use [the `ghcr.io/public-transport/gtfs-via-duckdb` Docker image](https://github.com/public-transport/gtfs-via-duckdb/pkgs/container/gtfs-via-duckdb):
 
-```shell
-# variant A: use Docker image just to convert GTFS to SQL
-docker run --rm --volume /path/to/gtfs:/gtfs \
-    ghcr.io/public-transport/gtfs-via-duckdb --require-dependencies -- '/gtfs/*.csv' \
-    | sponge | psql -b
-```
-
 *Note:* Remember to pass the `/gtfs/*.csv` glob as a string (with `'`), so that it gets evaluated *inside* the Docker container.
 
-With the code above, the `psql -b` process will run *outside* of the Docker container, so your host machine needs access to PostgreSQL.
-
-If you want to directly import the GTFS data *from within the Docker container*, you need add `psql` to the image and run it from inside. To do that, write a new Dockerfile that extends the `ghcr.io/public-transport/gtfs-via-duckdb` image:
-
-```Dockerfile
-FROM ghcr.io/public-transport/gtfs-via-duckdb
-ENV PGPORT=5432 PGUSER=postgres
-WORKDIR /gtfs
-# pass all arguments into gtfs-via-duckdb, pipe output into psql:
-ENTRYPOINT ["/bin/sh", "-c", "gtfs-via-duckdb $0 $@ | sponge | psql -b"]
-```
-
 ```shell
-# start PostgreSQL DB in another container "db"
-docker run --name db -p 5432:5432 -e POSTGRES_PASSWORD=password postgis/postgis
-
-# variant B: use Docker image to convert GTFS to SQL and import it directly
-docker build -t import-gtfs . # build helper Docker image from Dockerfile
 docker run --rm --volume /path/to/gtfs:/gtfs \
-	--link db -e PGHOST=db -e PGPASSWORD=password \
-	import-gtfs --require-dependencies -- '/gtfs/*.csv'
+	ghcr.io/public-transport/gtfs-via-duckdb --require-dependencies -- '/gtfs/*.csv'
 ```
 
 ### Importing a GTFS Schedule feed continuously
@@ -253,17 +227,15 @@ Because it works as [atomically](https://en.wikipedia.org/wiki/Atomicity_(databa
 
 ### Exporting data efficiently
 
-If you want to export data from the database, use the [`COPY` command](https://www.postgresql.org/docs/14/sql-copy.html); On an [M1 MacBook Air](https://en.wikipedia.org/wiki/MacBook_Air_(Apple_silicon)#Third_generation_(Retina_with_Apple_silicon)), PostgreSQL 14 can export about 500k `connections` rows per second.
+If you want to export data from the database, use the [`COPY` command](https://duckdb.org/docs/stable/sql/statements/copy).
 
 ```shell
-psql -c 'COPY (SELECT * FROM connections) TO STDOUT csv HEADER' >connections.csv
+duckdb -c 'COPY (SELECT * FROM connections) TO STDOUT csv HEADER' my-gtfs.duckdb >my-gtfs-connections.csv
 ```
-
-In the nested `SELECT` query, you can use features like `WHERE`, `ORDER BY` and `LIMIT`. Because `psql` passes on the exported data right away, you could stream it into another process.
 
 ### Querying stops by location efficiently
 
-If you want to find stops by (geo)location, run `gtfs-via-duckdb` with `--stops-location-index`. This will create a [spatial index](https://postgis.net/workshops/postgis-intro/indexing.html) on `stops.stop_loc`, so that most [PostGIS functions & operators](https://postgis.net/docs/manual-3.2/reference.html#Measurement_Functions) make use of it.
+If you want to find stops by (geo)location, run `gtfs-via-duckdb` with `--stops-location-index`. This will create a [spatial index](https://duckdb.org/docs/stable/extensions/spatial/r-tree_indexes) on `stops.stop_loc`, so that most spatial queries can be done efficiently.
 
 ### more guides
 
@@ -283,19 +255,19 @@ Let's consider two examples:
 
 `gtfs-via-duckdb` always prioritizes correctness over speed. Because it follows the GTFS semantics, when filtering `arrivals_departures` by *absolute* departure date+time, it cannot automatically filter `service_days` (which is `calendar` and `calendar_dates` combined), because **even a date *before* the date of the desired departure time frame might still end up *within*, when combined with a `departure_time` of e.g. `27:30:00`**; Instead, it has to consider all `service_days` and apply the `departure_time` to all of them to check if they're within the range.
 
-However, if you determine your feed's largest `arrival_time`/`departure_time`, you can filter on `date` when querying `arrivals_departures`; This allows PostgreSQL to reduce the number of joins and calendar calculations by orders of magnitude, speeding up your queries significantly. `gtfs-via-postgres` provides two low-level helper functions `largest_arrival_time()` & `largest_departure_time()` for this, as well as two high-level helper functions `dates_filter_min(t_min)` & `dates_filter_max(t_max)` (see below).
+However, if you determine your feed's largest `arrival_time`/`departure_time`, you can filter on `date` when querying `arrivals_departures`; This allows DuckDB to reduce the number of joins and calendar calculations by orders of magnitude, speeding up your queries significantly. `gtfs-via-duckdb` provides a low-level helper table `largest_arr_dep_time` for this, as well as two high-level helper functions `dates_filter_min(t_min)` & `dates_filter_max(t_max)` (see below).
 
-For example, when querying all *absolute* departures at `de:11000:900120003` (*S Ostkreuz Bhf (Berlin)*) between `2022-03-23T12:30:00+01` and  `2022-03-23T12:35:00+01` within the [2022-02-25 *VBB* feed](https://vbb-gtfs.jannisr.de/2022-02-25/), filtering by `date` speeds it up nicely (Apple M1, PostgreSQL 14.2):
+For example, when querying all *absolute* departures at `de:11000:900120003` (*S Ostkreuz Bhf (Berlin)*) between `2022-03-23T12:30:00+01` and  `2022-03-23T12:35:00+01` within the [2022-07-01 *VBB* feed](https://vbb-gtfs.jannisr.de/2022-07-01/), filtering by `date` speeds it up nicely (Apple M2, DuckDB v1.3.0):
 
 `station_id` filter | `date` filter | query time | nr of results
 -|-|-|-
-`de:11000:900120003` | *none* | 230ms | ~574k
-`de:11000:900120003` | `2022-03-13` >= `date` < `2022-04-08` | 105ms | ~51k
-`de:11000:900120003` | `2022-03-23` >= `date` < `2022-03-24` | 55ms | ~2k
-`de:11000:900120003` | `2022-03-22` > `date` < `2022-03-24` | 55ms | ~2k
-*none* | *none* | 192s | 370m
-*none* | `2022-03-13` >= `date` < `2022-04-08` | 34s | ~35m
-*none* | `2022-03-22` > `date` < `2022-03-24` | 2.4s | ~1523k
+`de:11000:900120003` | *none* | todo | ~todok
+`de:11000:900120003` | `2022-03-13` >= `date` < `2022-04-08` | todo | ~todok
+`de:11000:900120003` | `2022-03-23` >= `date` < `2022-03-24` | todo | ~todok
+`de:11000:900120003` | `2022-03-22` > `date` < `2022-03-24` | todo | ~todok
+*none* | *none* | todo | todom
+*none* | `2022-03-13` >= `date` < `2022-04-08` | todo | ~todom
+*none* | `2022-03-22` > `date` < `2022-03-24` | todo | ~todok
 
 Using `dates_filter_min(t_min)` & `dates_filter_max(t_max)`, we can easily filter by `date`. When filtering by `t_departure` (absolute departure date+time), `t_min` is the lower `t_departure` bound, whereas `t_max` is the upper bound. The VBB example above can be queried like this:
 
@@ -314,7 +286,7 @@ AND "date" <= dates_filter_max('2022-03-23T12:35:00+01') -- evaluates to 2023-03
 
 `gtfs-via-duckdb` is fast enough for most use cases I can think of. If there's a particular kind of query that you think should be faster, please [open an Issue](https://github.com/public-transport/gtfs-via-duckdb/issues/new)!
 
-The following benchmarks were run with the [2022-07-01 VBB GTFS dataset](https://vbb-gtfs.jannisr.de/2022-07-01/) (41k `stops`, 6m `stop_times`, 207m arrivals/departures) using `gtfs-via-duckdb@5.0.0` on an [M2](https://en.wikipedia.org/wiki/Apple_M2) laptop running macOS 12.6.8; All measurements are in milliseconds.
+The following benchmarks were run with the [2022-07-01 VBB GTFS dataset](https://vbb-gtfs.jannisr.de/2022-07-01/) (41k `stops`, 6m `stop_times`, 207m arrivals/departures) using `gtfs-via-duckdb@5.0.0` and DuckDB v1.3 on an [M2](https://en.wikipedia.org/wiki/Apple_M2) laptop running macOS 14.7.6; All measurements are in milliseconds.
 
 todo: re-run benchmarks!
 

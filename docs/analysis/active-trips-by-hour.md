@@ -4,7 +4,7 @@ Do you want to know how many trips are running at a specific point in time?
 
 `gtfs-via-duckdb` optionally provides a **(materialized) view `stats_active_trips_by_hour` to answer this. Use the `--stats-active-trips-by-hour` flag to enable it**:
 
-- If you run `gtfs-to-sql` with `--stats-active-trips-by-hour=view`, `stats_active_trips_by_hour` will be a "regular" non-materialized view. Use this option if you want to import the GTFS data quickly, and if you only query `stats_active_trips_by_hour` rarely or in time-uncritical scenarios.
+- If you run `gtfs-to-duckdb` with `--stats-active-trips-by-hour=view`, `stats_active_trips_by_hour` will be a "regular" non-materialized view. Use this option if you want to import the GTFS data quickly, and if you only query `stats_active_trips_by_hour` rarely or in time-uncritical scenarios.
 - If you pass `--stats-active-trips-by-hour=materialized-view`, the `stats_active_trips_by_hour` view will [be materialized](https://www.postgresql.org/docs/14/rules-materializedviews.html). Use this option if you need fast queries, and if you can tolerate significantly longer import times (a minute for small feeds, many hours for large feeds).
 
 ## example: number of active trips over the course of a day

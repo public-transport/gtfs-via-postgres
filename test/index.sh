@@ -6,7 +6,7 @@ set -o pipefail
 cd "$(dirname $0)"
 set -x
 
-psql -t -c 'SELECT version()'
+duckdb --version
 
 # todo: adopt set of feeds from https://github.com/MobilityData/gtfs-validator/issues/2079
 
@@ -16,5 +16,6 @@ psql -t -c 'SELECT version()'
 ./routes-without-agency-id.sh
 ./stops-without-level-id.sh
 ./invalid-empty-agency-id.sh
+./multiple-datasets.sh
 
 echo -e "\n\n✔︎ tests passing"

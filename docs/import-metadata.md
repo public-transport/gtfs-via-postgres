@@ -1,6 +1,6 @@
 # import metadata
 
-If you run `gtfs-to-sql` with the `--import-metadata` option, it will create functions providing information about the imported feed as well as the import process.
+If you run `gtfs-to-duckdb` with the `--import-metadata` option, it will create functions providing information about the imported feed as well as the import process.
 
 An example with the [2023-04-05 VBB GTFS feed](https://vbb-gtfs.jannisr.de/2023-04-05):
 

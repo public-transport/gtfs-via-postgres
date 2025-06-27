@@ -66,7 +66,7 @@ const {
 if (flags.help) {
 	process.stdout.write(`
 Usage:
-    gtfs-to-sql [options] [--] <gtfs-file> ...
+    import-gtfs-into-duckdb [options] [--] <path-to-duckdb> <gtfs-file> ...
 Options:
     --silent                  -s  Don't show files being converted.
     --require-dependencies    -d  Require files that the specified GTFS files depend
@@ -108,11 +108,14 @@ Options:
                                     none, view & materialized-view.
     --import-metadata             Create functions returning import metadata:
                                     - gtfs_data_imported_at (timestamp with time zone)
-                                    - gtfs_via_postgres_version (text)
-                                    - gtfs_via_postgres_options (jsonb)
+                                    - gtfs_via_duckdb_version (text)
+                                    - gtfs_via_duckdb_options (jsonb)
+Notes:
+    If you just want to check if the GTFS data can be imported but don't care about the
+    resulting DuckDB database file, you can import into an in-memory database by specifying
+    \`:memory:\` as the <path-to-duckdb>.
 Examples:
-    gtfs-to-sql some-gtfs/*.txt | sponge | psql -b # import into PostgreSQL
-    gtfs-to-sql -u -- some-gtfs/*.txt | gzip >gtfs.sql.gz # generate a gzipped SQL dump
+    import-gtfs-into-duckdb some-gtfs.duckdb some-gtfs/*.txt
 
 [1] https://developers.google.com/transit/gtfs/reference/extended-route-types
 [2] https://groups.google.com/g/gtfs-changes/c/keT5rTPS7Y0/m/71uMz2l6ke0J
@@ -126,11 +129,11 @@ if (flags.version) {
 }
 
 const {basename, extname} = require('path')
-const {pipeline} = require('stream')
 const convertGtfsToSql = require('./index')
-const DataError = require('./lib/data-error')
 
-const files = args.map((file) => {
+const [pathToDb] = args
+
+const files = args.slice(1).map((file) => {
 	const name = basename(file, extname(file))
 	return {name, file}
 })
@@ -155,16 +158,8 @@ if ('lower-case-lang-codes' in flags) {
 	opt.lowerCaseLanguageCodes = flags['lower-case-lang-codes']
 }
 
-pipeline(
-	convertGtfsToSql(files, opt),
-	process.stdout,
-	(err) => {
-		if (!err) return;
-		if (err instanceof DataError) {
-			console.error(String(err))
-		} else if (err.code !== 'EPIPE') {
-			console.error(err)
-		}
-		process.exit(1)
-	}
-)
+convertGtfsToSql(pathToDb, files, opt)
+.catch((err) => {
+	console.error(err)
+	process.exit(1)
+})

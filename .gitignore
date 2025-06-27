@@ -10,8 +10,13 @@ pnpm-debug.log
 /shrinkwrap.yaml
 
 /test/amtrak-gtfs-2021-10-06
+/test/*.duckdb
 
 /*.gtfs
 /*.gtfs.zip
 /*.gtfs.tar.gz
 /*.gtfs.tar.zst
+
+/*.duckdb
+/*.duckdb.gz
+/*.duckdb.br

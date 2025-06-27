@@ -19,11 +19,6 @@ jobs:
         node-version:
           - '22.x'
           - '24.x'
-        postgis-docker-tag:
-          - '14-3.5-alpine'
-          - '15-3.5-alpine'
-          - '16-3.5-alpine'
-          - '17-3.5-alpine'
 
     steps:
     - name: checkout
@@ -32,35 +27,16 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-    - name: install sponge (moreutils)
-      run: sudo apt install -y moreutils
 
-    - name: install & start PostgreSQL with PostGIS
-      # todo: currently, it uses mdillon, which doesn't have PostgreSQL 14
-      # uses: huaxk/postgis-action@v1
-      # with:
-      #   postgresql version: '${{ matrix.postgis-docker-tag }}'
-      #   postgresql password: password
-      #   postgresql user: postgres
-      #   postgresql db: postgres
+    - name: install DuckDB
       run: |
-        docker run -d \
-          -e POSTGRES_USER=$PGUSER -e POSTGRES_PASSWORD=$PGPASSWORD -e POSTGRES_DB=$PGDATABASE \
-          -p 5432:5432 postgis/postgis:${{ matrix.postgis-docker-tag }} \
-          -c timezone=Europe/Berlin
-      env:
-        PGUSER: postgres
-        PGPASSWORD: password
-        PGDATABASE: postgres
+        set -eux -o pipefail
+        curl -fsSL -U '${{ github.repository }} CI' 'https://install.duckdb.org' | sh
+        echo "$HOME/.duckdb/cli/latest" >>"$GITHUB_PATH"
+        ~/.duckdb/cli/latest/duckdb --version
 
     - run: npm install
 
     - run: npm run lint
     - name: npm test
       run : npm test
-      env:
-        PGHOST: localhost
-        PGPORT: '5432'
-        PGUSER: postgres
-        PGPASSWORD: password
-        PGDATABASE: postgres
