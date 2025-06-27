@@ -18,7 +18,7 @@ psql -c "$(cat <<- EOM
 		to_stop_id, t_arrival
 	FROM connections
 	WHERE trip_id = 'during-dst-1'
-	AND t_departure > '2019-03-31T01:55+01' AND t_departure < '2019-03-31T03:00+02'
+	AND t_departure > '2019-03-31T01:55:00+01:00' AND t_departure < '2019-03-31T03:00:00+02:00'
 	-- AND route_id = 'D'
 	-- AND from_stop_id = 'airport'
 EOM)"
@@ -31,7 +31,7 @@ psql -c "$(cat <<- EOM
 		stop_sequence
 	FROM arrivals_departures
 	WHERE trip_id = 'during-dst-1'
-	AND t_departure > '2019-03-31T01:55+01' AND t_departure < '2019-03-31T03:00+02'
+	AND t_departure > '2019-03-31T01:55:00+01:00' AND t_departure < '2019-03-31T03:00:00+02:00'
 	-- AND route_id = 'D'
 	-- AND stop_id = 'airport'
 EOM)"

@@ -93,7 +93,7 @@ connection_during_dst=$(cat << EOF
 		extract(epoch from t_departure)::integer as dep
 	FROM connections
 	WHERE trip_id = 'during-dst-1'
-	AND t_departure = '2019-03-31T01:58+01'
+	AND t_departure = '2019-03-31T01:58:00+01:00'
 EOF
 )
 dst1=$(psql --csv -t -c "$connection_during_dst" | head -n 1)
