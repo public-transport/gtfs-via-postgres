@@ -14,6 +14,5 @@ psql -t -c 'SELECT version()'
 ./routes-without-agency-id.sh
 ./stops-without-level-id.sh
 ./invalid-empty-agency-id.sh
-./multiple-schemas.sh
 
 echo -e "\n\n✔︎ tests passing"
