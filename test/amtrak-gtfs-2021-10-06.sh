@@ -14,7 +14,7 @@ ls -lh amtrak-gtfs-2021-10-06
 psql -c 'create database amtrak_2021_10_06'
 export PGDATABASE='amtrak_2021_10_06'
 
-../cli.js -d --trips-without-shape-id --schema amtrak \
+../cli.js -d --trips-without-shape-id \
 	--import-metadata \
 	--stats-by-route-date=view \
 	--stats-by-agency-route-stop-hour=view \
@@ -24,7 +24,7 @@ export PGDATABASE='amtrak_2021_10_06'
 
 query=$(cat << EOF
 select extract(epoch from t_arrival)::integer as t_arrival
-from amtrak.arrivals_departures
+from arrivals_departures
 where stop_id = 'BHM' -- Birmingham
 and date = '2021-11-26'
 order by t_arrival
@@ -59,7 +59,7 @@ fi
 
 acelaStatQuery=$(cat << EOF
 SELECT nr_of_trips, nr_of_arrs_deps
-FROM amtrak.stats_by_route_date
+FROM stats_by_route_date
 WHERE route_id = '40751' -- Acela
 AND date = '2021-11-26'
 AND is_effective = True
@@ -73,7 +73,7 @@ fi
 
 acelaPhillyStatQuery=$(cat << EOF
 SELECT nr_of_arrs
-FROM amtrak.stats_by_agency_route_stop_hour
+FROM stats_by_agency_route_stop_hour
 WHERE route_id = '40751' -- Acela
 AND stop_id = 'PHL' -- Philadelphia
 AND effective_hour = '2022-07-24 09:00:00-05:00'
