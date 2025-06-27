@@ -9,16 +9,11 @@ LABEL org.opencontainers.image.licenses="(Apache-2.0 AND Prosperity-3.0.0)"
 
 WORKDIR /app
 
-# Both moreutils (providing sponge) and postgresql-client (providing psql) are not required but come in handy for users.
-RUN apk add --no-cache \
-	postgresql-client \
-	moreutils
-
 ADD package.json /app
 RUN npm install --production && npm cache clean --force
 
 ADD . /app
-RUN ln -s /app/cli.js /usr/local/bin/gtfs-via-postgres
+RUN ln -s /app/cli.js /usr/local/bin/gtfs-via-duckdb
 
 VOLUME /gtfs
 WORKDIR /gtfs
