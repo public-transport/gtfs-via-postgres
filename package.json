@@ -58,7 +58,7 @@
 		"node": ">=22"
 	},
 	"dependencies": {
-		"@duckdb/node-api": "^1.2.2-alpha.18",
+		"@duckdb/node-api": "^1.4.4-r.1",
 		"debug": "^4.3.3",
 		"gtfs-utils": "^5.1.0",
 		"sequencify": "0.0.7"
