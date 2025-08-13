@@ -41,10 +41,10 @@ const {
 		'stops-without-level-id': {
 			type: 'boolean',
 		},
-		'lower-case-lang-codes': {
+		'stops-location-index': {
 			type: 'boolean',
 		},
-		'stops-location-index': {
+		'lower-case-lang-codes': {
 			type: 'boolean',
 		},
 		'stats-by-route-date': {
@@ -54,24 +54,6 @@ const {
 			type: 'string',
 		},
 		'stats-active-trips-by-hour': {
-			type: 'string',
-		},
-		'schema': {
-			type: 'string',
-		},
-		'postgraphile': {
-			type: 'boolean',
-		},
-		'postgraphile-password': {
-			type: 'string',
-		},
-		'postgrest': {
-			type: 'boolean',
-		},
-		'postgrest-password': {
-			type: 'string',
-		},
-		'postgrest-query-cost-limit': {
 			type: 'string',
 		},
 		'import-metadata': {
@@ -84,7 +66,7 @@ const {
 if (flags.help) {
 	process.stdout.write(`
 Usage:
-    gtfs-to-sql [options] [--] <gtfs-file> ...
+    import-gtfs-into-duckdb [options] [--] <path-to-duckdb> <gtfs-file> ...
 Options:
     --silent                  -s  Don't show files being converted.
     --require-dependencies    -d  Require files that the specified GTFS files depend
@@ -124,34 +106,16 @@ Options:
                                     currently running trips over time, by hour.
                                     Like --stats-by-route-date, this flag accepts
                                     none, view & materialized-view.
-    --schema                      The schema to use for the database. Default: public
-                                    Even when importing into a schema other than \`public\`,
-                                    a function \`public.gtfs_via_postgres_import_version()\`
-                                    gets created, to ensure that multiple imports into the
-                                    same database are all made using the same version. See
-                                    also multiple-datasets.md in the docs.
-    --postgraphile                Tweak generated SQL for PostGraphile usage.
-                                    https://www.graphile.org/postgraphile/
-    --postgraphile-password       Password for the PostGraphile PostgreSQL user.
-                                    Default: $POSTGRAPHILE_PGPASSWORD, fallback random.
-    --postgrest                   Tweak generated SQL for PostgREST usage.
-                                    Please combine it with --schema.
-                                    https://postgrest.org/
-    --postgrest-password          Password for the PostgREST PostgreSQL user \`web_anon\`.
-                                    Default: $POSTGREST_PGPASSWORD, fallback random.
-    --postgrest-query-cost-limit  Define a cost limit [1] for queries executed by PostgREST
-                                    on behalf of a user. It is only enforced if
-                                    pg_plan_filter [2] is installed in the database!
-                                    Must be a positive float. Default: none
-                                    [1] https://www.postgresql.org/docs/14/using-explain.html
-                                    [2] https://github.com/pgexperts/pg_plan_filter
     --import-metadata             Create functions returning import metadata:
                                     - gtfs_data_imported_at (timestamp with time zone)
-                                    - gtfs_via_postgres_version (text)
-                                    - gtfs_via_postgres_options (jsonb)
+                                    - gtfs_via_duckdb_version (text)
+                                    - gtfs_via_duckdb_options (jsonb)
+Notes:
+    If you just want to check if the GTFS data can be imported but don't care about the
+    resulting DuckDB database file, you can import into an in-memory database by specifying
+    \`:memory:\` as the <path-to-duckdb>.
 Examples:
-    gtfs-to-sql some-gtfs/*.txt | sponge | psql -b # import into PostgreSQL
-    gtfs-to-sql -u -- some-gtfs/*.txt | gzip >gtfs.sql.gz # generate a gzipped SQL dump
+    import-gtfs-into-duckdb some-gtfs.duckdb some-gtfs/*.txt
 
 [1] https://developers.google.com/transit/gtfs/reference/extended-route-types
 [2] https://groups.google.com/g/gtfs-changes/c/keT5rTPS7Y0/m/71uMz2l6ke0J
@@ -165,11 +129,11 @@ if (flags.version) {
 }
 
 const {basename, extname} = require('path')
-const {pipeline} = require('stream')
 const convertGtfsToSql = require('./index')
-const DataError = require('./lib/data-error')
 
-const files = args.map((file) => {
+const [pathToDb] = args
+
+const files = args.slice(1).map((file) => {
 	const name = basename(file, extname(file))
 	return {name, file}
 })
@@ -185,9 +149,6 @@ const opt = {
 	statsByRouteIdAndDate: flags['stats-by-route-date'] || 'none',
 	statsByAgencyIdAndRouteIdAndStopAndHour: flags['stats-by-agency-route-stop-hour'] || 'none',
 	statsActiveTripsByHour: flags['stats-active-trips-by-hour'] || 'none',
-	schema: flags['schema'] || 'public',
-	postgraphile: !!flags.postgraphile,
-	postgrest: !!flags.postgrest,
 	importMetadata: !!flags['import-metadata'],
 }
 if ('stops-without-level-id' in flags) {
@@ -196,31 +157,9 @@ if ('stops-without-level-id' in flags) {
 if ('lower-case-lang-codes' in flags) {
 	opt.lowerCaseLanguageCodes = flags['lower-case-lang-codes']
 }
-if ('postgraphile-password' in flags) {
-	opt.postgraphilePassword = flags['postgraphile-password']
-}
-if ('postgrest-password' in flags) {
-	opt.postgrestPassword = flags['postgrest-password']
-}
-if ('postgrest-query-cost-limit' in flags) {
-	const limit = parseFloat(flags['postgrest-query-cost-limit'])
-	if (!Number.isFinite(limit) || limit < 0) {
-		console.error('Invalid --postgrest-query-cost-limit value.')
-		process.exit(1)
-	}
-	opt.lowerCaseLanguageCodes = limit
-}
 
-pipeline(
-	convertGtfsToSql(files, opt),
-	process.stdout,
-	(err) => {
-		if (!err) return;
-		if (err instanceof DataError) {
-			console.error(String(err))
-		} else if (err.code !== 'EPIPE') {
-			console.error(err)
-		}
-		process.exit(1)
-	}
-)
+convertGtfsToSql(pathToDb, files, opt)
+.catch((err) => {
+	console.error(err)
+	process.exit(1)
+})

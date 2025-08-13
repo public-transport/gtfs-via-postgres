@@ -1,4 +1,4 @@
 SELECT *
 FROM connections
-WHERE trip_id = '168977951'
-AND date > '2022-08-08' AND date <= '2022-08-09'
+WHERE trip_id = '262535123' -- route_id=17452_900 (M4)
+AND date >= '2025-05-26' AND date <= '2025-06-01'

@@ -17,14 +17,8 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - '20.x'
           - '22.x'
           - '24.x'
-        postgis-docker-tag:
-          - '14-3.5-alpine'
-          - '15-3.5-alpine'
-          - '16-3.5-alpine'
-          - '17-3.5-alpine'
 
     steps:
     - name: checkout
@@ -33,55 +27,14 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-    - name: install sponge (moreutils)
-      run: sudo apt install -y moreutils
 
-    - name: install & start PostgreSQL with PostGIS
-      # todo: currently, it uses mdillon, which doesn't have PostgreSQL 14
-      # uses: huaxk/postgis-action@v1
-      # with:
-      #   postgresql version: '${{ matrix.postgis-docker-tag }}'
-      #   postgresql password: password
-      #   postgresql user: postgres
-      #   postgresql db: postgres
+    - name: install DuckDB
       run: |
-        docker run -d \
-          -e POSTGRES_USER=$PGUSER -e POSTGRES_PASSWORD=$PGPASSWORD -e POSTGRES_DB=$PGDATABASE \
-          -p 5432:5432 postgis/postgis:${{ matrix.postgis-docker-tag }} \
-          -c timezone=Europe/Berlin
-      env:
-        PGUSER: postgres
-        PGPASSWORD: password
-        PGDATABASE: postgres
-
-    - name: install PostgREST
-      run: |
-        set -euo pipefail
-        set -x
-        dl_url="$(
-          curl -fsSL \
-            -H "User-Agent: $user_agent" \
-            -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
-            'https://api.github.com/repos/PostgREST/postgrest/releases/latest' \
-            | jq -rc '.assets[] | select(.name | test("linux-static-x86-64")) | .browser_download_url'
-        )"
-        wget -nv -U "$user_agent" \
-          --header='Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
-          -O /tmp/postgrest.tar.xz \
-          "$dl_url"
-        tar -C /usr/local/bin -J -x postgrest </tmp/postgrest.tar.xz
-        /usr/local/bin/postgrest --version
-      env:
-        user_agent: 'public-transport/gtfs-via-postgres CI'
+        curl -fsSL -U '${{ github.repository }} CI' 'https://install.duckdb.org' | sh
+        export PATH="$HOME/.duckdb/cli/latest:$PATH"
 
     - run: npm install
 
     - run: npm run lint
     - name: npm test
       run : npm test
-      env:
-        PGHOST: localhost
-        PGPORT: '5432'
-        PGUSER: postgres
-        PGPASSWORD: password
-        PGDATABASE: postgres

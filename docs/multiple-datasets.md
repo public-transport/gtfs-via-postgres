@@ -1,26 +1,31 @@
-# importing multiple datasets into one DB
+# working with multiple datasets
 
-Using `gtfs-via-postgres`, you can import more than one dataset into a single PostgreSQL database by importing them into separate [schemas](https://www.postgresql.org/docs/14/ddl-schemas.html). You can then run queries combine or compare data from them.
+Using [DuckDB's ability to attach databases to one session](https://duckdb.org/docs/stable/sql/statements/attach), you can run queries combining or comparing data from multiple GTFS datasets.
 
-As an example, let's import two datasets ([Paris](https://en.wikipedia.org/wiki/Île-de-France_Mobilités)' and [Berlin](https://en.wikipedia.org/wiki/Verkehrsverbund_Berlin-Brandenburg)'s) into separate schemas:
+As an example, let's compare two datasets from [Paris](https://en.wikipedia.org/wiki/Île-de-France_Mobilités) and [Berlin](https://en.wikipedia.org/wiki/Verkehrsverbund_Berlin-Brandenburg).
+
+First, we import each into its own database:
 
 ```shell
-wget -U 'gtfs-via-postgres demo' -O paris.gtfs.zip 'https://eu.ftp.opendatasoft.com/stif/GTFS/IDFM-gtfs.zip'
+wget -U 'gtfs-via-duckdb demo' -O paris.gtfs.zip 'https://eu.ftp.opendatasoft.com/stif/GTFS/IDFM-gtfs.zip'
 unzip -d paris.gtfs paris.gtfs.zip
-gtfs-to-sql --require-dependencies \
-	--schema paris -- paris.gtfs/*.txt \
-	| sponge | psql -b
+gtfs-to-duckdb --require-dependencies \
+	paris.gtfs.duckdb \
+	paris.gtfs/*.txt
 
-wget -U 'gtfs-via-postgres demo' -O berlin.gtfs.zip 'https://www.vbb.de/vbbgtfs'
+wget -U 'gtfs-via-duckdb demo' -O berlin.gtfs.zip 'https://www.vbb.de/vbbgtfs'
 unzip -d berlin.gtfs berlin.gtfs.zip
-gtfs-to-sql --require-dependencies \
-	--schema berlin -- berlin.gtfs/*.txt \
-	| sponge | psql -b
+gtfs-to-duckdb --require-dependencies \
+	berlin.gtfs.duckdb \
+	berlin.gtfs/*.txt
 ```
 
-We can now do queries across both datasets, for example finding the geographically furthest 2 stops:
+In a new DuckDB shell/session, we can now do queries across both datasets, for example finding the geographically furthest 2 stops:
 
 ```sql
+ATTACH 'paris.gtfs.duckdb' AS paris;
+ATTACH 'berlin.gtfs.duckdb' AS berlin;
+
 -- warning: takes a long time to compute!
 SELECT
 	paris.stop_id AS paris_stop_id,
@@ -28,8 +33,7 @@ SELECT
 FROM
 	paris.stops paris,
 	berlin.stops berlin
+-- todo: does this operator work in DuckDB?
 ORDER BY paris.stop_loc <-> berlin.stop_loc DESC
 LIMIT 100
 ```
-
-*Note:* During an import, a function `public.gtfs_via_postgres_import_version()` gets created that returns `gtfs-via-postgres`'s version. If that function already exists (because it has been created by a previous import), its return value is compared to `gtfs-via-postgres`'s version, and if these two versions are not equal, the second import will fail. This ensures that multiple imports into the same database can only be made using the exact same `gtfs-via-postgres` version.
