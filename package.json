@@ -1,7 +1,7 @@
 {
 	"name": "gtfs-via-postgres",
 	"description": "Process GTFS using PostgreSQL.",
-	"version": "4.10.3",
+	"version": "4.10.4",
 	"main": "lib/index.js",
 	"bin": {
 		"gtfs-to-sql": "cli.js",
@@ -34,7 +34,7 @@
 		"Magnus Burton <magnus.burton@me.com>",
 		"smohiudd <saadiq@developmentseed.org>"
 	],
-	"homepage": "https://github.com/public-transport/gtfs-via-postgres/tree/4.9.0",
+	"homepage": "https://github.com/public-transport/gtfs-via-postgres/tree/4.10.4",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/public-transport/gtfs-via-postgres.git"
@@ -49,6 +49,10 @@
 		{
 			"type": "patreon",
 			"url": "https://patreon.com/derhuerst"
+		},
+		{
+			"type": "liberapay",
+			"url": "https://liberapay.com/derhuerst"
 		}
 	],
 	"engines": {
