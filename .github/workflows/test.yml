@@ -22,9 +22,9 @@ jobs:
           - '20.x'
           - '22.x'
         postgis-docker-tag:
-          - '14-3.4-alpine'
-          - '15-3.4-alpine'
-          - '16-3.4-alpine'
+          - '14-3.5-alpine'
+          - '15-3.5-alpine'
+          - '16-3.5-alpine'
 
     steps:
     - name: checkout
