@@ -257,17 +257,20 @@ Let's consider two examples:
 
 However, if you determine your feed's largest `arrival_time`/`departure_time`, you can filter on `date` when querying `arrivals_departures`; This allows DuckDB to reduce the number of joins and calendar calculations by orders of magnitude, speeding up your queries significantly. `gtfs-via-duckdb` provides a low-level helper table `largest_arr_dep_time` for this, as well as two high-level helper functions `dates_filter_min(t_min)` & `dates_filter_max(t_max)` (see below).
 
-For example, when querying all *absolute* departures at `de:11000:900120003` (*S Ostkreuz Bhf (Berlin)*) between `2022-03-23T12:30:00+01` and  `2022-03-23T12:35:00+01` within the [2025-05-21 *VBB* feed](https://vbb-gtfs.jannisr.de/2025-05-21/), filtering by `date` speeds it up nicely (Apple M2, DuckDB v1.3.0):
+For example, when querying all *absolute* departures at `de:11000:900100001` (*S+U Friedrichstr. (Berlin)*) between `2025-05-27T07:10:00+02` and  `2025-05-27T07:30:00+02` within the [2025-05-21 *VBB* feed](https://vbb-gtfs.jannisr.de/2025-05-21/), filtering by `date` speeds it up nicely (Apple M2, DuckDB v1.4.4):
 
-`station_id` filter | `date` filter | query time | nr of results
--|-|-|-
-`de:11000:900120003` | *none* | todo | ~todok
-`de:11000:900120003` | `2022-03-13` >= `date` < `2022-04-08` | todo | ~todok
-`de:11000:900120003` | `2022-03-23` >= `date` < `2022-03-24` | todo | ~todok
-`de:11000:900120003` | `2022-03-22` > `date` < `2022-03-24` | todo | ~todok
-*none* | *none* | todo | todom
-*none* | `2022-03-13` >= `date` < `2022-04-08` | todo | ~todom
-*none* | `2022-03-22` > `date` < `2022-03-24` | todo | ~todok
+`station_id` filter | `date` filter | `t_departure` filter | avg. query time | nr of results
+-|-|-|-|-
+`de:11000:900100001` | *none* | *none* | 1.1s | ~533k
+`de:11000:900100001` | *none* | `2025-05-27T07:10:00+02` >= `t_departure` < `2025-05-27T07:30:00+02` | 1.1s | 50
+`de:11000:900100001` | `2025-05-20` >= `date` < `2025-06-03` | `2025-05-27T07:10:00+02` >= `t_departure` < `2025-05-27T07:30:00+02` | 130ms | 50
+`de:11000:900100001` | `2025-05-25` >= `date` < `2025-05-28` | `2025-05-27T07:10:00+02` >= `t_departure` < `2025-05-27T07:30:00+02` | 80ms | 50
+`de:11000:900100001` | `2025-05-27` >= `date` < `2025-05-28` | `2025-05-27T07:10:00+02` >= `t_departure` < `2025-05-27T07:30:00+02` | 73ms | 50
+*none* | *none* | *none* | 22s (`count(*)` only) | ~263m
+*none* | *none* | `2025-05-27T07:10:00+02` >= `t_departure` < `2025-05-27T07:30:00+02` | 27s (`count(*)` only) | ~35k
+*none* | `2025-05-20` >= `date` < `2025-06-03` | `2025-05-27T07:10:00+02` >= `t_departure` < `2025-05-27T07:30:00+02` | 2.1s | ~35k
+*none* | `2025-05-25` >= `date` < `2025-05-28` | `2025-05-27T07:10:00+02` >= `t_departure` < `2025-05-27T07:30:00+02` | 773ms | ~35k
+*none* | `2025-05-27` >= `date` < `2025-05-28` | `2025-05-27T07:10:00+02` >= `t_departure` < `2025-05-27T07:30:00+02` | 619ms | ~35k
 
 Using `dates_filter_min(t_min)` & `dates_filter_max(t_max)`, we can easily filter by `date`. When filtering by `t_departure` (absolute departure date+time), `t_min` is the lower `t_departure` bound, whereas `t_max` is the upper bound. The VBB example above can be queried like this:
 
@@ -275,10 +278,10 @@ Using `dates_filter_min(t_min)` & `dates_filter_max(t_max)`, we can easily filte
 SELECT *
 FROM arrivals_departures
 -- filter by absolute departure date+time
-WHERE t_departure >= '2022-03-23T12:30:00+01' AND t_departure <= '2022-03-23T12:35:00+01'
+WHERE t_departure >= '2025-05-27T07:10:00+02' AND t_departure <= '2025-05-27T07:30:00+02'
 -- allow "cutoffs" by filtering by date
-AND "date" >= dates_filter_min('2022-03-23T12:30:00+01') -- evaluates to 2023-03-22
-AND "date" <= dates_filter_max('2022-03-23T12:35:00+01') -- evaluates to 2023-03-23
+AND "date" >= dates_filter_min('2025-05-27T07:10:00+02') -- evaluates to 2025-05-25
+AND "date" <= dates_filter_max('2025-05-27T07:30:00+02') -- evaluates to 2023-03-27
 ```
 
 
@@ -286,33 +289,30 @@ AND "date" <= dates_filter_max('2022-03-23T12:35:00+01') -- evaluates to 2023-03
 
 `gtfs-via-duckdb` is fast enough for most use cases I can think of. If there's a particular kind of query that you think should be faster, please [open an Issue](https://github.com/public-transport/gtfs-via-duckdb/issues/new)!
 
-The following benchmarks were run with the [2025-05-21 VBB GTFS dataset](https://vbb-gtfs.jannisr.de/2025-05-21/) (41k `stops`, 6m `stop_times`, 207m arrivals/departures) using `gtfs-via-duckdb@5.0.0-alpha.3` and DuckDB v1.3 on an [M2](https://en.wikipedia.org/wiki/Apple_M2) laptop running macOS 14.7.6; All measurements are in milliseconds.
-
-todo: re-run benchmarks!
+The following benchmarks were run with the [2025-05-21 VBB GTFS dataset](https://vbb-gtfs.jannisr.de/2025-05-21/) (41k `stops`, 6m `stop_times`, 207m arrivals/departures) using `gtfs-via-duckdb@5.0.0` and DuckDB v1.3 on an [M2](https://en.wikipedia.org/wiki/Apple_M2) laptop running macOS 14.7.7; All measurements are in milliseconds.
 
 | query | avg | min | p25 | p50 | p75 | p95 | p99 | max | iterations |
 | - | - | - | - | - | - | - | - | - | - |
-| <pre>SELECT *<br>FROM stops<br>ORDER BY ST_Distance(stop_loc::geometry, ST_SetSRID(ST_MakePoint(9.7, 50.547), 4326)) ASC<br>LIMIT 100</pre> | 15 | 14.506 | 15 | 15 | 15 | 15 | 15 | 14.658 | 170 |
-| <pre>SELECT *<br>FROM arrivals_departures<br>WHERE route_short_name = 'S1'<br>AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date >= dates_filter_min('2022-08-09T07:10+02')<br>AND date <= dates_filter_max('2022-08-09T07:30+02')</pre> | 22 | 21.77 | 22 | 22 | 22 | 23 | 24 | 24.999 | 90 |
-| <pre>SELECT *<br>FROM arrivals_departures<br>WHERE station_id = 'de:11000:900100001' -- S+U Friedrichstr. (Berlin)<br>AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date >= dates_filter_min('2022-08-09T07:10+02')<br>AND date <= dates_filter_max('2022-08-09T07:30+02')</pre> | 19 | 18.939 | 19 | 19 | 19 | 20 | 21 | 21.706 | 170 |
-| <pre>SELECT *<br>FROM arrivals_departures<br>WHERE station_id = 'de:11000:900100001' -- S+U Friedrichstr. (Berlin)<br>AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date >= dates_filter_min('2022-08-09T07:10+02')<br>AND date <= dates_filter_max('2022-08-09T07:30+02')<br>AND stop_sequence = 0</pre> | 5 | 5.375 | 5 | 5 | 5 | 6 | 6 | 5.684 | 500 |
-| <pre>SELECT *<br>FROM arrivals_departures<br>WHERE stop_id = 'de:11000:900100001::4' -- S+U Friedrichstr. (Berlin)<br>AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date >= dates_filter_min('2022-08-09T07:10+02')<br>AND date <= dates_filter_max('2022-08-09T07:30+02')</pre> | 8 | 8.163 | 8 | 8 | 8 | 8 | 8 | 9.107 | 400 |
-| <pre>SELECT *<br>FROM arrivals_departures<br>WHERE trip_id = '168977951'<br>AND date > '2022-08-08' AND date <= '2022-08-09'</pre> | 2 | 2.085 | 2 | 2 | 2 | 2 | 2 | 2.277 | 500 |
-| <pre>SELECT count(*)<br>FROM arrivals_departures<br>WHERE stop_id = 'de:11000:900100001::4' -- S+U Friedrichstr. (Berlin)</pre> | 67 | 66.065 | 67 | 67 | 67 | 67 | 69 | 68.927 | 50 |
-| <pre>SELECT count(*)<br>FROM arrivals_departures<br>WHERE stop_id = 'definitely-non-existent'</pre> | 5 | 5.379 | 5 | 5 | 6 | 6 | 6 | 6.351 | 500 |
-| <pre>SELECT *<br>FROM arrivals_departures<br>WHERE t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date >= dates_filter_min('2022-08-09T07:10+02'::timestamp with time zone)<br>AND date <= dates_filter_max('2022-08-09T07:30+02'::timestamp with time zone)</pre> | 2734 | 2698.415 | 2704 | 2711 | 2738 | 2804 | 2817 | 2819.877 | 5 |
-| <pre>SELECT *<br>FROM arrivals_departures<br>WHERE t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date >= '2022-08-08'<br>AND date <= '2022-08-09'</pre> | 2153 | 1781.159 | 1886 | 2156 | 2183 | 2642 | 2734 | 2756.867 | 5 |
-| <pre>SELECT *<br>FROM connections<br>WHERE route_short_name = 'S1'<br>AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date >= dates_filter_min('2022-08-09T07:10+02')<br>AND date <= dates_filter_max('2022-08-09T07:30+02')</pre> | 84 | 82.654 | 83 | 84 | 84 | 84 | 84 | 84.33 | 20 |
-| <pre>SELECT *<br>FROM connections<br>WHERE from_station_id = 'de:11000:900100001' -- S+U Friedrichstr. (Berlin)<br>AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date >= dates_filter_min('2022-08-09T07:10+02')<br>AND date <= dates_filter_max('2022-08-09T07:30+02')</pre> | 58 | 57.796 | 58 | 58 | 58 | 58 | 58 | 58.308 | 50 |
-| <pre>SELECT *<br>FROM connections<br>WHERE from_station_id = 'de:11000:900100001' -- S+U Friedrichstr. (Berlin)<br>AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date >= dates_filter_min('2022-08-09T07:10+02')<br>AND date <= dates_filter_max('2022-08-09T07:30+02')<br>AND from_stop_sequence = 0</pre> | 10 | 9.851 | 10 | 10 | 10 | 11 | 11 | 12.626 | 300 |
-| <pre>SELECT *<br>FROM connections<br>WHERE from_stop_id = 'de:11000:900100001::4' -- S+U Friedrichstr. (Berlin)<br>AND t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date >= dates_filter_min('2022-08-09T07:10+02')<br>AND date <= dates_filter_max('2022-08-09T07:30+02')</pre> | 14 | 13.467 | 14 | 14 | 14 | 14 | 14 | 13.714 | 200 |
-| <pre>SELECT *<br>FROM connections<br>WHERE trip_id = '168977951'<br>AND date > '2022-08-08' AND date <= '2022-08-09'</pre> | 4 | 3.577 | 4 | 4 | 4 | 4 | 5 | 6.152 | 500 |
-| <pre>SELECT count(*)<br>FROM connections<br>WHERE from_stop_id = 'de:11000:900100001::4' -- S+U Friedrichstr. (Berlin)</pre> | 87 | 86.362 | 87 | 87 | 87 | 87 | 87 | 87.518 | 40 |
-| <pre>SELECT count(*)<br>FROM connections<br>WHERE from_stop_id = 'definitely-non-existent'</pre> | 8 | 7.237 | 8 | 8 | 8 | 8 | 9 | 13.125 | 500 |
-| <pre>SELECT *<br>FROM connections<br>WHERE t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date >= dates_filter_min('2022-08-09T07:10+02'::timestamp with time zone)<br>AND date <= dates_filter_max('2022-08-09T07:30+02'::timestamp with time zone)<br>ORDER BY t_departure<br>LIMIT 100</pre> | 15584 | 15517.829 | 15549 | 15580 | 15617 | 15647 | 15653 | 15654.632 | 3 |
-| <pre>SELECT *<br>FROM connections<br>WHERE t_departure >= '2022-08-09T07:10+02' AND t_departure <= '2022-08-09T07:30+02'<br>AND date >= '2022-08-08'<br>AND date <= '2022-08-09'<br>ORDER BY t_departure<br>LIMIT 100</pre> | 6816 | 6559.442 | 6685 | 6811 | 6945 | 7052 | 7074 | 7079.167 | 3 |
-| <pre>SELECT *<br>FROM stats_by_route_date<br>WHERE route_id = '17452_900' -- M4<br>AND date >= '2022-08-08' AND date <= '2022-08-14'<br>AND is_effective = true</pre> | 688 | 677.417 | 678 | 678 | 681 | 715 | 722 | 723.411 | 5 |
-
+| <pre>SELECT *<br>FROM stops<br>ORDER BY ST_Distance(stop_loc::geometry, ST_Point(9.7, 50.547)) ASC<br>LIMIT 100</pre> | 6.35 | 5.91 | 5.98 | 6.25 | 6.6 | 6.86 | 8.41 | 10.05 | 1576 |
+| <pre>SELECT *<br>FROM arrivals_departures<br>WHERE route_short_name = 'S1'<br>AND t_departure >= '2025-05-27T07:10:00+02' AND t_departure <= '2025-05-27T07:30:00+02'<br>AND date >= dates_filter_min('2025-05-27T07:10:00+02'::timestamp with time zone)<br>AND date <= dates_filter_max('2025-05-27T07:30+02'::timestamp with time zone)</pre> | 305.15 | 260.52 | 303.8 | 307.73 | 312.2 | 320.64 | 326.84 | 328.44 | 33 |
+| <pre>SELECT *<br>FROM arrivals_departures<br>WHERE station_id = 'de:11000:900100001' -- S+U Friedrichstr. (Berlin)<br>AND t_departure >= '2025-05-27T07:10+02' AND t_departure <= '2025-05-27T07:30+02'<br>AND date >= dates_filter_min('2025-05-27T07:10+02')<br>AND date <= dates_filter_max('2025-05-27T07:30+02')</pre> | 129.43 | 119.85 | 126.19 | 128.62 | 131.84 | 138.44 | 140.46 | 142 | 78 |
+| <pre>SELECT *<br>FROM arrivals_departures<br>WHERE station_id = 'de:11000:900100001' -- S+U Friedrichstr. (Berlin)<br>AND t_departure >= '2025-05-27T07:10+02' AND t_departure <= '2025-05-27T07:30+02'<br>AND date >= dates_filter_min('2025-05-27T07:10+02')<br>AND date <= dates_filter_max('2025-05-27T07:30+02')<br>AND stop_sequence = 0</pre> | 81.42 | 65.73 | 79.48 | 82.11 | 84.33 | 87.26 | 89.64 | 102.97 | 123 |
+| <pre>SELECT *<br>FROM arrivals_departures<br>WHERE stop_id = 'de:11000:900100001::4' -- S+U Friedrichstr. (Berlin)<br>AND t_departure >= '2025-05-27T07:10+02' AND t_departure <= '2025-05-27T07:30+02'<br>AND date >= dates_filter_min('2025-05-27T07:10+02')<br>AND date <= dates_filter_max('2025-05-27T07:30+02')</pre> | 83.79 | 64.57 | 82.15 | 84.64 | 85.83 | 91.36 | 95.79 | 97.08 | 120 |
+| <pre>SELECT *<br>FROM arrivals_departures<br>WHERE trip_id = '262623609' -- route_id=10144_109, route_short_name=S2<br>AND date = '2025-05-27'</pre> | 14.25 | 12.38 | 13.42 | 13.98 | 14.84 | 16.12 | 18.98 | 21.77 | 702 |
+| <pre>SELECT count(*)<br>FROM arrivals_departures<br>WHERE stop_id = 'de:11000:900100001::4' -- S+U Friedrichstr. (Berlin)</pre> | 70.9 | 67.54 | 69.09 | 70.1 | 72.47 | 75.73 | 77.24 | 78.83 | 142 |
+| <pre>SELECT count(*)<br>FROM arrivals_departures<br>WHERE stop_id = 'definitely-non-existent'</pre> | 23.61 | 20.31 | 21.97 | 22.67 | 24.84 | 27.51 | 30.78 | 40.43 | 424 |
+| <pre>SELECT *<br>FROM arrivals_departures<br>WHERE t_departure >= '2025-05-27T07:10+02' AND t_departure <= '2025-05-27T07:30+02'<br>AND date >= '2025-05-25'<br>AND date <= '2025-05-27'</pre> | 1269.86 | 1139.03 | 1254.52 | 1272.09 | 1318.94 | 1329.66 | 1331.44 | 1331.89 | 8 |
+| <pre>SELECT *<br>FROM arrivals_departures<br>WHERE t_departure >= '2025-05-27T07:10:00+02' AND t_departure <= '2025-05-27T07:30:00+02'<br>AND "date" >= dates_filter_min('2025-05-27T07:10:00+02'::timestamp with time zone)<br>AND "date" <= dates_filter_max('2025-05-27T07:30:00+02'::timestamp with time zone)</pre> | 34148.21 | 32101.25 | 33459.12 | 34816.99 | 35171.69 | 35455.44 | 35512.2 | 35526.38 | 3 |
+| <pre>SELECT *<br>FROM connections<br>WHERE route_short_name = 'S1'<br>AND t_departure >= '2025-05-27T07:10+02' AND t_departure <= '2025-05-27T07:30+02'<br>AND date >= dates_filter_min('2025-05-27T07:10+02')<br>AND date <= dates_filter_max('2025-05-27T07:30+02')</pre> | 8697.84 | 8629.78 | 8673.26 | 8716.73 | 8731.86 | 8743.96 | 8746.39 | 8746.99 | 3 |
+| <pre>SELECT *<br>FROM connections<br>WHERE from_station_id = 'de:11000:900194006' -- S Schöneweide/Sterndamm (Berlin)<br>AND t_departure >= '2025-05-27T07:10+02' AND t_departure <= '2025-05-27T07:30+02'<br>AND date >= dates_filter_min('2025-05-27T07:10+02')<br>AND date <= dates_filter_max('2025-05-27T07:30+02')</pre> | 1154.01 | 1070.8 | 1115.77 | 1156.47 | 1168.38 | 1243.5 | 1281.37 | 1290.84 | 9 |
+| <pre>SELECT *<br>FROM connections<br>WHERE from_station_id = 'de:11000:900194006' -- S Schöneweide/Sterndamm (Berlin)<br>AND t_departure >= '2025-05-27T07:10+02' AND t_departure <= '2025-05-27T07:30+02'<br>AND date >= dates_filter_min('2025-05-27T07:10+02')<br>AND date <= dates_filter_max('2025-05-27T07:30+02')<br>AND from_stop_sequence_consec = 0</pre> | 482.23 | 454.29 | 466.55 | 467.45 | 475.64 | 555.32 | 571.05 | 574.98 | 21 |
+| <pre>SELECT *<br>FROM connections<br>WHERE from_stop_id = 'de:11000:900100001::4' -- S+U Friedrichstr. (Berlin)<br>AND t_departure >= '2025-05-27T07:10+02' AND t_departure <= '2025-05-27T07:30+02'<br>AND date >= dates_filter_min('2025-05-27T07:10+02')<br>AND date <= dates_filter_max('2025-05-27T07:30+02')</pre> | 885.14 | 835.29 | 869.24 | 875.76 | 909.79 | 922.32 | 923.64 | 923.97 | 12 |
+| <pre>SELECT *<br>FROM connections<br>WHERE trip_id = '262535123' -- route_id=17452_900 (M4)<br>AND date >= '2025-05-26' AND date <= '2025-06-01'</pre> | 19.31 | 15.83 | 18.02 | 18.99 | 20.27 | 22.76 | 24.78 | 27.96 | 519 |
+| <pre>SELECT count(*)<br>FROM connections<br>WHERE from_stop_id = 'de:11000:900100001::4' -- S+U Friedrichstr. (Berlin)</pre> | 341.42 | 263.96 | 340.65 | 346.83 | 350.72 | 355.91 | 358.76 | 359.65 | 30 |
+| <pre>SELECT count(*)<br>FROM connections<br>WHERE from_stop_id = 'definitely-non-existent'</pre> | 343.5 | 314.1 | 319.13 | 345.04 | 354.63 | 362.52 | 463.4 | 503.94 | 30 |
+| <pre>SELECT *<br>FROM connections<br>WHERE t_departure >= '2025-05-27T07:10+02' AND t_departure <= '2025-05-27T07:30+02'<br>AND date >= dates_filter_min('2025-05-27T07:10+02'::timestamp with time zone)<br>AND date <= dates_filter_max('2025-05-27T07:30+02'::timestamp with time zone)<br>ORDER BY t_departure<br>LIMIT 100</pre> | 1013055.35 | 986377.24 | 1026394.41 | 1009900.4 | 1026394.41 | 992028.36 | 1042228.66 | 1042888.42 | 3 |
+| <pre>SELECT *<br>FROM connections<br>WHERE t_departure >= '2025-05-27T07:10+02' AND t_departure <= '2025-05-27T07:30+02'<br>AND date >= '2025-05-25' AND date <= '2025-05-27'<br>ORDER BY t_departure<br>LIMIT 100</pre> | 16347.21 | 16250.36 | 16285.17 | 16319.98 | 16395.63 | 16456.16 | 16468.27 | 16471.29 | 3 |
+| <pre>SELECT *<br>FROM stats_by_route_date<br>WHERE route_id = '17452_900' -- M4<br>AND date >= '2025-05-26' AND date <= '2025-06-01'<br>AND is_effective = true</pre> | 4765.59 | 4704.49 | 4706.87 | 4709.25 | 4796.14 | 4865.64 | 4879.54 | 4883.02 | 3 |
 
 ## Related Projects
 
