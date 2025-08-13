@@ -19,10 +19,12 @@ jobs:
         node-version:
           - '20.x'
           - '22.x'
+          - '24.x'
         postgis-docker-tag:
           - '14-3.5-alpine'
           - '15-3.5-alpine'
           - '16-3.5-alpine'
+          - '17-3.5-alpine'
 
     steps:
     - name: checkout
