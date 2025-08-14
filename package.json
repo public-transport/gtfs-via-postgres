@@ -32,7 +32,8 @@
 	"contributors": [
 		"Daniel Langbein <daniel@systemli.org>",
 		"Magnus Burton <magnus.burton@me.com>",
-		"smohiudd <saadiq@developmentseed.org>"
+		"smohiudd <saadiq@developmentseed.org>",
+		"@mattkinnia"
 	],
 	"homepage": "https://github.com/public-transport/gtfs-via-postgres/tree/4.10.4",
 	"repository": {
