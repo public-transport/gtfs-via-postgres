@@ -92,7 +92,7 @@ npm exec -- gtfs-to-sql --require-dependencies -- gtfs/*.csv | sponge | psql -b
 # COMMIT
 ```
 
-Importing will take 10s to 10m, depending on the size of the feed. On an [M1 MacBook Air](https://en.wikipedia.org/wiki/MacBook_Air_(Apple_silicon)#Third_generation_(Retina_with_Apple_silicon)), importing the above feed takes about 4m; Importing the [260kb 2021-10-06 Amtrak feed](https://transitfeeds.com/p/amtrak/1136/20211006) takes 6s.
+Importing will take 10s to 10m, depending on the size of the feed. On an [M2 MacBook Air](https://support.apple.com/en-us/111867), importing the above feed takes about 4m; Importing the [260kb 2021-10-06 Amtrak feed](https://transitfeeds.com/p/amtrak/1136/20211006) takes 6s.
 
 The [DELFI](https://www.delfi.de/) feed with ca. 330 MB may take 1 hour or more and require at least 35 GB of disk space for the database.
 
@@ -376,7 +376,9 @@ AND "date" <= dates_filter_max('2022-03-23T12:35+01') -- evaluates to 2023-03-23
 
 With all use cases I could think of, `gtfs-via-postgres` is reasonably fast. If there's a particular kind of query that you think should be faster, please [open an Issue](https://github.com/public-transport/gtfs-via-postgres/issues/new)!
 
-The following benchmarks were run with the [2022-07-01 VBB GTFS dataset](https://vbb-gtfs.jannisr.de/2022-07-01/) (41k `stops`, 6m `stop_times`, 207m arrivals/departures) using `gtfs-via-postgres@4.7.4` and PostgreSQL 14.7 on an [M2](https://en.wikipedia.org/wiki/Apple_M2) laptop running macOS 12.6.8; All measurements are in milliseconds.
+The following benchmarks were run with the [2022-07-01 VBB GTFS dataset](https://vbb-gtfs.jannisr.de/2022-07-01/) (41k `stops`, 6m `stop_times`, 207m arrivals/departures) using `gtfs-via-postgres@4.7.4` and PostgreSQL 18.0 on an [M2](https://en.wikipedia.org/wiki/Apple_M2) laptop running macOS 14.8; All measurements are in milliseconds.
+
+todo: re-run benchmarks!
 
 | query | avg | min | p25 | p50 | p75 | p95 | p99 | max | iterations |
 | - | - | - | - | - | - | - | - | - | - |
