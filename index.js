@@ -61,6 +61,8 @@ const convertGtfsToSql = async (pathToDb, files, opt = {}) => {
 			dep: [],
 		},
 
+		// todo: currently doesn't fail if *neither* calendar nor calendar_dates is present!
+
 		// special handling of calendar/calendar_dates:
 		// service_days relies on *both* calendar's & calendar_dates' tables to
 		// be present, so we add mock tasks here. Each of these mock tasks get
