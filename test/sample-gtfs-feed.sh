@@ -298,4 +298,21 @@ if [[ "$stops_translated_rows" != "$stops_translated_expected" ]]; then
 	exit 1
 fi
 
+dep_arr_time_smoke_test=$(cat << EOF
+	SELECT
+		from_stop_sequence,
+		extract(epoch from t_departure)::integer as dep,
+		t_departure,
+		departure_time,
+		to_stop_sequence,
+		extract(epoch from t_arrival)::integer as arr,
+		t_arrival,
+		arrival_time
+	FROM connections
+	WHERE trip_id = 'b-downtown-on-working-days'
+	ORDER BY t_departure
+EOF
+)
+duckdb -csv -noheader -c "$dep_arr_time_smoke_test" "$path_to_db"
+
 echo 'works ✔'
