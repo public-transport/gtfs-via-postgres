@@ -8,9 +8,11 @@ set -x
 
 env | grep '^PG' || true
 
-# path_to_db="sample-gtfs-feed.duckdb"
-path_to_db="$(mktemp -d -t gtfs.XXX)/sample-gtfs-feed.duckdb"
+path_to_db="sample-gtfs-feed.duckdb"
+# path_to_db="$(mktemp -d -t gtfs.XXX)/sample-gtfs-feed.duckdb"
 # path_to_db=':memory:'
+
+rm -f "$path_to_db"
 
 # todo: what about sample-gtfs-feed@0.13?
 # --lower-case-lang-codes: Even though sample-gtfs-feed@0.11.2 *does not* contain invalid-case language codes (e.g. de_aT or de-at), we check that with --lower-case-lang-codes valid ones are still accepted.
@@ -297,5 +299,22 @@ if [[ "$stops_translated_rows" != "$stops_translated_expected" ]]; then
 	echo "stops_translated with stop_id=airport*" 1>&2
 	exit 1
 fi
+
+dep_arr_time_smoke_test=$(cat << EOF
+	SELECT
+		from_stop_sequence,
+		extract(epoch from t_departure)::integer as dep,
+		t_departure,
+		departure_time,
+		to_stop_sequence,
+		extract(epoch from t_arrival)::integer as arr,
+		t_arrival,
+		arrival_time
+	FROM connections
+	WHERE trip_id = 'b-downtown-on-working-days'
+	ORDER BY t_departure
+EOF
+)
+duckdb -csv -noheader -c "$dep_arr_time_smoke_test" "$path_to_db"
 
 echo 'works ✔'
