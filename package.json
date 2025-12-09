@@ -1,7 +1,7 @@
 {
 	"name": "gtfs-via-duckdb",
 	"description": "Analyze GTFS datasets using DuckDB.",
-	"version": "5.0.0",
+	"version": "5.0.0-alpha.5",
 	"main": "lib/index.js",
 	"bin": {
 		"gtfs-to-duckdb": "cli.js"
