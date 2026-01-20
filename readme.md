@@ -327,6 +327,14 @@ With the `--postgrest` flag, `gtfs-via-postgres` will augment the schema with a 
 
 [read more](docs/postgrest.md)
 
+### Folder mode
+
+With the `--folder-mode` flag, a folder name can be used instead of a file wildcard. All files in the given directory will be read and used in the script. Unsupported files can be ignored using the `-u` flag.
+
+```
+npm exec -- gtfs-to-sql --folder-mode -- gtfs | sponge | psql -b
+```
+
 ### more guides
 
 The [`docs` directory](docs) contains more instructions on how to use `gtfs-via-postgres`.
