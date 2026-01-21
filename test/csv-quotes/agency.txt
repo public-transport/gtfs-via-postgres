@@ -1,0 +1,3 @@
+agency_id,agency_name,agency_url,agency_timezone,agency_lang,agency_phone
+7500,STRASSENBAHN,https://www.delfi.de,Europe/Berlin,,
+8872,Leipziger Verkehrsbetriebe,https://www.delfi.de,Europe/Berlin,,

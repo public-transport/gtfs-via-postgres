@@ -1,0 +1,35 @@
+stop_name,parent_station,stop_id,stop_desc,stop_lat,stop_lon,location_type,wheelchair_boarding,level_id,platform_code
+Augsburg Hbf,,de:09761:100:33:P,Bus Bahnhofstraße,48.365913,10.887977,,,2,P
+"Augsburg, Königsplatz",,de:09761:101:51:C4,Bereich swa C,48.365005,10.89431,,,2,C4
+"Augsburg, Innovationspark/LfU",de:09761:107,de:09761:107:51:a,Bereich Strab,48.32637,10.897993,,,2,a
+Augsburg Haunstetterstraße,,de:09761:111:51:a,VGA Haunstetter S,48.35468,10.901918,,,2,8
+"Augsburg, Fachoberschule",de:09761:113,de:09761:113:51:a,Bereich Strab,48.343235,10.900517,,,2,a
+"Augsburg, Rotes Tor",de:09761:116,de:09761:116:51:A,Strab stadtaus,48.35823,10.902152,,,2,A
+"Augsburg, Universität",de:09761:119,de:09761:119:51:a,Strab,48.333664,10.898819,,,2,a
+"Augsburg, Von-Parseval-Straße",de:09761:121,de:09761:121:51:a,Bereich Strab,48.34814,10.900589,,,2,a
+"Haunstetten, Hofackerstraße",de:09761:127,de:09761:127:51:a,Bereich Strab,48.314034,10.894211,,,2,a
+"Haunstetten, Kopernikusstraße",de:09761:128,de:09761:128:51:b,Bereich Strab,48.31769,10.895567,,,2,b
+"Haunst., Bischofsackerweg",de:09761:129,de:09761:129:51:a,Bereich Strab,48.32256,10.896376,,,2,a
+"Augsburg, Schertlinstraße",de:09761:12,de:09761:12:51:A,Bereich Strab,48.35167,10.901802,,,2,A
+"Augsburg, Th.-Heuss-Platz/IHK",,de:09761:132:0:B,"Augsburg, Th.-Heuss-Platz/IHK",48.36029,10.897544,,,2,B
+"Augsburg, Bukowina-Institut/PCI",de:09761:141,de:09761:141:51:A,Bereich Strab,48.33806,10.899143,,,2,A
+Haunstetten Südwest,,de:09761:145:1:A,,48.30331,10.892863,,,,
+"Haunstetten, Brahmsstraße",,de:09761:146:1:A,,48.296505,10.890357,,,,
+"Haunstetten, Inninger Str. P+R",de:09761:276,de:09761:276:51:A,Strab Steig a,48.309925,10.893654,,,2,A
+"Augsburg, BBW/Institut f.Physik",de:09761:524,de:09761:524:51:b,Bereich Strab,48.330105,10.898828,,,2,b
+"Königsbr., Bereitschaftspolizei",,de:09772:147:1:A,,48.29098,10.887671,,,,
+"Königsbrunn, Augsburger Str.",,de:09772:148:1:A,,48.280567,10.884518,,,,
+"Königsbr., Mindelheimer Str.",,de:09772:149:0:A,,48.276173,10.883404,,,,
+"Königsbrunn, Guldenstraße",,de:09772:7008:31:C,Trasse,48.284634,10.885093,,,2,C
+"Königsbrunn, Zentrum",,de:09772:7050:31:E,Bahnsteig Ost,48.271282,10.88724,,,2,E
+"Leipzig, Heiterblick, Teslastr.",,de:14713:11276::01,,51.364105,12.451795,,,,
+"Leipzig, Bautzner Str.",,de:14713:11278::01,,51.355507,12.433723,,,,
+"Leipzig, Volksgarten",,de:14713:11280::01,,51.348396,12.419914,,,,
+"Leipzig, Friedrich-List-Platz",,de:14713:12706::03,,51.345566,12.39266,,,,
+"Leipzig, Einertstr.",,de:14713:12713::01,,51.3459,12.399839,,,,
+"Leipzig, Hermann-Liebmann-/Eisenbahnstr.",,de:14713:12714::01,,51.345535,12.406542,,,,
+"Leipzig, Permoser-/Torgauer Str.",,de:14713:12829::01,,51.352062,12.426539,,,,
+"Leipzig, Torgauer Platz",,de:14713:12851::03,,51.345547,12.41511,,,,
+"Leipzig, Hohentichelnstr.",,de:14713:13282::01,,51.35987,12.442907,,,,
+"Leipzig, Arcus Park",,de:14713:145::01,,51.3615,12.44634,,,,
+"Leipzig, Schwantesstr.",,de:14713:696::01,,51.35376,12.430156,,,,
