@@ -115,6 +115,7 @@ const convertGtfsToSql = async (pathToDb, files, opt = {}) => {
 		const dependencies = deps[file.name] || []
 		for (const dep of dependencies) {
 			if (requireDependencies && !tasks[dep] && !fileNames.includes(dep)) {
+				// todo: improve error message & CLI output!
 				const err = new Error(`${file.name} depends on ${dep}`)
 				err.code = 'MISSING_GTFS_DEPENDENCY'
 				throw err
@@ -177,7 +178,6 @@ const convertGtfsToSql = async (pathToDb, files, opt = {}) => {
 		// calendar's & calendar_dates's importData() should run even if their respective files are not present.
 		// Also, the frequencies table is needed for stop_times's arrivals_departures & connections views.
 		if (!task.file && importData.runDespiteMissingSrcFile !== true) {
-			console.error('skipping!') // todo: remove
 			continue
 		}
 

@@ -73,7 +73,7 @@
 	"scripts": {
 		"test": "./test/index.sh",
 		"lint": "eslint .",
-		"benchmark": "./benchmark/run.sh",
+		"benchmark": "./benchmark/index.cjs",
 		"build-binaries": "pkg --public -t node22-macos-x64,node22-macos-arm64,node22-linux-x64,node22-linux-arm64 -o dist/gtfs-via-duckdb cli.js && gzip -k --best dist/gtfs-via-duckdb-*",
 		"prepublishOnly": "npm run lint && npm test"
 	}
