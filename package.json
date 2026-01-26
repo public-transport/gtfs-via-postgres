@@ -68,7 +68,7 @@
 		"csv-parser": "^3.0.0",
 		"eslint": "^9.36.0",
 		"sample-gtfs-feed": "^0.13.0",
-		"tinybench": "^5.1.0"
+		"tinybench": "^6.0.0"
 	},
 	"scripts": {
 		"test": "./test/index.sh",
