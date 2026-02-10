@@ -80,6 +80,8 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 			},
 		}),
 
+		// todo: currently doesn't fail if *neither* calendar nor calendar_dates is present!
+
 		// special handling of calendar/calendar_dates:
 		// service_days relies on *both* calendar's & calendar_dates' tables to
 		// be present, so we add mock tasks here. Each of these mock tasks get
@@ -132,6 +134,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		const dependencies = deps[file.name] || []
 		for (const dep of dependencies) {
 			if (requireDependencies && !tasks[dep] && !fileNames.includes(dep)) {
+				// todo: improve error message & CLI output!
 				const err = new Error(`${file.name} depends on ${dep}`)
 				err.code = 'MISSING_GTFS_DEPENDENCY'
 				throw err
