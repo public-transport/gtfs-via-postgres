@@ -5,6 +5,7 @@ const csvParser = require('csv-parser')
 const {ok} = require('assert')
 
 let firstRow = true
+let keys
 
 pipeline(
 	process.stdin,
@@ -15,12 +16,13 @@ pipeline(
 			if (firstRow) {
 				firstRow = false
 
-				const keys = Object.keys(row).filter(key => key !== 'filename')
+				keys = Object.keys(row).filter(key => key !== 'filename')
 				process.stdout.write(`| ${keys.join(' | ')} |\n`)
 				process.stdout.write(`| ${keys.map(_ => '-').join(' | ')} |\n`)
 			}
 
-			const formattedVals = Object.entries(row)
+			const formattedVals = keys
+			.map(key => [key, row[key]])
 			.map(([key, val]) => {
 				if (key === 'query') return '<pre>' + val.replace(/\n/g, '<br>') + '</pre>'
 				return val
