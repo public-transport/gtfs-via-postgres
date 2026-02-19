@@ -12,6 +12,8 @@ env | grep '^PG' || true
 path_to_db="$(mktemp -d -t gtfs.XXX)/sample-gtfs-feed.duckdb"
 # path_to_db=':memory:'
 
+tz_sql="SET TimeZone = 'Europe/Berlin';"
+
 # todo: what about sample-gtfs-feed@0.13?
 # --lower-case-lang-codes: Even though sample-gtfs-feed@0.11.2 *does not* contain invalid-case language codes (e.g. de_aT or de-at), we check that with --lower-case-lang-codes valid ones are still accepted.
 ../cli.js -d --trips-without-shape-id --lower-case-lang-codes -- \
@@ -236,7 +238,7 @@ WHERE trip_id = 'b-downtown-on-working-days' AND "date" = '2019-05-29' AND frequ
 ORDER BY t_departure
 EOF
 )
-frequencies_it_rows="$(duckdb -csv -noheader -c "$frequencies_it_query" "$path_to_db")"
+frequencies_it_rows="$(duckdb -csv -noheader -c "$tz_sql $frequencies_it_query" "$path_to_db")"
 frequencies_it_expected=$(cat << EOF
 2019-05-29 08:10:00+02,1,airport,3
 2019-05-29 08:18:00+02,3,lake,3
@@ -258,7 +260,7 @@ ORDER BY t_departure ASC
 LIMIT 3
 EOF
 )
-frequencies_it_connections_rows="$(duckdb -csv -noheader -c "$frequencies_it_connections_query" "$path_to_db")"
+frequencies_it_connections_rows="$(duckdb -csv -noheader -c "$tz_sql $frequencies_it_connections_query" "$path_to_db")"
 frequencies_it_connections_expected=$(cat << EOF
 1,2019-03-08 08:00:00+01,2019-03-08 08:06:00+01,1
 1,2019-03-08 08:05:00+01,2019-03-08 08:11:00+01,2
