@@ -21,6 +21,9 @@ To work with the time-related data (`stop_times` etc.), `gtfs-via-postgres` supp
 - the time-*unexpanded* data that is almost directly taken from the GTFS Schedule data – This is useful if you want to do network analysis.
 - the time-*expanded* view that "applies" every trip's `stop_times` rows to all of its service days – This is useful for routing & queries from the traveller's perspective.
 
+> [!NOTE]
+> If you don't have a good reason to use PostgreSQL (e.g. because you use one of `gtfs-via-postgres`' unique features like [GraphQL support](#graphql-support)), I recommend you to use [`gtfs-via-duckdb`](https://github.com/public-transport/gtfs-via-duckdb). It is a fork of and the spiritual successor to `gtfs-via-postgres`. Refer to the [comparison below](#gtfs-via-duckdb) for details.
+
 
 ## Installation
 
@@ -405,6 +408,14 @@ The following benchmarks were run with the [2022-07-01 VBB GTFS dataset](https:/
 ## Related Projects
 
 There are some projects that are very similar to `gtfs-via-postgres`:
+
+### gtfs-via-duckdb
+
+[`gtfs-via-duckdb`](https://github.com/public-transport/gtfs-via-duckdb) is a fork of and the spiritual successor to `gtfs-via-postgres`, importing GTFS into a [*DuckDB*](https://duckdb.org/) database file. The two have the same features, shortcomings and conceptual design (runtime access to the GTFS happens using SQL only).
+
+`gtfs-via-duckdb`'s usage in production systems is much less complex: [`duckdb-gtfs-importer`](https://github.com/OpenDataVBB/duckdb-gtfs-importer) can enable the *robustness* and *atomicity* goals [explained in `postgis-gtfs-importer`'s readme](https://github.com/mobidata-bw/postgis-gtfs-importer/blob/v5/README.md) with a much simpler design (>1 DB files, symlink to the latest).
+
+Because DuckDB tends to be more efficient than PostgreSQL, with the mostly [OLAP](https://en.wikipedia.org/wiki/Online_analytical_processing)-like queries run for GTFS analysis, so `gtfs-via-duckdb` imports datasets faster and queries for common use cases usually run faster.
 
 ### Node-GTFS
 
