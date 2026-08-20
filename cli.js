@@ -59,6 +59,9 @@ const {
 		'schema': {
 			type: 'string',
 		},
+		'no-transaction': {
+			type: 'boolean',
+		},
 		'postgraphile': {
 			type: 'boolean',
 		},
@@ -130,6 +133,7 @@ Options:
                                     gets created, to ensure that multiple imports into the
                                     same database are all made using the same version. See
                                     also multiple-datasets.md in the docs.
+    --no-transaction              *Do not* wrap all import SQL commands in a \`BEGIN\`/\`COMMIT\`.
     --postgraphile                Tweak generated SQL for PostGraphile usage.
                                     https://www.graphile.org/postgraphile/
     --postgraphile-password       Password for the PostGraphile PostgreSQL user.
@@ -195,6 +199,9 @@ if ('stops-without-level-id' in flags) {
 }
 if ('lower-case-lang-codes' in flags) {
 	opt.lowerCaseLanguageCodes = flags['lower-case-lang-codes']
+}
+if ('no-transaction' in flags) {
+	opt.runInTransaction = !flags['no-transaction']
 }
 if ('postgraphile-password' in flags) {
 	opt.postgraphilePassword = flags['postgraphile-password']

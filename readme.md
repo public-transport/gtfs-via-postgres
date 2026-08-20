@@ -198,6 +198,7 @@ Options:
                                     gets created, to ensure that multiple imports into the
                                     same database are all made using the same version. See
                                     also multiple-datasets.md in the docs.
+    --no-transaction              *Do not* wrap all import SQL commands in a `BEGIN`/`COMMIT`.
     --postgraphile                Tweak generated SQL for PostGraphile usage.
                                     https://www.graphile.org/postgraphile/
     --postgraphile-password       Password for the PostGraphile PostgreSQL user.

@@ -26,6 +26,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		statsByAgencyIdAndRouteIdAndStopAndHour: 'none',
 		statsActiveTripsByHour: 'none',
 		schema: 'public',
+		runInTransaction: true,
 		postgraphile: false,
 		postgraphilePassword: process.env.POSTGRAPHILE_PGPASSWORD || null,
 		postgrest: false,
@@ -163,7 +164,7 @@ ${inspect(opt, {compact: false}).split('\n').map(line => '-- ' + line).join('\n'
 \\set ON_ERROR_STOP on
 CREATE EXTENSION IF NOT EXISTS postgis;
 ${opt.schema !== 'public' ? `CREATE SCHEMA IF NOT EXISTS "${opt.schema}";` : ''}
-BEGIN;
+${opt.runInTransaction ? 'BEGIN;' : ''}
 
 -- gtfs-via-postgres supports importing >1 GTFS datasets into 1 DB, each dataset within its own schema. See https://github.com/public-transport/gtfs-via-postgres/issues/51 for more information.
 -- Because almost all helper utilities (enums, functions, etc.) are schema-specific, they get imported more than once. In order to prevent subtle bugs due to incompatibilities among two schemas imported by different gtfs-via-postgres versions, we mock a "mutex" here by checking for public.gtfs_via_postgres_import_version()'s return value.
@@ -356,7 +357,8 @@ $$;
 ` : ''}
 ` : ''}
 
-COMMIT;`
+${opt.runInTransaction ? 'COMMIT;' : ''}
+`
 }
 
 module.exports = convertGtfsToSql
