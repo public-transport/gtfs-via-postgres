@@ -11,8 +11,10 @@ env | grep '^PG' || true
 psql -c 'create database sample_gtfs_feed'
 export PGDATABASE='sample_gtfs_feed'
 
+export GTFS_FEED_DIGEST=a1b2d3d4
+
 # --lower-case-lang-codes: Even though sample-gtfs-feed@0.11.2 *does not* contain invalid-case language codes (e.g. de_aT or de-at), we check that with --lower-case-lang-codes valid ones are still accepted.
-../cli.js -d --trips-without-shape-id --lower-case-lang-codes -- \
+../cli.js -d --trips-without-shape-id --lower-case-lang-codes --import-metadata -- \
 	../node_modules/sample-gtfs-feed/gtfs/agency.txt \
 	../node_modules/sample-gtfs-feed/gtfs/calendar.txt \
 	../node_modules/sample-gtfs-feed/gtfs/calendar_dates.txt \
@@ -25,6 +27,12 @@ export PGDATABASE='sample_gtfs_feed'
 	../node_modules/sample-gtfs-feed/gtfs/pathways.txt \
 	../node_modules/sample-gtfs-feed/gtfs/translations.txt \
 	| sponge | psql -b
+
+digest=$(psql --csv -t -c 'SELECT gtfs_feed_digest()' | head -n 1)
+if [[ "$digest" != "$GTFS_FEED_DIGEST" ]]; then
+	echo "invalid gtfs_feed_digest(): $digest" 1>&2
+	exit 1
+fi
 
 query=$(cat << EOF
 select extract(epoch from t_arrival)::integer as t_arrival

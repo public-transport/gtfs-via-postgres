@@ -35,6 +35,7 @@ const convertGtfsToSql = async function* (files, opt = {}) {
 		// see also https://www.postgresql.org/docs/14/using-explain.html
 		postgrestQueryCostLimit: null, // or float
 		importMetadata: false,
+		feedDigest: process.env.GTFS_FEED_DIGEST || null,
 		...opt,
 	}
 	debug('opt', opt)

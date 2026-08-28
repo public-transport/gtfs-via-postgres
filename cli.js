@@ -153,6 +153,7 @@ Options:
                                     - gtfs_data_imported_at (timestamp with time zone)
                                     - gtfs_via_postgres_version (text)
                                     - gtfs_via_postgres_options (jsonb)
+                                    - gtfs_feed_digest (text)
 Examples:
     gtfs-to-sql some-gtfs/*.txt | sponge | psql -b # import into PostgreSQL
     gtfs-to-sql -u -- some-gtfs/*.txt | gzip >gtfs.sql.gz # generate a gzipped SQL dump
