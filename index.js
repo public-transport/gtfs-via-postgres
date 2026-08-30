@@ -253,9 +253,9 @@ LANGUAGE sql;
 		}
 
 		if ('string' === typeof afterAll && afterAll) {
-			yield afterAll + ';\n'
+			yield afterAll + '\n'
 		} else if ('function' === typeof afterAll) {
-			yield afterAll(opt, workingState) + ';\n'
+			yield afterAll(opt, workingState) + '\n'
 		}
 	}
 
