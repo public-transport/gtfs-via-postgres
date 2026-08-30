@@ -8,6 +8,8 @@ pnpm-debug.log
 /package-lock.json
 /yarn.lock
 /shrinkwrap.yaml
+/pnpm-lock.yaml
+/pnpm-workspace.yaml
 
 /test/amtrak-gtfs-2021-10-06
 
