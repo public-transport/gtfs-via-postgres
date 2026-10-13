@@ -18,5 +18,6 @@ psql -t -c 'SELECT version()'
 ./stops-without-level-id.sh
 ./invalid-empty-agency-id.sh
 ./multiple-schemas.sh
+./shapes-srid.sh
 
 echo -e "\n\n✔︎ tests passing"
