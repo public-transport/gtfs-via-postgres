@@ -415,7 +415,7 @@ There are some projects that are very similar to `gtfs-via-postgres`:
 
 [`gtfs-via-duckdb`](https://github.com/public-transport/gtfs-via-duckdb) is a fork of and the spiritual successor to `gtfs-via-postgres`, importing GTFS into a [*DuckDB*](https://duckdb.org/) database file. The two have the same features, shortcomings and conceptual design (runtime access to the GTFS happens using SQL only).
 
-`gtfs-via-duckdb`'s usage in production systems is much less complex: [`duckdb-gtfs-importer`](https://github.com/OpenDataVBB/duckdb-gtfs-importer) can enable the *robustness* and *atomicity* goals [explained in `postgis-gtfs-importer`'s readme](https://github.com/mobidata-bw/postgis-gtfs-importer/blob/v5/README.md) with a much simpler design (>1 DB files, symlink to the latest).
+`gtfs-via-duckdb`'s usage in production systems is much less complex: [`duckdb-gtfs-importer`](https://github.com/OpenDataVBB/duckdb-gtfs-importer) can enable the *robustness* and *atomicity* goals [explained in `postgis-gtfs-importer`'s readme](https://github.com/mobidata-bw/postgis-gtfs-importer/blob/v7/README.md) with a much simpler design (>1 DB files, symlink to the latest).
 
 Because DuckDB tends to be more efficient than PostgreSQL, with the mostly [OLAP](https://en.wikipedia.org/wiki/Online_analytical_processing)-like queries run for GTFS analysis, so `gtfs-via-duckdb` imports datasets faster and queries for common use cases usually run faster.
 
