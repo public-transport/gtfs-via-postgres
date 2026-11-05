@@ -163,6 +163,11 @@ Options:
                                     - basic: core route types in the GTFS spec
                                     - google-extended: Extended GTFS Route Types [1]
                                     - tpeg-pti: proposed TPEG-PTI-based route types [2]
+                                    - french-carpooling: Carpooling route types the
+                                      French National Access Point (NAP) decided on [3],
+                                      extending google-extended.
+                                    - otp-carpooling: OpenTripPlanner's carpooling route
+                                      types [4], extending google-extended.
                                     May also be a set of these schemes, separated by `,`.
                                     Default: google-extended
     --trips-without-shape-id      Don't require trips.txt items to have a shape_id.
@@ -225,6 +230,8 @@ Examples:
 
 [1] https://developers.google.com/transit/gtfs/reference/extended-route-types
 [2] https://groups.google.com/g/gtfs-changes/c/keT5rTPS7Y0/m/71uMz2l6ke0J
+[3] https://github.com/google/transit/issues/430#issuecomment-4432430607
+[4] https://github.com/opentripplanner/OpenTripPlanner/pull/4641
 ```
 
 Some notable limitations mentioned in the [PostgreSQL 14 documentation on date/time types](https://www.postgresql.org/docs/14/datatype-datetime.html):

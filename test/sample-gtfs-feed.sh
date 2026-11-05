@@ -14,7 +14,11 @@ export PGDATABASE='sample_gtfs_feed'
 export GTFS_FEED_DIGEST=a1b2d3d4
 
 # --lower-case-lang-codes: Even though sample-gtfs-feed@0.11.2 *does not* contain invalid-case language codes (e.g. de_aT or de-at), we check that with --lower-case-lang-codes valid ones are still accepted.
-../cli.js -d --trips-without-shape-id --lower-case-lang-codes --import-metadata -- \
+../cli.js -d --import-metadata \
+	--trips-without-shape-id \
+	--lower-case-lang-codes \
+	--route-types-schemes google-extended,french-carpooling,otp-carpooling \
+	-- \
 	../node_modules/sample-gtfs-feed/gtfs/agency.txt \
 	../node_modules/sample-gtfs-feed/gtfs/calendar.txt \
 	../node_modules/sample-gtfs-feed/gtfs/calendar_dates.txt \
@@ -299,5 +303,24 @@ if [[ "$stops_translated_rows" != "$stops_translated_expected" ]]; then
 	echo "stops_translated with stop_id=airport*" 1>&2
 	exit 1
 fi
+
+insert_carpooling_routes=$(cat << EOF
+	INSERT INTO routes (
+		route_id,
+		agency_id,
+		route_type
+	)
+	VALUES
+		-- used by the French NAP [1]
+		-- [1] https://github.com/google/transit/issues/430#issuecomment-4432430607
+		('carpooling-route-a', 'FTA', '1550'),
+		-- used by OTP [1] and Amarillo [2]
+		-- [1] https://github.com/opentripplanner/OpenTripPlanner/pull/4641
+		-- [2] https://github.com/mfdz/amarillo/blob/0f10cc70c574fa413c9b30d22bcd69fa4f5f5125/amarillo/services/gtfs_constants.py#L4
+		('carpooling-route-b', 'FTA', '1551'),
+		('carpooling-route-c', 'FTA', '1560')
+EOF
+)
+psql --csv -t -c "$insert_carpooling_routes"
 
 echo 'works ✔'
