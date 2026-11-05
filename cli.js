@@ -32,6 +32,9 @@ const {
 		'route-types-scheme': {
 			type: 'string',
 		},
+		'route-types-schemes': {
+			type: 'string',
+		},
 		'trips-without-shape-id': {
 			type: 'boolean',
 		},
@@ -183,7 +186,7 @@ const opt = {
 	silent: !!flags.silent,
 	requireDependencies: !!flags['require-dependencies'],
 	ignoreUnsupportedFiles: !!flags['ignore-unsupported'],
-	routeTypesScheme: flags['route-types-scheme'] || 'google-extended',
+	routeTypesSchemes: ['google-extended'],
 	tripsWithoutShapeId: !!flags['trips-without-shape-id'],
 	routesWithoutAgencyId: !!flags['routes-without-agency-id'],
 	stopsLocationIndex: !!flags['stops-location-index'],
@@ -194,6 +197,11 @@ const opt = {
 	postgraphile: !!flags.postgraphile,
 	postgrest: !!flags.postgrest,
 	importMetadata: !!flags['import-metadata'],
+}
+if ('route-types-schemes' in flags) {
+	opt.routeTypesSchemes = flags['route-types-schemes'].split(',')
+} else if ('route-types-scheme' in flags) {
+	opt.routeTypesSchemes = [flags['route-types-scheme']]
 }
 if ('stops-without-level-id' in flags) {
 	opt.stopsWithoutLevelId = flags['stops-without-level-id']
