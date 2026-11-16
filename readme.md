@@ -11,7 +11,7 @@
 
 - ✅ handles [daylight saving time correctly](#correctness-vs-speed-regarding-gtfs-time-values) but retains reasonable lookup performance
 - ✅ supports `frequencies.txt`
-- ✨ joins `stop_times.txt`/`frequencies.txt`, `calendar.txt`/`calendar_dates.txt`, `trips.txt`, `route.txt` & `stops.txt` into [views](https://www.postgresql.org/docs/14/sql-createview.html) for straightforward data analysis (see below)
+- ✨ joins `stop_times.txt`/`frequencies.txt`, `calendar.txt`/`calendar_dates.txt`, `trips.txt`, `route.txt` & `stops.txt` into [views](https://www.postgresql.org/docs/15/sql-createview.html) for straightforward data analysis (see below)
 - 🚀 is carefully optimised to let PostgreSQL's query planner do its magic, yielding quick lookups even with large datasets (see [performance section](#performance))
 - ✅ validates and imports `translations.txt`
 - ✨ exposes (almost) all data via GraphQL using [PostGraphile](https://www.graphile.org/postgraphile/introduction/), and as a RESTful API using [PostgREST](https://postgrest.org/)
@@ -35,7 +35,8 @@ Or use [`npx`](https://npmjs.com/package/npx). ✨
 
 There are also [prebuilt binaries](https://github.com/public-transport/gtfs-via-postgres/releases/latest) and [Docker images](https://github.com/public-transport/gtfs-via-postgres/pkgs/container/gtfs-via-postgres) available.
 
-*Note:* `gtfs-via-postgres` **needs PostgreSQL >=14** to work, as it uses the [`WITH … AS NOT MATERIALIZED`](https://www.postgresql.org/docs/14/queries-with.html#id-1.5.6.12.7) syntax. You can check your PostgreSQL server's version with `psql -t -c 'SELECT version()'`.
+*Note:* `gtfs-via-postgres` **needs PostgreSQL >=15** to work, as it uses the [`WITH … AS NOT MATERIALIZED`](https://www.postgresql.org/docs/15/queries-with.html#id-1.5.6.12.7) syntax. You can check your PostgreSQL server's version with `psql -t -c 'SELECT version()'`.
+todo: require >=17 (debian trixie, ubuntu 25.04) or >=16 (debian trixie, ubuntu 24.04 lts)
 
 
 ## Getting Started
@@ -67,7 +68,7 @@ ls -lh gtfs
 #  16M trips.csv
 ```
 
-Depending on your specific setup, configure access to the PostgreSQL database via [`PG*` environment variables](https://www.postgresql.org/docs/14/libpq-envars.html):
+Depending on your specific setup, configure access to the PostgreSQL database via [`PG*` environment variables](https://www.postgresql.org/docs/15/libpq-envars.html):
 
 ```sh
 export PGUSER=postgres
@@ -76,7 +77,7 @@ env PGDATABASE=postgres psql -c 'create database vbb_2022_02_25'
 export PGDATABASE=vbb_2022_02_25
 ```
 
-*Note*: `gtfs-via-postgres` generates SQL that contains the `CREATE EXTENSION postgis` instruction. For this to work, the PostgreSQL user you're connecting as needs the `CREATE` [permission](https://www.postgresql.org/docs/14/ddl-priv.html) on the database. Also, the `postgis` extension must either be marked as trusted (by putting `trusted = true` into `$(pg_config --sharedir)/extension/postgis.control`), or your user must be a superuser.
+*Note*: `gtfs-via-postgres` generates SQL that contains the `CREATE EXTENSION postgis` instruction. For this to work, the PostgreSQL user you're connecting as needs the `CREATE` [permission](https://www.postgresql.org/docs/15/ddl-priv.html) on the database. Also, the `postgis` extension must either be marked as trusted (by putting `trusted = true` into `$(pg_config --sharedir)/extension/postgis.control`), or your user must be a superuser.
 
 Install `gtfs-via-postgres` and use it to import the GTFS data:
 
@@ -101,7 +102,7 @@ The [DELFI](https://www.delfi.de/) feed with ca. 330 MB may take 1 hour or more 
 
 In addition to a table for each GTFS file, `gtfs-via-postgres` adds these views to help with real-world analysis:
 
-- `service_days` ([materialized](https://www.postgresql.org/docs/14/sql-creatematerializedview.html)) "applies" [`calendar_dates`](https://gtfs.org/documentation/schedule/reference/#calendar_datestxt) to [`calendar`](https://gtfs.org/documentation/schedule/reference/#calendartxt) to give you all days of operation for each "service" defined in [`calendar`](https://gtfs.org/documentation/schedule/reference/#calendartxt).
+- `service_days` ([materialized](https://www.postgresql.org/docs/15/sql-creatematerializedview.html)) "applies" [`calendar_dates`](https://gtfs.org/documentation/schedule/reference/#calendar_datestxt) to [`calendar`](https://gtfs.org/documentation/schedule/reference/#calendartxt) to give you all days of operation for each "service" defined in [`calendar`](https://gtfs.org/documentation/schedule/reference/#calendartxt).
 - `arrivals_departures` "applies" [`stop_times`](https://gtfs.org/documentation/schedule/reference/#stop_timestxt)/[`frequencies`](https://gtfs.org/documentation/schedule/reference/#frequenciestxt) to [`trips`](https://gtfs.org/documentation/schedule/reference/#tripstxt) and `service_days` to give you all arrivals/departures at each stop with their *absolute* dates & times. It also resolves each stop's parent station ID & name.
 - `connections` "applies" [`stop_times`](https://gtfs.org/documentation/schedule/reference/#stop_timestxt)/[`frequencies`](https://gtfs.org/documentation/schedule/reference/#frequenciestxt) to [`trips`](https://gtfs.org/documentation/schedule/reference/#tripstxt) and `service_days`, just like `arrivals_departures`, but gives you departure (at stop A) & arrival (at stop B) *pairs*.
 - `shapes_aggregated` aggregates individual shape points in [`shapes`](https://gtfs.org/documentation/schedule/reference/#shapestxt) into a [PostGIS `LineString`](http://postgis.net/workshops/postgis-intro/geometries.html#linestrings).
@@ -217,7 +218,7 @@ Options:
                                     on behalf of a user. It is only enforced if
                                     pg_plan_filter [2] is installed in the database!
                                     Must be a positive float. Default: none
-                                    [1] https://www.postgresql.org/docs/14/using-explain.html
+                                    [1] https://www.postgresql.org/docs/15/using-explain.html
                                     [2] https://github.com/pgexperts/pg_plan_filter
     --import-metadata             Create functions returning import metadata:
                                     - gtfs_data_imported_at (timestamp with time zone)
@@ -234,7 +235,7 @@ Examples:
 [4] https://github.com/opentripplanner/OpenTripPlanner/pull/4641
 ```
 
-Some notable limitations mentioned in the [PostgreSQL 14 documentation on date/time types](https://www.postgresql.org/docs/14/datatype-datetime.html):
+Some notable limitations mentioned in the [PostgreSQL 15 documentation on date/time types](https://www.postgresql.org/docs/15/datatype-datetime.html):
 
 > For `timestamp with time zone`, the internally stored value is always in UTC (Universal Coordinated Time, traditionally known as Greenwich Mean Time, GMT). An input value that has an explicit time zone specified is converted to UTC using the appropriate offset for that time zone.
 
@@ -288,7 +289,7 @@ Because it works as [atomically](https://en.wikipedia.org/wiki/Atomicity_(databa
 
 ### Exporting data efficiently
 
-If you want to export data from the database, use the [`COPY` command](https://www.postgresql.org/docs/14/sql-copy.html); On an [M1 MacBook Air](https://en.wikipedia.org/wiki/MacBook_Air_(Apple_silicon)#Third_generation_(Retina_with_Apple_silicon)), PostgreSQL 14 can export about 500k `connections` rows per second.
+If you want to export data from the database, use the [`COPY` command](https://www.postgresql.org/docs/15/sql-copy.html); On an [M1 MacBook Air](https://en.wikipedia.org/wiki/MacBook_Air_(Apple_silicon)#Third_generation_(Retina_with_Apple_silicon)), PostgreSQL 15 can export about 500k `connections` rows per second.
 
 ```shell
 psql -c 'COPY (SELECT * FROM connections) TO STDOUT csv HEADER' >connections.csv
